@@ -205,12 +205,12 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
             (nsfw) content, according to the `safety_checker`.
         """
 
-        # if isinstance(prompt, str):
-        #     batch_size = 1
-        # elif isinstance(prompt, list):
-        #     batch_size = len(prompt)
-        # else:
-        #     raise ValueError(f"`prompt` has to be of type `str` or `list` but is {type(prompt)}")
+        if isinstance(prompt, str):
+            batch_size = 1
+        elif isinstance(prompt, list):
+            batch_size = len(prompt)
+        else:
+            raise ValueError(f"`prompt` has to be of type `str` or `list` but is {type(prompt)}")
 
         # if height % 8 != 0 or width % 8 != 0:
         #     raise ValueError(f"`height` and `width` have to be divisible by 8 but are {height} and {width}.")
@@ -328,11 +328,11 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
         # latents = 1 / 0.18215 * latents
         
         prompt = [prompt]
-        height = 512
-        width = 512
-        num_inference_steps = 50
+        # height = 512
+        # width = 512
+        # num_inference_steps = 50
         guidance_scale = 7.5
-        batch_size = len(prompt)
+        # batch_size = len(prompt)
 
 
 # In[ ]:
@@ -366,7 +366,7 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
             # In[ ]:
 
 
-            self.scheduler.set_timesteps(num_inference_steps)
+            self.scheduler.set_timesteps(self.num_inference_steps)
 
             for t in self.scheduler.timesteps:
                 latent_model_input = torch.cat([latents] * 2)
