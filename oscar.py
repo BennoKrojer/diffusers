@@ -11,7 +11,12 @@ from transformers import logging
 from diffusers import AutoencoderKL, UNet2DConditionModel, PNDMScheduler
 from PIL import Image
 from tqdm.auto import tqdm
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--prompt',type=str)
+parser.add_argument('--image_path',type=str)
+args = parser.parse_args()
 
 # In[ ]:
 
@@ -39,8 +44,10 @@ unet.to(device='cuda', dtype=torch.bfloat16)
 
 # In[ ]:
 
-
-prompt = ["a victorian portrait of a squirrel eating a bagel"]
+if args.prompt:
+    prompt = [args.prompt]
+else:
+    prompt = ["keith harring style painting of a squirrel with a bowtie"]
 height = 512
 width = 512
 num_inference_steps = 50
@@ -51,7 +58,11 @@ batch_size = len(prompt)
 # In[ ]:
 
 
-text_input = tokenizer(prompt, padding='max_length', max_length=tokenizer.model_max_length, truncation=True, return_tensors='pt')
+text_input = tokenizer(prompt, 
+                       padding='max_length', 
+                       max_length=tokenizer.model_max_length, 
+                       truncation=True, 
+                       return_tensors='pt')
 with torch.autocast('cuda'):
     text_embeddings = text_encoder(text_input.input_ids.to('cuda'))[0]
 
@@ -99,7 +110,12 @@ with torch.autocast('cuda'):
 
 
     # In[ ]:
-
-
+    if args.image_path:
+        fname = args.image_path
+    else:
+        fname = f"./generated_images/{prompt[0].replace(' ','_')}.png"
     images = (images / 2 + 0.5).clamp(0, 1)
-    to_pil_image(images[0])
+    # save_image(images[0], fname)
+    im = to_pil_image(images[0])
+    # save_image(im,fname)
+    im.save(fname)

@@ -19,6 +19,8 @@ if is_torch_available() and is_transformers_available():
         StableDiffusionInpaintPipeline,
         StableDiffusionInpaintPipelineLegacy,
         StableDiffusionPipeline,
+        StableDiffusionImg2LatentPipeline,
+        StableDiffusionText2LatentPipeline,
     )
 
 if is_transformers_available() and is_onnx_available():

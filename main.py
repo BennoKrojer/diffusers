@@ -6,4 +6,7 @@ print("made it")
 pipe = pipe.to("cuda")
 
 prompt = "a photo of an astronaut riding a horse on mars"
+# print(prompt)
 image = pipe(prompt).images[0]  
+# print('saving')
+# im.save(f"./generated_images/{prompt.replace(' ','_')}.png")
