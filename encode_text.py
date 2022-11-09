@@ -16,6 +16,7 @@ from src.diffusers import StableDiffusionText2LatentPipeline
 parser = argparse.ArgumentParser()
 parser.add_argument('--save_dir',type=str)
 parser.add_argument('--prompt',type=str)
+parser.add_argument('--batch_size',type=int)
 args = parser.parse_args()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -50,19 +51,27 @@ pipe = pipe.to(device)
 # 1. get prompts passed as arg
 prompts = [args.prompt]
 
+# TODO once max batch size is found, process text in batches of that sieze
+    
+batch_size = args.batch_size if args.batch_size else 1
+
+def batchify(prompts, batch_size=1):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(prompts), batch_size):
+        yield prompts[i:i + batch_size]
+
 print('processing prompts')
 # 2. process each image into torch.FloatTensor or PIL.Image.Image
-for prompt in tqdm(prompts):
-    print(prompt)
-    fname = prompt.replace(' ','_')
-    print(fname)
+for batch in tqdm(batchify(prompts)):
+    dictionary = {}
         
     # 3. run pipeline on each query
-    latent = pipe(prompt)
+    latents = pipe(batch)
+    # output shape is (batch_size,4,*,*)
     
     # 4. save the latent representation
-    print(type(latent))
-    print(latent.shape)
-    print(latent)
-    save_path = os.path.join(args.save_dir,f'{fname}_latent.pt')
-    torch.save(latent, save_path)
+    for i, prompt in enumerate(batch):
+        fname = prompt.replace(' ','_')
+        save_path = os.path.join(args.save_dir,f'{fname}_latent.pt')
+        latent_img = latents[i]
+        torch.save(latent_img, save_path)

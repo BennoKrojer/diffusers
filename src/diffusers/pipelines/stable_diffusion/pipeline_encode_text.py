@@ -206,14 +206,12 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
         """
 
         if isinstance(prompt, str):
-            batch_size = 1
-        elif isinstance(prompt, list):
-            batch_size = len(prompt)
+            prompt = [prompt]
         else:
             raise ValueError(f"`prompt` has to be of type `str` or `list` but is {type(prompt)}")
-
-        # if height % 8 != 0 or width % 8 != 0:
-        #     raise ValueError(f"`height` and `width` have to be divisible by 8 but are {height} and {width}.")
+        batch_size = len(prompt)
+        if height % 8 != 0 or width % 8 != 0:
+            raise ValueError(f"`height` and `width` have to be divisible by 8 but are {height} and {width}.")
 
         # if (callback_steps is None) or (
         #     callback_steps is not None and (not isinstance(callback_steps, int) or callback_steps <= 0)
@@ -327,7 +325,7 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
 
         # latents = 1 / 0.18215 * latents
         
-        prompt = [prompt]
+        
         # height = 512
         # width = 512
         # num_inference_steps = 50
@@ -337,17 +335,28 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
 
 # In[ ]:
 
+        # get prompt text embeddings
+        text_inputs = self.tokenizer(
+            prompt,
+            padding="max_length",
+            max_length=self.tokenizer.model_max_length,
+            return_tensors="pt",
+        )
+        text_input_ids = text_inputs.input_ids
 
-        text_input = self.tokenizer(prompt, 
-                            padding='max_length', 
-                            max_length=self.tokenizer.model_max_length, 
-                            truncation=True, 
-                            return_tensors='pt')
+        if text_input_ids.shape[-1] > self.tokenizer.model_max_length:
+            removed_text = self.tokenizer.batch_decode(text_input_ids[:, self.tokenizer.model_max_length :])
+            logger.warning(
+                "The following part of your input was truncated because CLIP can only handle sequences up to"
+                f" {self.tokenizer.model_max_length} tokens: {removed_text}"
+            )
+            text_input_ids = text_input_ids[:, : self.tokenizer.model_max_length]
+       
         with torch.autocast('cuda'):
-            text_embeddings = self.text_encoder(text_input.input_ids.to(self.device))[0]
-
-            max_length = text_input.input_ids.shape[-1]
-            uncond_input = self.tokenizer([''] * batch_size, padding='max_length', max_length=max_length, return_tensors='pt')
+            text_embeddings = self.text_encoder(text_input_ids.to(self.device))[0]
+            
+            max_length = text_input_ids.shape[-1]
+            uncond_input = self.tokenizer([""] * batch_size, padding='max_length', max_length=max_length,  truncation=True,return_tensors='pt')
             uncond_embeddings = self.text_encoder(uncond_input.input_ids.to(self.device))[0]
 
             text_embeddings = torch.cat([uncond_embeddings, text_embeddings])
@@ -357,16 +366,15 @@ class StableDiffusionText2LatentPipeline(DiffusionPipeline):
 
 
             # generator = torch.manual_seed(0)
-            generator = None
 
-            latents = torch.randn((batch_size, self.unet.in_channels, self.height // 8, self.width // 8), generator=generator, device='cuda', dtype=torch.bfloat16)
+            latents = torch.randn((batch_size, self.unet.in_channels, height // 8, width // 8), generator=generator, device='cuda', dtype=torch.bfloat16)
             latents = latents * self.scheduler.init_noise_sigma
 
 
             # In[ ]:
 
 
-            self.scheduler.set_timesteps(self.num_inference_steps)
+            self.scheduler.set_timesteps(num_inference_steps)
 
             for t in self.scheduler.timesteps:
                 latent_model_input = torch.cat([latents] * 2)

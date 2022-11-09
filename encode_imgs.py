@@ -61,9 +61,9 @@ for img_path in tqdm(paths):
     latent = pipe(img)
     
     # 4. save the latent representations 
-    print(type(latent))
-    print(latent.shape)
-    print(latent)
+    # print(type(latent))
+    # print(latent.shape)
+    # print(latent)
     if args.save_dir:
         save_path = os.path.join(args.save_dir,f'{fname}_latent.pt')
         torch.save(latent, save_path)

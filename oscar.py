@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--prompt',type=str)
 parser.add_argument('--image_path',type=str)
 args = parser.parse_args()
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # In[ ]:
 
@@ -37,9 +38,9 @@ scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule='sca
 # In[ ]:
 
 
-vae.to(device='cuda', dtype=torch.bfloat16)
-text_encoder.to(device='cuda', dtype=torch.bfloat16)
-unet.to(device='cuda', dtype=torch.bfloat16)
+vae.to(device=device, dtype=torch.bfloat16)
+text_encoder.to(device=device, dtype=torch.bfloat16)
+unet.to(device=device, dtype=torch.bfloat16)
 
 
 # In[ ]:
@@ -47,7 +48,7 @@ unet.to(device='cuda', dtype=torch.bfloat16)
 if args.prompt:
     prompt = [args.prompt]
 else:
-    prompt = ["keith harring style painting of a squirrel with a bowtie"]
+    prompt = ["victorian portrait of a squirrel eating a flower","keith harring style painting of a squirrel with a bowtie"]
 height = 512
 width = 512
 num_inference_steps = 50
@@ -106,6 +107,7 @@ with torch.autocast('cuda'):
 
 
     latents = 1 / 0.18215 * latents
+    print(latents.shape)
     images = vae.decode(latents).sample
 
 
