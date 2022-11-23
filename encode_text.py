@@ -8,6 +8,7 @@ import os
 from PIL import Image
 from tqdm.auto import tqdm
 import argparse
+import time
 
 
 from src.diffusers import StableDiffusionText2LatentPipeline
@@ -49,7 +50,10 @@ pipe = pipe.to(device)
 
 
 # 1. get prompts passed as arg
-prompts = [args.prompt]
+if args.prompt:
+    prompts = [args.prompt]
+else:
+    prompts = ['archery in space','silly dog','flying unicorn']*10000
 
 # TODO once max batch size is found, process text in batches of that sieze
     
@@ -62,16 +66,29 @@ def batchify(prompts, batch_size=1):
 
 print('processing prompts')
 # 2. process each image into torch.FloatTensor or PIL.Image.Image
-for batch in tqdm(batchify(prompts)):
+times = 0
+i=0
+batches = batchify(prompts, batch_size)
+for batch in tqdm(batches):
     dictionary = {}
         
     # 3. run pipeline on each query
+    start_time = time.time()
     latents = pipe(batch)
+    tot_time = time.time() - start_time
+    if len(batch) == batch_size:
+        times += tot_time
+    print(f'batch {i} of size {len(batch)} took {tot_time} seconds.')
     # output shape is (batch_size,4,*,*)
     
     # 4. save the latent representation
-    for i, prompt in enumerate(batch):
-        fname = prompt.replace(' ','_')
-        save_path = os.path.join(args.save_dir,f'{fname}_latent.pt')
-        latent_img = latents[i]
-        torch.save(latent_img, save_path)
+    if args.save_dir:
+        for i, prompt in enumerate(batch):
+            fname = prompt.replace(' ','_')
+            save_path = os.path.join(args.save_dir,f'{fname}_latent.pt')
+            latent_img = latents[i]
+            torch.save(latent_img, save_path)
+    i += 1
+    if i > 5:
+        break
+print(f"average batch time is {times/i}.")
