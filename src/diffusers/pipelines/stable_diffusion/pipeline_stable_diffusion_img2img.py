@@ -343,7 +343,8 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         # It's more optimized to move all timesteps to correct device beforehand
         timesteps = self.scheduler.timesteps[t_start:].to(self.device)
 
-        for i, t in enumerate(self.progress_bar(timesteps)):
+        # for i, t in enumerate(self.progress_bar(timesteps)):
+        for i, t in enumerate(timesteps):
             # expand the latents if we are doing classifier free guidance
             latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
             latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
@@ -385,4 +386,4 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         if not return_dict:
             return (image, has_nsfw_concept)
 
-        return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
+        return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept), latents
