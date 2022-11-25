@@ -11,7 +11,7 @@ import argparse
 import json
 
 
-from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg2LatentPipeline
+from src.diffusers import StableDiffusionImg2ImgPipeline
 
 
 parser = argparse.ArgumentParser()
@@ -21,40 +21,51 @@ args = parser.parse_args()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # initialize pipeline
+device = "cuda"
+model_id_or_path = "./stable-diffusion-v1-5"
+pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+    model_id_or_path,
+    # revision="fp16", 
+    # torch_dtype=torch.float16,
+) # TODO try just modifying their code and saving the latents
+
+# or download via git clone https://huggingface.co/runwayml/stable-diffusion-v1-5
+# and pass `model_id_or_path="./stable-diffusion-v1-5"`.
+pipe = pipe.to(device)
+
 
 data = json.load(open('winoground/data.json', 'r'))
 
-for i, ex in tqdm(enumerate(data)):
+for i, ex in tqdm(enumerate(data), total=len(data)):
 
     cap0 = ex['caption_0']
     cap1 = ex['caption_1']
     img_id = ex['id']
-    # img_path0 = f'winoground/images/ex_{img_id}_img_0.png'
-    # img_path1 = f'winoground/images/ex_{img_id}_img_1.png'
+    img_path0 = f'winoground/images/ex_{img_id}_img_0.png'
+    img_path1 = f'winoground/images/ex_{img_id}_img_1.png'
 
-    # fname0 = img_path0.split('/')[-1].split('.')[0]
-    # fname1 = img_path1.split('/')[-1].split('.')[0]
-    # if os.path.exists(os.path.join(args.save_dir_images,f'{fname1}_latent.pt')):
-    #     continue
-    save_path1 = os.path.join(args.save_dir_captions,f'ex{i}_caption1_latent.pt')
-    if os.path.exists(save_path1):
-        continue    
+    img0 = Image.open(img_path0).convert("RGB")
+    img1 = Image.open(img_path1).convert("RGB")
 
-    # img0 = Image.open(img_path0).convert("RGB").resize((512,512))
-    # img1 = Image.open(img_path1).convert("RGB").resize((512,512))
-
-    # latent0_text = pipe_text(cap0)
-    latent1_text = pipe_text(cap1)
+    img0 = img0.resize((512, 512))
+    img1 = img1.resize((512, 512))
     
-    # save_path0 = os.path.join(args.save_dir_captions,f'ex{i}_caption0_latent.pt')
-    # torch.save(latent0_text, save_path0)
-    torch.save(latent1_text, save_path1)
+    if not os.path.exists(f'{args.save_dir_captions}/ex_{img_id}_img_0_cap_0.png'):
+        img00, latent00 = pipe(prompt=cap0, init_image=img0, strength=0.8, guidance_scale=7.5, num_inference_steps=50)
+        torch.save(latent00, f"{args.save_dir_captions}/ex_{img_id}_latent_0_cap_0.pt")
+        img00.images[0].save(f"{args.save_dir_captions}/ex_{img_id}_img_0_cap_0.png")
 
-    # latent0_img = pipe_img(img0)
-    # latent1_img = pipe_img(img1)
-
-    # save_path = os.path.join(args.save_dir_images,f'{fname0}_latent.pt')
-    # torch.save(latent0_img, save_path)
-    # save_path = os.path.join(args.save_dir_images,f'{fname1}_latent.pt')
-    # torch.save(latent1_img, save_path)
+    if not os.path.exists(f'{args.save_dir_captions}/ex_{img_id}_img_1_cap_0.png'):
+        img01, latent01 = pipe(prompt=cap0, init_image=img1, strength=0.8, guidance_scale=7.5, num_inference_steps=50)
+        torch.save(latent01, f"{args.save_dir_captions}/ex_{img_id}_latent_1_cap_0.pt")
+        img01.images[0].save(f"{args.save_dir_captions}/ex_{img_id}_img_1_cap_0.png")
     
+    if not os.path.exists(f'{args.save_dir_captions}/ex_{img_id}_img_0_cap_1.png'):
+        img10, latent10 = pipe(prompt=cap1, init_image=img0, strength=0.8, guidance_scale=7.5, num_inference_steps=50)
+        torch.save(latent10, f"{args.save_dir_captions}/ex_{img_id}_latent_0_cap_1.pt")
+        img10.images[0].save(f"{args.save_dir_captions}/ex_{img_id}_img_0_cap_1.png")
+
+    if not os.path.exists(f'{args.save_dir_captions}/ex_{img_id}_img_1_cap_1.png'):
+        img11, latent11 = pipe(prompt=cap1, init_image=img1, strength=0.8, guidance_scale=7.5, num_inference_steps=50)
+        torch.save(latent11, f"{args.save_dir_captions}/ex_{img_id}_latent_1_cap_1.pt")
+        img11.images[0].save(f"{args.save_dir_captions}/ex_{img_id}_img_1_cap_1.png")
