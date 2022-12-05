@@ -38,7 +38,6 @@ pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
 )
 pipe = pipe.to(device)
 
-
 data = json.load(open('imagecode/valid_data.json', 'r'))
 
 for i, (set_id, descriptions) in tqdm(enumerate(data.items()), total=len(data)):

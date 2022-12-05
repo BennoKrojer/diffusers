@@ -30,18 +30,22 @@ if __name__ == "__main__":
     
     for i, (set_id, descriptions) in tqdm(enumerate(data.items()), total=len(data)):
         print("RUNNING SET: ", i, set_id)
+        if 'open-images' not in set_id:
+            continue
         for idx, description in descriptions.items():
             idx = int(idx)
             all_imgs = glob(f'./imagecode/image-sets/{set_id}/*.jpg')
             all_imgs = sorted(all_imgs, key=lambda x: int(x.split('/')[-1].split('.')[0][3:]))
-            correct_img = all_imgs[idx]
-            correct_img = Image.open(correct_img).convert('RGB').resize((512, 512))
-            latent_correct = pipe_img(correct_img).flatten().float()
+            # correct_img = all_imgs[idx]
+            # correct_img = Image.open(correct_img).convert('RGB').resize((512, 512))
+            # latent_correct = pipe_img(correct_img).flatten().float()
             smallest_dist = 100000000000
             best_i = 0
             for i in range(10):
-                img_i = torch.load(f'imagecode/img2img_captions_latent_guidance_scale_7.5_strength_0.6_steps_50/{set_id}_{idx}_{i}.pt', map_location=torch.device(device)).flatten().float()
-                dist = torch.dot(img_i - latent_correct, img_i - latent_correct)
+                img = Image.open(all_imgs[i]).convert('RGB').resize((512, 512))
+                latent_before = pipe_img(img).flatten().float()
+                latent_after = torch.load(f'imagecode/img2img_captions_latent_guidance_scale_7.5_strength_0.6_steps_50/{set_id}_{idx}_{i}.pt', map_location=torch.device(device)).flatten().float()
+                dist = torch.dot(latent_after - latent_before, latent_after - latent_before)
                 if i == 0 or smallest_dist > dist:
                     smallest_dist = dist
                     best_i = i
