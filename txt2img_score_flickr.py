@@ -29,7 +29,7 @@ if __name__ == "__main__":
     base_dir = 'flickr30'
     img_dir = base_dir + '/images/'
     top10 = json.load(open('flickr30/top10_RN50x64.json', 'r'))
-    experiment_name = 'img2img_captions_latent_guidance_scale_7.5_strength_0.8_steps_50_seed_'
+    experiment_name = 'img2img_captions_latent_guidance_scale_7.5_strength_0.8_steps_50_txt2img_seed_0'
     print('EVALUATING', experiment_name)
     acc = 0
     total = 0
@@ -44,6 +44,14 @@ if __name__ == "__main__":
         correct_idx = all_images.index(correct_path)
         smallest_dist = 100000000000
         best_i = 0
+
+        if USE_CLIP:
+            image_after = Image.open(f'flickr/{experiment_name}/{i}.png').convert('RGB')
+            image_after = preprocess(image_after).unsqueeze(0).to(device)
+            with torch.no_grad():
+                latent_after = clip_model.encode_image(image_after).squeeze().float()
+        else:
+            latent_after = torch.load(f'flickr/{experiment_name}/{i}.pt', map_location=torch.device(device)).flatten().float()
         for j in range(10):
             img_id = all_images[j].split('/')[-1].split('.')[0]
             img = Image.open(all_images[j]).convert('RGB')
@@ -54,36 +62,8 @@ if __name__ == "__main__":
             else:
                 img = img.resize((512, 512))
                 latent_before = pipe_img(img).flatten().float()
-            dists = []
-            latents = []
-            for seed in [0]:
-                if USE_CLIP:
-                    image_after = Image.open(f'flickr/{experiment_name}{seed}/{i}_{img_id}.png').convert('RGB')
-                    image_after = preprocess(image_after).unsqueeze(0).to(device)
-                    with torch.no_grad():
-                        latent_after = clip_model.encode_image(image_after).squeeze().float()
-                else:
-                    latent_after = torch.load(f'flickr/{experiment_name}{seed}/{i}_{img_id}.pt', map_location=torch.device(device)).float().flatten()
-                # latents.append(latent_after)
-                dist = torch.dot(latent_after - latent_before, latent_after - latent_before)
-                dists.append(dist)
-            if LATENT_AVG:
-                latent = torch.mean(torch.stack(latents), dim=0)
-                image = vae.decode(latent).sample
-                image = (image / 2 + 0.5).clamp(0, 1)
-                im = to_pil_image(image[0])
-                if not os.path.exists(f'flickr/{experiment_name}avg'):
-                    os.makedirs(f'flickr/{experiment_name}avg')
-                im.save(f'flickr/{experiment_name}avg/{i}_{img_id}.png')
-                image_after = Image.open(f'flickr/{experiment_name}avg/{i}_{img_id}.png').convert('RGB')
-                image_after = preprocess(image_after).unsqueeze(0).to(device)
-                with torch.no_grad():
-                    latent_after = clip_model.encode_image(image_after).squeeze().float()
-                dist = torch.dot(latent_after - latent_before, latent_after - latent_before)
-            elif AVG:
-                dist = sum(dists) / len(dists)
-            else:
-                dist = max(dists)
+
+            dist = torch.dot(latent_after - latent_before, latent_after - latent_before)
             if j == 0 or smallest_dist > dist:
                 smallest_dist = dist
                 best_i = j
