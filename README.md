@@ -16,7 +16,7 @@ To download the datasets, follow:
 To run our evaluation, we first encode/store the generated images:
 For this, use `encode_flickr.py`, `encode_winoground.py` and `encode_imagecode.py`.
 
-Next you can run 
+Next you can run `img2img_score_{flickr,imagecode,winoground}.py` and txt2img_score_{flickr,winoground,imagecode}.py`.
 
 <p align="center">
     <br>
