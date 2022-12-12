@@ -18,6 +18,10 @@ For this, use `encode_flickr.py`, `encode_winoground.py` and `encode_imagecode.p
 
 Next you can run `img2img_score_{flickr,imagecode,winoground}.py` and `txt2img_score_{flickr,winoground,imagecode}.py`.
 
+## Installation
+
+In addtion to the below installations, please install CLIP as described in the official [repository](https://github.com/openai/CLIP).
+
 <p align="center">
     <br>
     <img src="https://github.com/huggingface/diffusers/raw/main/docs/source/imgs/diffusers_library.jpg" width="400"/>
