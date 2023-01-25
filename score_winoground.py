@@ -9,7 +9,6 @@ clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda:0')
 def score(i,metric,caption_path='winoground/captions_latent',image_path='winoground/images_latent', use_clip=False):
     metrics = {'cos': torch.nn.CosineSimilarity(dim=0), 'dot': torch.dot, 'ce': torch.nn.CrossEntropyLoss()}
     metric = metrics[metric]
-    
     if use_clip:
         image0 = Image.open(os.path.join('winoground/all_generated_images', f'ex{i}_caption0_generated.png'))
         image1 = Image.open(os.path.join('winoground/all_generated_images', f'ex{i}_caption1_generated.png'))
@@ -34,13 +33,12 @@ def score(i,metric,caption_path='winoground/captions_latent',image_path='winogro
         img_latent0 = torch.load(image_path + f'/ex_{i}_img_0_latent.pt', map_location=torch.device(device)).flatten().float()
         img_latent1 = torch.load(image_path + f'/ex_{i}_img_1_latent.pt', map_location=torch.device(device)).flatten().float()
 
-    c0_i0 = metric(caption_latent0, img_latent0)
-    c0_i1 = metric(caption_latent0, img_latent1)
-    c1_i0 = metric(caption_latent1, img_latent0)
-    c1_i1 = metric(caption_latent1, img_latent1)
+    c0_i0 = torch.dot(caption_latent0 - img_latent0, caption_latent0 - img_latent0)
+    c0_i1 = torch.dot(caption_latent0 - img_latent1, caption_latent0 - img_latent1)
+    c1_i0 = torch.dot(caption_latent1 - img_latent0, caption_latent1 - img_latent0)
+    c1_i1 = torch.dot(caption_latent1 - img_latent1, caption_latent1 - img_latent1)
 
-    if metric == 'ce':
-        c0_i0, c0_i1, c1_i0, c1_i1 = -c0_i0, -c0_i1, -c1_i0, -c1_i1
+    c0_i0, c0_i1, c1_i0, c1_i1 = -c0_i0, -c0_i1, -c1_i0, -c1_i1
 
     
     
@@ -50,7 +48,7 @@ def score(i,metric,caption_path='winoground/captions_latent',image_path='winogro
 if __name__ == "__main__":
     from tqdm import tqdm
 
-    METRIC = 'cos'
+    METRIC = 'dot'
 
     caption_path = 'winoground/captions_latent/'
     image_path = 'winoground/images_latent/'
@@ -61,7 +59,7 @@ if __name__ == "__main__":
 
     
     for i in tqdm(range(400)):
-        c0_i0, c0_i1, c1_i0, c1_i1 = score(i,metric=METRIC,caption_path=caption_path,image_path=image_path, use_clip=True)
+        c0_i0, c0_i1, c1_i0, c1_i1 = score(i,metric=METRIC,caption_path=caption_path,image_path=image_path, use_clip=False)
         text_score = 1 if c0_i0 > c1_i0 and c1_i1 > c0_i1 else 0
         img_score = 1 if c0_i0 > c0_i1 and c1_i1 > c1_i0 else 0
         group_score = 1 if text_score and img_score else 0
