@@ -82,7 +82,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             new_config = dict(scheduler.config)
             new_config["steps_offset"] = 1
             scheduler._internal_dict = FrozenDict(new_config)
-
+        safety_checker = None
         if safety_checker is None:
             logger.warn(
                 f"You have disabled the safety checker for {self.__class__} by passing `safety_checker=None`. Ensure"
@@ -348,7 +348,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             # expand the latents if we are doing classifier free guidance
             latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
             latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
-
+    
             # predict the noise residual
             noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=text_embeddings).sample
 

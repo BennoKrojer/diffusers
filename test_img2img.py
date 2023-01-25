@@ -63,7 +63,4 @@ latent = pipe(prompt, img, strength=0.8, guidance_scale=7.5)
 img_save_path = os.path.join('/home/krojerb/img-gen-project/diffusers/generated_images',f'{fname}.png')
 # images[0].save(img_save_path)
 
-image = vae.decode(latent).sample
-image = (image / 2 + 0.5).clamp(0, 1)
-im = to_pil_image(image[0]) 
-im.save(img_save_path)
+cim.save(img_save_path)

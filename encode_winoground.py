@@ -67,7 +67,7 @@ for i, ex in tqdm(enumerate(data)):
     #     continue
     save_path1 = os.path.join(args.save_dir_captions,f'ex{i}_caption1_latent.pt')
     if os.path.exists(save_path1):
-        continue    
+        continue
 
     # img0 = Image.open(img_path0).convert("RGB").resize((512,512))
     # img1 = Image.open(img_path1).convert("RGB").resize((512,512))
