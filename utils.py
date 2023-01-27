@@ -1,3 +1,5 @@
+import numpy as np
+
 RETRIEVAL_TASKS = ['imagecode', 'flickr30k']
 
 def evaluate_winoground(scores):
@@ -10,6 +12,7 @@ def evaluate_winoground(scores):
 def evaluate_retrieval(args, scores, img_idx):
     img_idx = img_idx.cpu().numpy()
     scores = scores.cpu().numpy()
+    scores = np.stack(scores, axis=0)
     retrieval_accuracy = 0
     for i in range(scores.shape[0]):
         if img_idx[i] == np.argmax(scores[i]):
@@ -19,11 +22,10 @@ def evaluate_retrieval(args, scores, img_idx):
 
 def evaluate_scores(args, scores, batch):
     if args.task == 'winoground':
-        text_score, img_score, group_score = evaluate_winoground(scores)
-        print(f'Text score: {text_score}')
-        print(f'Image score: {img_score}')
-        print(f'Group score: {group_score}')
+        score = evaluate_winoground(scores)
     elif args.task in RETRIEVAL_TASKS:
         img_idx = batch[-1]
-        retrieval_accuracy = evaluate_retrieval(args, scores, img_idx)
-        print(f'Retrieval accuracy: {retrieval_accuracy}')
+        score = evaluate_retrieval(args, scores, img_idx)
+    else:
+        raise NotImplementedError
+    return score

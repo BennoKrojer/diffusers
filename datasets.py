@@ -3,22 +3,25 @@ import os
 import random
 from torch.utils.data import Dataset
 from PIL import Image
+import torchvision.transforms as transforms
+from pathlib import Path
 
-def get_dataset(dataset_name, root_dir, split='valid', resize=512):
+def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=512):
     if dataset_name == 'winoground':
-        return WinogroundDataset(root_dir, resize=resize)
+        return WinogroundDataset(root_dir, transform, resize=resize)
     elif dataset_name == 'imagecode':
-        return ImageCoDeDataset(root_dir, split, resize=resize)
-    elif daataset_name == 'flickr30k':
-        return Flickr30KDataset(root_dir, split, resize=resize)
+        return ImageCoDeDataset(root_dir, split, transform, resize=resize)
+    elif dataset_name == 'flickr30k':
+        return Flickr30KDataset(root_dir, split, transform, resize=resize)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
 class WinogroundDataset(Dataset):
-    def __init__(self, root_dir, resize=512):
+    def __init__(self, root_dir, transform, resize=512):
         self.root_dir = root_dir
         self.data = json.load(open(f'{root_dir}/data.json', 'r'))
         self.resize = resize
+        self.transform = transform
 
     def __len__(self):
         return len(self.data)
@@ -35,6 +38,12 @@ class WinogroundDataset(Dataset):
         img1 = Image.open(img_path1).convert("RGB")
         img0 = img0.resize((self.resize, self.resize))
         img1 = img1.resize((self.resize, self.resize))
+        if self.transform:
+            img0 = self.transform(img0).cuda()
+            img1 = self.transform(img1).cuda()
+        else:
+            img0 = transforms.ToTensor()(img0).cuda()
+            img1 = transforms.ToTensor()(img1).cuda()
 
         imgs = [img0, img1]
         text = [cap0, cap1]
@@ -42,13 +51,14 @@ class WinogroundDataset(Dataset):
         return imgs, text
 
 class ImageCoDeDataset(Dataset):
-    def __init__(self, root_dir, split, resize=512):
+    def __init__(self, root_dir, split, transform, resize=512):
         self.root_dir = root_dir
         self.resize = resize
-        dataset = self.load_data(root_dir, split)
+        self.dataset = self.load_data(root_dir, split)
+        self.transform = transform
 
     @staticmethod
-    def load_data(data_dir, split, video_only=False):
+    def load_data(data_dir, split, static_only=True):
         with open(f'{data_dir}/{split}_data.json') as f:
             json_file = json.load(f)
         img_path = f'{data_dir}/image-sets'
@@ -59,8 +69,8 @@ class ImageCoDeDataset(Dataset):
             img_files = sorted(img_files, key=lambda x: int(str(x).split('/')[-1].split('.')[0][3:]))
             for img_idx, text in data.items():
                 static = 'open-images' in img_dir
-                if video_only:
-                    if not static:
+                if static_only:
+                    if static:
                         dataset.append((img_dir, img_files, int(img_idx), text))
                 else:
                     dataset.append((img_dir, img_files, int(img_idx), text))
@@ -72,26 +82,46 @@ class ImageCoDeDataset(Dataset):
     
     def __getitem__(self, idx):
         img_dir, img_files, img_idx, text = self.dataset[idx]
-        imgs = [Image.open(img_path).convert("RGB").resize(self.resize, self.resize) for img_path in img_files]
+        imgs = [Image.open(img_path).convert("RGB").resize((self.resize, self.resize)) for img_path in img_files]
+        if self.transform:
+            imgs = [self.transform(img).cuda() for img in imgs]
+        else:
+            imgs = [transforms.ToTensor()(img).cuda() for img in imgs]
 
         return imgs, [text], img_dir, img_idx
 
 class Flickr30KDataset(Dataset):
-    def __init__(self, root_dir, split, resize=512):
+    def __init__(self, root_dir, split, transform, resize=512):
         self.root_dir = root_dir
         self.resize = resize
         self.data = json.load(open(f'{root_dir}/top10_RN50x64.json', 'r'))
         self.data = list(self.data.items())
+        self.data = self.remove_impossible(self.data)
+        self.transform = transform
     
+
+    @staticmethod
+    def remove_impossible(data):
+        new_data = []
+        for caption, imgs in data:
+            correct, imgs = imgs[0], imgs[1]
+            if correct in imgs:
+                new_data.append((caption, [correct, imgs]))
+        return new_data
+
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
         ex = self.data[idx]
         text = ex[0]
-        correct_path = f'datasets/{ex[1][0]}'
-        img_paths = f'datasets/{ex[1][1]}'
+        correct_path = ex[1][0]
+        img_paths = ex[1][1]
         img_idx = img_paths.index(correct_path)
-        imgs = [Image.open(img_path).convert("RGB").resize(self.resize, self.resize) for img_path in img_paths]
-        
+        imgs = [Image.open(f'datasets/{img_path}').convert("RGB").resize((self.resize, self.resize)) for img_path in img_paths]
+        if self.transform:
+            imgs = [self.transform(img).cuda() for img in imgs]
+        else:
+            imgs = [transforms.ToTensor()(img).cuda() for img in imgs]
+
         return imgs, [text], img_idx
