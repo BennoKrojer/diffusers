@@ -17,7 +17,7 @@ vae = AutoencoderKL.from_pretrained(model_id_or_path, subfolder='vae', use_auth_
 vae.to(device='cuda')
 pipe_img = StableDiffusionImg2LatentPipeline(vae)
 pipe = pipe_img.to(device)
-USE_CLIP = False
+USE_CLIP = True
 
 if USE_CLIP:
     print("Loading CLIP")
@@ -26,9 +26,9 @@ if USE_CLIP:
 if __name__ == "__main__":
 
 
-    base_dir = 'flickr30'
+    base_dir = 'datasets/flickr30'
     img_dir = base_dir + '/images/'
-    top10 = json.load(open('flickr30/top10_RN50x64.json', 'r'))
+    top10 = json.load(open('datasets/flickr30k/top10_RN50x64.json', 'r'))
     experiment_name = 'img2img_captions_latent_guidance_scale_7.5_strength_0.8_steps_50_txt2img_seed_0'
     print('EVALUATING', experiment_name)
     acc = 0
@@ -38,6 +38,8 @@ if __name__ == "__main__":
     LATENT_AVG = False
     
     for i, (caption, (correct_path, all_images)) in tqdm(enumerate(top10.items()), total=len(top10.items())):
+        correct_path = 'datasets/' + correct_path
+        all_images = ['datasets/' + path for path in all_images]
         if correct_path not in all_images:
             total += 1
             continue
