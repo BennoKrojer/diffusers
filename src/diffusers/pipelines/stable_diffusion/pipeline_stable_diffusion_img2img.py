@@ -386,9 +386,4 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         if not return_dict:
             return (image, has_nsfw_concept)
 
-<<<<<<< HEAD
-        # return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
-        return latents, StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept)
-=======
         return StableDiffusionPipelineOutput(images=image, nsfw_content_detected=has_nsfw_concept), latents
->>>>>>> 5bb53a63ff310241be53a37a333ccc446891abca
