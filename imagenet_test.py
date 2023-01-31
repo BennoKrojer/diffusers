@@ -1,29 +1,38 @@
 import argparse
 import os
 import random
+import time
 
 import torch
 import torchvision
 import torch.utils.data
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from torch.utils.data import Subset
+print('imports done!')
+
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('data_path', metavar='DIR', default='/home/krojerb/scratch/imagenet/',
+parser.add_argument('--data_path', metavar='DIR', default='/home/krojerb/scratch/imagenet/',
                     help='path to dataset (default: /home/krojerb/scratch/imagenet/)')
 parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N',
                     help='mini-batch size (default: 256)')
+args = parser.parse_args()
 
-imagenet_val_data = torchvision.datasets.ImageNet('/home/krojerb/scratch/imagenet/val_data')
-data_loader = torch.utils.data.DataLoader(imagenet_data,
-                                          batch_size=4,
-                                          shuffle=True,)
+# print('loading data')
+# imagenet_val_data = torchvision.datasets.ImageNet('/home/krojerb/scratch/imagenet/val_data')
+# data_loader = torch.utils.data.DataLoader(imagenet_val_data,
+#                                         batch_size=4,
+#                                         shuffle=True,)
 
-valdir = os.path.join(args.data, 'val_data')
 
+print('creating data loader')
+valdir = os.path.join(args.data_path, 'val_data')
+
+# TODO: see why this is necessary and perhaps we don't need it?
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+                                    std=[0.229, 0.224, 0.225])
 
 val_dataset = datasets.ImageFolder(
     valdir,
@@ -37,3 +46,17 @@ val_dataset = datasets.ImageFolder(
 val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
         pin_memory=True, sampler=None)
+
+print('iterating though dataloader')
+for i, (images, target) in enumerate(val_loader):
+    if torch.cuda.is_available():
+        images = images.cuda(args.gpu, non_blocking=True)
+        target = target.cuda(args.gpu, non_blocking=True)
+    print(f"type of images: {type(images)}")
+    print(f"shape of images: {images.shape}")
+    print(f"shape of images[0]: {images[0].shape}")
+    print(f"images[0]:\n{images[0]}")
+    print(f"type of target: {type(target)}")
+    print(f"shape of target: {target.shape}")
+    print(f"target:\n{target}")
+    # compute output       
