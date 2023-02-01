@@ -1,4 +1,7 @@
 # Initially taken from Github's Python gitignore file
+# our version
+stable-diffusion-v1-5/
+winoground/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
