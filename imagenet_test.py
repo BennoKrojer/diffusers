@@ -8,7 +8,7 @@ import torchvision
 import torch.utils.data
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-from torch.utils.data import Subset
+# from torch.utils.data import Subset
 print('imports done!')
 
 
@@ -42,6 +42,8 @@ val_dataset = datasets.ImageFolder(
         transforms.ToTensor(),
         normalize,
     ]))
+print(val_dataset)
+print(val_dataset.class_to_idx)
 
 val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
@@ -59,4 +61,5 @@ for i, (images, target) in enumerate(val_loader):
     print(f"type of target: {type(target)}")
     print(f"shape of target: {target.shape}")
     print(f"target:\n{target}")
-    # compute output       
+    # compute output  
+    break     
