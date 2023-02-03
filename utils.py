@@ -3,7 +3,7 @@ import numpy as np
 RETRIEVAL_TASKS = ['imagecode', 'flickr30k']
 
 def evaluate_winoground(scores):
-    c0_i0, c0_i1, c1_i0, c1_i1 = scores
+    c0_i0, c0_i1, c1_i0, c1_i1 = scores[0]
     text_score = 1 if c0_i0 > c1_i0 and c1_i1 > c0_i1 else 0
     img_score = 1 if c0_i0 > c0_i1 and c1_i1 > c1_i0 else 0
     group_score = 1 if text_score and img_score else 0

@@ -16,7 +16,7 @@ vae = AutoencoderKL.from_pretrained(model_id_or_path, subfolder='vae', use_auth_
 vae.to(device='cuda', dtype=torch.bfloat16)
 pipe_img = StableDiffusionImg2LatentPipeline(vae)
 pipe = pipe_img.to(device)
-USE_CLIP = False
+USE_CLIP = True
 
 # clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda:0')
 if USE_CLIP:
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     METRIC = 'dot'
 
-    data = json.load(open('imagecode/valid_data.json', 'r'))
+    data = json.load(open('datasets/imagecode/valid_data.json', 'r'))
 
     acc = 0
     total = 0
@@ -39,13 +39,14 @@ if __name__ == "__main__":
             continue
         for idx, description in descriptions.items():
             idx = int(idx)
-            all_imgs = glob(f'./imagecode/image-sets/{set_id}/*.jpg')
+            all_imgs = glob(f'datasets/imagecode/image-sets/{set_id}/*.jpg')
             all_imgs = sorted(all_imgs, key=lambda x: int(x.split('/')[-1].split('.')[0][3:]))
             # correct_img = all_imgs[idx]
             # correct_img = Image.open(correct_img).convert('RGB').resize((512, 512))
             # latent_correct = pipe_img(correct_img).flatten().float()
             smallest_dist = 100000000000
             best_i = 0
+            dists = []
             for i in range(10):
 
                 if USE_CLIP:
@@ -57,14 +58,15 @@ if __name__ == "__main__":
                     latent_before = pipe_img(img).flatten().float()
 
                 if USE_CLIP:
-                    img = Image.open(f'imagecode/img2img_captions_latent_guidance_scale_7.5/{set_id}_{idx}_{i}.png').convert('RGB')
+                    img = Image.open(f'datasets/imagecode/img2img_captions_latent_guidance_scale_7.5/{set_id}_{idx}_{i}.png').convert('RGB')
                     img = preprocess(img).unsqueeze(0).to(device)
                     with torch.no_grad():
                         latent_after = clip_model.encode_image(img).squeeze().float()
                 else:        
-                    latent_after = torch.load(f'imagecode/img2img_captions_latent_guidance_scale_7.5/{set_id}_{idx}_{i}.pt', map_location=torch.device(device)).flatten().float()
+                    latent_after = torch.load(f'datasets/imagecode/img2img_captions_latent_guidance_scale_7.5/{set_id}_{idx}_{i}.pt', map_location=torch.device(device)).flatten().float()
                 
                 dist = torch.dot(latent_after - latent_before, latent_after - latent_before)
+                dists.append(dist)
                 if i == 0 or smallest_dist > dist:
                     smallest_dist = dist
                     best_i = i
