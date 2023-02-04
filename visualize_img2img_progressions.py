@@ -20,6 +20,8 @@ from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg
 
 import cProfile
 
+STARTER_IDX = 0
+
 class Scorer:
     def __init__(self, args, clip_model=None, preprocess=None):
         self.similarity = args.similarity
@@ -41,23 +43,30 @@ class Scorer:
         imgs, texts = batch[0], batch[1]
         imgs, imgs_resize = imgs[0], imgs[1]
         imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+        correct_idx = batch[-1]
 
         scores = []
 
         for text in texts:
             if not args.img2img:
-                # check to see if the generated image already exists in self.cache_dir
-                # if so, save it into a variable called gen
                 gen, latent = model(prompt=list(text))
                 gen = gen.images
                 if self.cache_dir:
+                    torch.save(latent, f'{self.cache_dir}/{i}.pt')
                     gen.save(f'{self.cache_dir}/{i}.png')
             for img_idx, img in enumerate(imgs):
+                if img_idx != STARTER_IDX: #TODO: DELETE THIS
+                    continue
                 resized_img = imgs_resize[img_idx]
                 if args.img2img:
-                    gen, latent = model(prompt=list(text), init_image=resized_img, strength=args.strength)
+                    visualize_dir = f'analysis/img2img_noise_levels/{args.datapoint_id}_{"in" if img_idx != correct_idx else ""}correct_starter_img'
+                    print('WRITING TO:', visualize_dir)
+                    if not os.path.exists(visualize_dir):
+                        os.makedirs(visualize_dir)
+                    gen, latent = model(prompt=list(text), init_image=resized_img, strength=args.strength, visualize_dir=visualize_dir)
                     gen = gen.images
                     if self.cache_dir:
+                        # torch.save(latent, f'{self.cache_dir}/{i}_{img_idx}.pt')
                         gen[0].save(f'{self.cache_dir}/{i}_{img_idx}.png')
                 score = self.score_pair(img, resized_img, gen, latent)
                 scores.append(score)
@@ -117,6 +126,10 @@ def main(args):
 
     metrics = []
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
+        if i > args.datapoint_id:
+            break
+        if i != args.datapoint_id: #TODO: DELETE THIS
+            continue
         scores = scorer.score_batch(i, args, batch, model)
         score = evaluate_scores(args, scores, batch)
         metrics.append(score)
@@ -142,17 +155,23 @@ if __name__ == '__main__':
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=1)
     parser.add_argument('--strength', type=float, default=0.8)
+    parser.add_argument('--num_inference_steps', type=int, default=50)
+    parser.add_argument('--datapoint_id', type=int, default=0)
     args = parser.parse_args()
 
-    random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    torch.cuda.manual_seed(args.seed)
-    torch.backends.cudnn.deterministic = True
-    torch.cuda.set_device(args.cuda_device)
 
     if args.cache:
         args.cache_dir = f'./cache/{args.task}/{"img2img" if args.img2img else "text2img"}_{args.similarity}_seed{args.seed}'
         if not os.path.exists(args.cache_dir):
             os.makedirs(args.cache_dir)
-            
+    for strength in [0.8, 0.75, 0.6, 0.5, 0.4, 0.3]:
+        random.seed(args.seed)
+        torch.manual_seed(args.seed)
+        torch.cuda.manual_seed(args.seed)
+        torch.backends.cudnn.deterministic = True
+        torch.cuda.set_device(args.cuda_device)
+
+        args.strength = strength
+        main(args)
+
     main(args)

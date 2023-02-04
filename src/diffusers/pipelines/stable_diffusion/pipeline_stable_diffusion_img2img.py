@@ -146,6 +146,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         return_dict: bool = True,
         callback: Optional[Callable[[int, int, torch.FloatTensor], None]] = None,
         callback_steps: Optional[int] = 1,
+        visualize_dir: Optional[str] = None,
         **kwargs,
     ):
         r"""
@@ -226,6 +227,14 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
 
         if isinstance(init_image, PIL.Image.Image):
             init_image = preprocess(init_image)
+        
+        if visualize_dir is not None:
+            image = (init_image / 2 + 0.5).clamp(0, 1)
+            image = image.cpu().permute(0, 2, 3, 1).numpy()
+            image = self.numpy_to_pil(image)
+            # save image
+            image[0].save(f"{visualize_dir}/{strength}_init_image_with_{prompt[0]}.png")
+
 
         # get prompt text embeddings
         text_inputs = self.tokenizer(
@@ -337,6 +346,16 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
 
         latents = init_latents
 
+        if visualize_dir is not None:
+            latents__ = 1 / 0.18215 * latents
+            image = self.vae.decode(latents__).sample
+
+            image = (image / 2 + 0.5).clamp(0, 1)
+            image = image.cpu().permute(0, 2, 3, 1).numpy()
+            image = self.numpy_to_pil(image)
+            # save image
+            image[0].save(f"{visualize_dir}/{strength}_init_noisy_image_with_{prompt[0]}.png")
+
         t_start = max(num_inference_steps - init_timestep + offset, 0)
 
         # Some schedulers like PNDM have timesteps as arrays
@@ -363,6 +382,16 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             # call the callback, if provided
             if callback is not None and i % callback_steps == 0:
                 callback(i, t, latents)
+
+            if i % 4 == 0 and visualize_dir is not None:
+                latents_ = 1 / 0.18215 * latents
+                image = self.vae.decode(latents_).sample
+
+                image = (image / 2 + 0.5).clamp(0, 1)
+                image = image.cpu().permute(0, 2, 3, 1).numpy()
+                image = self.numpy_to_pil(image)
+                # save image
+                image[0].save(f"{visualize_dir}/{strength}_intermediate_image_{i}_{prompt[0]}.png")
 
         latents = 1 / 0.18215 * latents
         image = self.vae.decode(latents).sample
