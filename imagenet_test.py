@@ -20,11 +20,6 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256)')
 args = parser.parse_args()
 
-# print('loading data')
-# imagenet_val_data = torchvision.datasets.ImageNet('/home/krojerb/scratch/imagenet/val_data')
-# data_loader = torch.utils.data.DataLoader(imagenet_val_data,
-#                                         batch_size=4,
-#                                         shuffle=True,)
 
 
 print('creating data loader')
@@ -34,14 +29,13 @@ valdir = os.path.join(args.data_path, 'val_data')
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                     std=[0.229, 0.224, 0.225])
 
-val_dataset = datasets.ImageFolder(
-    valdir,
-    transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize,
-    ]))
+val_dataset = datasets.ImageFolder(valdir,)
+    # transforms.Compose([
+    #     transforms.Resize(256),
+    #     transforms.CenterCrop(224),
+    #     transforms.ToTensor(),
+    #     normalize,
+    # ]))
 print(val_dataset)
 print(val_dataset.class_to_idx)
 
