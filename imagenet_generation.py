@@ -9,7 +9,6 @@ from PIL import Image
 from tqdm.auto import tqdm
 import argparse
 import json
-# import clip
 import random
 
 from datasets import get_dataset
@@ -18,28 +17,13 @@ from utils import evaluate_scores
 
 from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg2LatentPipeline, StableDiffusionImg2ImgPipeline, StableDiffusionPipeline
 
-# import cProfile
-
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
-
-classes = json.load(open('imagenet_classes.json')) # dict
-
-model_id_or_path = "./stable-diffusion-v1-5"
-model = StableDiffusionPipeline.from_pretrained(
-    model_id_or_path,
-    safety_checker=None
-    )        
-
-model = model.to(device)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--cuda_device', type=int, default=0)
-    parser.add_argument('--save_dir', type=str, default='./.cache/imagenet/generated_imgs/')
+    parser.add_argument('--save_dir', type=str, default='./cache/imagenet/generated_imgs/')
     
     args = parser.parse_args()
 
@@ -49,14 +33,27 @@ if __name__ == "__main__":
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
     
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
+
+    classes = json.load(open('imagenet_classes.json')) # dict
+    json.dump(classes, open('imagenet_classes.json', 'w'), indent=4)
+
+    model_id_or_path = "./stable-diffusion-v1-5"
+    model = StableDiffusionPipeline.from_pretrained(
+        model_id_or_path,
+        safety_checker=None
+        )        
+
+    model = model.to(device)
+
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
     
     for i, text in classes.items():
-        print(i)
-        gen, latent = model(prompt=list(text))
-        gen = gen.images
-        torch.save(latent, f'{args.save_dir}/{i}.pt')
+        # text = 'a photo of a ' + text
+        print(text)
+        gen, latent = model(prompt=text)
+        gen = gen.images[0]
+        # torch.save(latent, f'{args.save_dir}/{i}.pt')
         gen.save(f'{args.save_dir}/{i}.png')
-    
-    
