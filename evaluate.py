@@ -46,6 +46,8 @@ class Scorer:
 
         for text in texts:
             if not args.img2img:
+                # check to see if the generated image already exists in self.cache_dir
+                # if so, save it into a variable called gen
                 gen, latent = model(prompt=list(text))
                 gen = gen.images
                 if self.cache_dir:
