@@ -20,7 +20,7 @@ from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg
 
 import cProfile
 
-STARTER_IDX = 0
+STARTER_IDX = 6
 
 class Scorer:
     def __init__(self, args, clip_model=None, preprocess=None):
@@ -63,7 +63,7 @@ class Scorer:
                     print('WRITING TO:', visualize_dir)
                     if not os.path.exists(visualize_dir):
                         os.makedirs(visualize_dir)
-                    gen, latent = model(prompt=list(text), init_image=resized_img, strength=args.strength, visualize_dir=visualize_dir)
+                    gen, latent = model(prompt=list(text), init_image=resized_img, strength=args.strength, num_inference_steps=args.num_inference_steps, visualize_dir=visualize_dir)
                     gen = gen.images
                     if self.cache_dir:
                         # torch.save(latent, f'{self.cache_dir}/{i}_{img_idx}.pt')

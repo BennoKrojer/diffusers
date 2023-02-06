@@ -233,7 +233,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             image = image.cpu().permute(0, 2, 3, 1).numpy()
             image = self.numpy_to_pil(image)
             # save image
-            image[0].save(f"{visualize_dir}/{strength}_init_image_with_{prompt[0]}.png")
+            image[0].save(f"{visualize_dir}/{num_inference_steps}_{strength}_init_image_with_{prompt[0]}.png")
 
 
         # get prompt text embeddings
@@ -354,7 +354,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             image = image.cpu().permute(0, 2, 3, 1).numpy()
             image = self.numpy_to_pil(image)
             # save image
-            image[0].save(f"{visualize_dir}/{strength}_init_noisy_image_with_{prompt[0]}.png")
+            image[0].save(f"{visualize_dir}/{num_inference_steps}_{strength}_init_noisy_image_with_{prompt[0]}.png")
 
         t_start = max(num_inference_steps - init_timestep + offset, 0)
 
@@ -391,7 +391,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
                 image = image.cpu().permute(0, 2, 3, 1).numpy()
                 image = self.numpy_to_pil(image)
                 # save image
-                image[0].save(f"{visualize_dir}/{strength}_intermediate_image_{i}_{prompt[0]}.png")
+                image[0].save(f"{visualize_dir}/{num_inference_steps}_{strength}_intermediate_image_{i}_{prompt[0]}.png")
 
         latents = 1 / 0.18215 * latents
         image = self.vae.decode(latents).sample

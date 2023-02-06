@@ -114,8 +114,10 @@ def main(args):
 
 
     metrics = []
+    all_scores = []
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
         scores = scorer.score_batch(i, args, batch, model)
+        all_scores.append(scores)
         score = evaluate_scores(args, scores, batch)
         metrics.append(score)
         if args.task == 'winoground':
@@ -128,6 +130,7 @@ def main(args):
         else:
             accuracy = sum(metrics) / len(metrics)
             print(f'Retrieval Accuracy: {accuracy}')
+    json.dump(all_scores, open(f'{args.run_id}_scores.json', 'w'), indent=4)
 
 if __name__ == '__main__':
 
@@ -148,8 +151,10 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
 
+    args.run_id = f'{args.task}/{"img2img" if args.img2img else "text2img"}_{args.similarity}_strength{args.strength}_seed{args.seed}'
+
     if args.cache:
-        args.cache_dir = f'./cache/{args.task}/{"img2img" if args.img2img else "text2img"}_{args.similarity}_seed{args.seed}'
+        args.cache_dir = f'./cache/{args.run_id}'
         if not os.path.exists(args.cache_dir):
             os.makedirs(args.cache_dir)
             
