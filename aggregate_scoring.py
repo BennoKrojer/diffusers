@@ -19,7 +19,6 @@ import csv
 
 from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg2LatentPipeline, StableDiffusionImg2ImgPipeline, StableDiffusionPipeline
 
-import cProfile
 
 class Scorer:
     def __init__(self, args, clip_model=None, preprocess=None):

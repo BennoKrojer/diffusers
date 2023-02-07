@@ -23,9 +23,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--cuda_device', type=int, default=0)
-    parser.add_argument('--save_dir', type=str, default='./cache/imagenet/generated_imgs/')
+    parser.add_argument('--save_dir', type=str, default='./cache/imagenet/txt2img')
     
     args = parser.parse_args()
+
+    args.save_dir = f'{args.save_dir}_seed_{args.seed}'
 
     random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -53,6 +55,8 @@ if __name__ == "__main__":
     for i, text in classes.items():
         # text = 'a photo of a ' + text
         print(text)
+        if f'{args.save_dir}/{i}.png' in glob.glob(f'{args.save_dir}/*.png'):
+            continue
         gen, latent = model(prompt=text)
         gen = gen.images[0]
         # torch.save(latent, f'{args.save_dir}/{i}.pt')
