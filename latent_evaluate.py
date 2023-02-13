@@ -22,7 +22,7 @@ from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg
 import cProfile
 
 class Scorer:
-    def __init__(self, args, clip_model=None, preprocess=None, gen_imagenet=None):
+    def __init__(self, args, clip_model=None, preprocess=None):
         self.similarity = args.similarity
         if self.similarity == 'clip':
             self.clip_model = clip_model
@@ -32,7 +32,6 @@ class Scorer:
             vae.to(device='cuda', dtype=torch.bfloat16)
             self.vae_model = StableDiffusionImg2LatentPipeline(vae).to('cuda')
         self.cache_dir = args.cache_dir if args.cache else None
-        self.gen_imagenet = gen_imagenet
 
 
     def score_batch(self, i, args, batch, model):
@@ -51,7 +50,7 @@ class Scorer:
                 # check to see if the generated image already exists in self.cache_dir
                 # if so, save it into a variable called gen
                 if args.task == 'imagenet':
-                    gen = self.gen_imagenet[txt_idx]
+                    gen = Image.open(f'cache/imagenet/txt2img_seed_0/{txt_idx}.png')
                 else:
                     gen, latent = model(prompt=list(text))
                     gen = gen.images
@@ -64,25 +63,25 @@ class Scorer:
                     gen = gen.images
                     if self.cache_dir:
                         gen[0].save(f'{self.cache_dir}/{i}_{img_idx}.png')
-                score = self.score_pair(img, resized_img, gen)
+                score = self.score_pair(img, resized_img, gen, latent)
                 scores.append(score)
 
         scores = torch.stack(scores).permute(1, 0) if args.batchsize > 1 else torch.stack(scores).unsqueeze(0)
         return scores
         
-    def score_pair(self, img, resized_img, gen):
+    def score_pair(self, img, resized_img, gen, latent):
         """
         Takes a batch of images and a batch of generated images and returns a score for each image pair.
         """
-        if args.task == 'imagenet':
-            with torch.no_grad():
-                img_latent = self.clip_model.encode_image(img).squeeze().float()
-                gen_latent = gen
-        else:
+        if self.similarity == 'clip':
             gen = torch.stack([self.preprocess(g) for g in gen]).to('cuda')
             with torch.no_grad():
                 img_latent = self.clip_model.encode_image(img).squeeze().float()
                 gen_latent = self.clip_model.encode_image(gen).squeeze().float()
+        else:
+            #flatten except first dimension
+            gen_latent = latent.reshape(latent.shape[0], -1)
+            img_latent = self.vae_model(resized_img).reshape(latent.shape[0], -1)     
         
         diff = img_latent - gen_latent
         score = torch.norm(diff, p=2, dim=-1)
@@ -107,23 +106,22 @@ def main(args):
 
     model = model.to(device)
     
-    clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda')
-    if args.task == 'imagenet':
-        gen_imagenet = []
-        for i in range(1000):
-            gen_imagenet.append(torch.load(f'./cache/imagenet/txt2img_seed_{args.seed}/{i}.pt').to('cuda')) 
-        scorer = Scorer(args, clip_model=clip_model, preprocess=preprocess, gen_imagenet=gen_imagenet)
-    else:
+    
+    if args.similarity == 'clip':
+        clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda')
         scorer = Scorer(args, clip_model=clip_model, preprocess=preprocess)
 
-    dataset = get_dataset(args.task, f'datasets/{args.task}', transform=preprocess)
+        dataset = get_dataset(args.task, f'datasets/{args.task}', transform=preprocess)
+    else:
+        scorer = Scorer(args)
+        dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)
+
     dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=0)
-    
+
+
     metrics = []
     all_scores = []
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-        if args.subset and i % 10 != 0:
-            continue
         scores = scorer.score_batch(i, args, batch, model)
         all_scores.append(list(scores.cpu().numpy()[0]))
         score = evaluate_scores(args, scores, batch)
@@ -154,7 +152,6 @@ if __name__ == '__main__':
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=1)
     parser.add_argument('--strength', type=float, default=0.8)
-    parser.add_argument('--subset', action='store_true')
     args = parser.parse_args()
 
     random.seed(args.seed)

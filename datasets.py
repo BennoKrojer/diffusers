@@ -10,15 +10,15 @@ import numpy as np
 import torch
 from torchvision import datasets
 
-def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=512):
+def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=512, scoring_only=False):
     if dataset_name == 'winoground':
-        return WinogroundDataset(root_dir, transform, resize=resize)
+        return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode':
-        return ImageCoDeDataset(root_dir, split, transform, resize=resize)
+        return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'flickr30k':
-        return Flickr30KDataset(root_dir, split, transform, resize=resize)
+        return Flickr30KDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagenet':
-        return ImagenetDataset(root_dir, transform, resize=resize)
+        return ImagenetDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -78,28 +78,44 @@ class SVOClassificationDataset(Dataset):
         return len(self.data)
 
 class ImagenetDataset(Dataset):
-    def __init__(self, root_dir, transform, resize=512):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
         self.root_dir = root_dir
-        self.data = datasets.ImageFolder(root_dir)
-        self.loader = torch.utils.data.DataLoader(self.data, batch_size=1, shuffle=False, num_workers=0, pin_memory=True)
+        self.data = datasets.ImageFolder(root_dir + '/val')
+        # self.loader = torch.utils.data.DataLoader(self.data, batch_size=1, shuffle=False, num_workers=0, pin_memory=True)
         self.resize = resize
         self.transform = transform
-        self.classes = json.load(open(f'./imagenet_classes.json', 'r')).values()
+        self.classes = list(json.load(open(f'./imagenet_classes.json', 'r')).values())
+        self.scoring_only = scoring_only
 
 
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img, class_id = self.data[idx]
-        return img, self.classes, class_id
+        if not self.scoring_only:
+            img, class_id = self.data[idx]
+            img = img.convert("RGB")
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
+            if self.transform:
+                img = self.transform(img)
+            else:
+                img = transforms.ToTensor()(img)
+        else:
+            class_id = idx // 50
+
+        if self.scoring_only:
+            return self.classes, class_id
+        else:
+            return ([img], [img_resize]), self.classes, class_id
 
 class WinogroundDataset(Dataset):
-    def __init__(self, root_dir, transform, resize=512):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
         self.root_dir = root_dir
         self.data = json.load(open(f'{root_dir}/data.json', 'r'))
         self.resize = resize
         self.transform = transform
+        self.scoring_only = scoring_only
 
     def __len__(self):
         return len(self.data)
@@ -111,32 +127,35 @@ class WinogroundDataset(Dataset):
         img_id = ex['id']
         img_path0 = f'{self.root_dir}/images/ex_{img_id}_img_0.png'
         img_path1 = f'{self.root_dir}/images/ex_{img_id}_img_1.png'
+        if not self.scoring_only:
+            img0 = Image.open(img_path0).convert("RGB")
+            img1 = Image.open(img_path1).convert("RGB")
+            img0_resize = img0.resize((self.resize, self.resize))
+            img1_resize = img1.resize((self.resize, self.resize))
+            img0_resize = diffusers_preprocess(img0_resize)
+            img1_resize = diffusers_preprocess(img1_resize)
 
-        img0 = Image.open(img_path0).convert("RGB")
-        img1 = Image.open(img_path1).convert("RGB")
-        img0_resize = img0.resize((self.resize, self.resize))
-        img1_resize = img1.resize((self.resize, self.resize))
-        img0_resize = diffusers_preprocess(img0_resize)
-        img1_resize = diffusers_preprocess(img1_resize)
-
-        if self.transform:
-            img0 = self.transform(img0)
-            img1 = self.transform(img1)
-        else:
-            img0 = transforms.ToTensor()(img0)
-            img1 = transforms.ToTensor()(img1)
-        
-        imgs = [img0, img1]
+            if self.transform:
+                img0 = self.transform(img0)
+                img1 = self.transform(img1)
+            else:
+                img0 = transforms.ToTensor()(img0)
+                img1 = transforms.ToTensor()(img1)
+            
+            imgs = [img0, img1]
         text = [cap0, cap1]
-
-        return (imgs, [img0_resize, img1_resize]), text, img_id
+        if self.scoring_only:
+            return text, img_id
+        else:
+            return (imgs, [img0_resize, img1_resize]), text, img_id
 
 class ImageCoDeDataset(Dataset):
-    def __init__(self, root_dir, split, transform, resize=512):
+    def __init__(self, root_dir, split, transform, resize=512, scoring_only=False):
         self.root_dir = root_dir
         self.resize = resize
         self.dataset = self.load_data(root_dir, split)
         self.transform = transform
+        self.scoring_only = scoring_only
 
     @staticmethod
     def load_data(data_dir, split, static_only=True):
@@ -163,25 +182,30 @@ class ImageCoDeDataset(Dataset):
     
     def __getitem__(self, idx):
         img_dir, img_files, img_idx, text = self.dataset[idx]
-        imgs = [Image.open(img_path).convert("RGB") for img_path in img_files]
-        imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
-        imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
+        if not self.scoring_only:
+            imgs = [Image.open(img_path).convert("RGB") for img_path in img_files]
+            imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+            imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
 
-        if self.transform:
-            imgs = [self.transform(img) for img in imgs]
+            if self.transform:
+                imgs = [self.transform(img) for img in imgs]
+            else:
+                imgs = [transforms.ToTensor()(img) for img in imgs]
+
+        if self.scoring_only:
+            return text, img_dir, img_idx
         else:
-            imgs = [transforms.ToTensor()(img) for img in imgs]
-
-        return (imgs, imgs_resize), [text], img_dir, img_idx
+            return (imgs, imgs_resize), [text], img_dir, img_idx
 
 class Flickr30KDataset(Dataset):
-    def __init__(self, root_dir, split, transform, resize=512):
+    def __init__(self, root_dir, split, transform, resize=512, scoring_only=False):
         self.root_dir = root_dir
         self.resize = resize
         self.data = json.load(open(f'{root_dir}/top10_RN50x64.json', 'r'))
         self.data = list(self.data.items())
         self.data = self.remove_impossible(self.data)
         self.transform = transform
+        self.scoring_only = scoring_only
     
 
     @staticmethod
@@ -202,13 +226,16 @@ class Flickr30KDataset(Dataset):
         correct_path = ex[1][0]
         img_paths = ex[1][1]
         img_idx = img_paths.index(correct_path)
-        imgs = [Image.open(f'datasets/{img_path}').convert("RGB") for img_path in img_paths]
-        imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
-        imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
+        if not self.scoring_only:
+            imgs = [Image.open(f'datasets/{img_path}').convert("RGB") for img_path in img_paths]
+            imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+            imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
 
-        if self.transform:
-            imgs = [self.transform(img) for img in imgs]
+            if self.transform:
+                imgs = [self.transform(img) for img in imgs]
+            else:
+                imgs = [transforms.ToTensor()(img) for img in imgs]
+        if self.scoring_only:
+            return [text], img_idx
         else:
-            imgs = [transforms.ToTensor()(img) for img in imgs]
-
-        return (imgs, imgs_resize), [text], img_idx
+            return (imgs, imgs_resize), [text], img_idx

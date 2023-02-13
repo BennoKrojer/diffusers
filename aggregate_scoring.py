@@ -1,166 +1,103 @@
-import torch
-from torchvision.transforms.functional import to_pil_image
-from transformers import CLIPTextModel, CLIPTokenizer
-from transformers import logging
-from diffusers import AutoencoderKL, UNet2DConditionModel, PNDMScheduler
-import glob
-import os
-from PIL import Image
-from tqdm.auto import tqdm
-import argparse
-import json
-import clip
-import random
-
-from datasets import get_dataset
-from torch.utils.data import DataLoader
 from utils import evaluate_scores
 import csv
-
-from src.diffusers import StableDiffusionText2LatentPipeline, StableDiffusionImg2LatentPipeline, StableDiffusionImg2ImgPipeline, StableDiffusionPipeline
-
-
-class Scorer:
-    def __init__(self, args, clip_model=None, preprocess=None):
-        self.similarity = args.similarity
-        if self.similarity == 'clip':
-            self.clip_model = clip_model
-            self.preprocess = preprocess
-        else:
-            vae = AutoencoderKL.from_pretrained('./stable-diffusion-v1-5', subfolder='vae', use_auth_token='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')
-            vae.to(device='cuda', dtype=torch.bfloat16)
-            self.vae_model = StableDiffusionImg2LatentPipeline(vae).to('cuda')
-        self.cache_dir = args.cache_dir if args.cache else None
-
-
-    def score_batch(self, i, args, batch, model):
-        """
-        Takes a batch of images and captions and returns a score for each image-caption pair.
-        """
-
-        imgs, texts = batch[0], batch[1]
-        imgs, imgs_resize = imgs[0], imgs[1]
-        imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
-
-        scores = []
-
-        for text in texts:
-            if not args.img2img:
-                # check to see if the generated image already exists in self.cache_dir
-                # if so, save it into a variable called gen
-                gen, latent = model(prompt=list(text))
-                gen = gen.images
-                if self.cache_dir:
-                    gen.save(f'{self.cache_dir}/{i}.png')
-            for img_idx, img in enumerate(imgs):
-                resized_img = imgs_resize[img_idx]
-                if args.img2img:
-                    gen, latent = model(prompt=list(text), init_image=resized_img, strength=args.strength)
-                    gen = gen.images
-                    if self.cache_dir:
-                        gen[0].save(f'{self.cache_dir}/{i}_{img_idx}.png')
-                score = self.score_pair(img, resized_img, gen, latent)
-                scores.append(score)
-
-        scores = torch.stack(scores).permute(1, 0) if args.batchsize > 1 else torch.stack(scores).unsqueeze(0)
-        return scores
-        
-    def score_pair(self, img, resized_img, gen, latent):
-        """
-        Takes a batch of images and a batch of generated images and returns a score for each image pair.
-        """
-        if self.similarity == 'clip':
-            gen = torch.stack([self.preprocess(g) for g in gen]).to('cuda')
-            with torch.no_grad():
-                img_latent = self.clip_model.encode_image(img).squeeze().float()
-                gen_latent = self.clip_model.encode_image(gen).squeeze().float()
-        else:
-            #flatten except first dimension
-            gen_latent = latent.reshape(latent.shape[0], -1)
-            img_latent = self.vae_model(resized_img).reshape(latent.shape[0], -1)     
-        
-        diff = img_latent - gen_latent
-        score = torch.norm(diff, p=2, dim=-1)
-        score = - score # lower is better since it is a similarity similarity
-        return score
-
+from datasets import get_dataset
+from torch.utils.data import DataLoader
+import argparse
+import os
+import numpy as np
 
 def main(args):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    model_id_or_path = "./stable-diffusion-v1-5"
-    if args.img2img:
-        model = StableDiffusionImg2ImgPipeline.from_pretrained(
-            model_id_or_path,
-            safety_checker=None
-        )
-    else:
-        model = StableDiffusionPipeline.from_pretrained(
-            model_id_or_path,
-            safety_checker=None
-        )        
-
-    model = model.to(device)
     
-    
-    if args.similarity == 'clip':
-        clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda')
-        scorer = Scorer(args, clip_model=clip_model, preprocess=preprocess)
+    dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, scoring_only=True)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
 
-        dataset = get_dataset(args.task, f'datasets/{args.task}', transform=preprocess)
+    score_dir = f'./cache/{args.task}/{"img2img" if args.img2img else "txt2img"}{"_strength" if args.strength else ""}'
+
+    csv_files = [f for f in os.listdir(score_dir) if f.endswith('.csv')]
+
+    aggregated_scores = []
+    for f in csv_files:
+        with open(os.path.join(score_dir, f), 'r') as f:
+            reader = csv.reader(f)
+            scores = list(reader)
+        all_scores = [[float(s) for s in datapoint] for datapoint in scores]
+        aggregated_scores.append(all_scores)
+
+    aggregated_scores = np.array(aggregated_scores)
+    if args.deep_aggregation:
+        aggregated_scores = aggregated_scores.transpose(1, 2, 0)
+
+        progressing_scores = []
+        for sample_size in range(aggregated_scores.shape[-1]):
+            sub_aggregated_scores = aggregated_scores[:, :, :sample_size+1]
+            metrics = {'mean': [], 'max': [], 'min': []}
+            for i, batch in enumerate(dataloader):
+                if args.subset and i % 10 != 0:
+                    continue
+                scores = sub_aggregated_scores[i//10]
+                mean_scores = np.mean(scores, axis=1)
+                max_scores = np.max(scores, axis=1)
+                min_scores = np.min(scores, axis=1)
+
+                mean_metric = evaluate_scores(args, [mean_scores], batch)
+                max_metric = evaluate_scores(args, [max_scores], batch)
+                min_metric = evaluate_scores(args, [min_scores], batch)
+                
+                metrics['mean'].append(mean_metric)
+                metrics['max'].append(max_metric)
+                metrics['min'].append(min_metric)
+
+            for k, v in metrics.items():
+                print(f'Aggregation method: {k}')
+                if args.task == 'winoground':
+                    text_score = sum([m[0] for m in v]) / len(v)
+                    img_score = sum([m[1] for m in v]) / len(v)
+                    group_score = sum([m[2] for m in v]) / len(v)
+                    print(f'Text score: {text_score}')
+                    print(f'Image score: {img_score}')
+                    print(f'Group score: {group_score}')
+                else:
+                    accuracy = sum(v) / len(v)
+                    print(f'Retrieval Accuracy: {accuracy}')
+                    if k == 'mean':
+                        progressing_scores.append(accuracy)
+        # plot progressing scores accumulatively
+        import matplotlib.pyplot as plt
+        plt.plot(progressing_scores)
+        plt.xlabel('Number of Aggregated Scores')
+        plt.ylabel('Retrieval Accuracy')
+        plt.savefig(f'./cache/{args.task}/{"img2img" if args.img2img else "txt2img"}{"_strength" if args.strength else ""}/progressing_scores.png')
+
     else:
-        scorer = Scorer(args)
-        dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)
-
-    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=0)
-
-
-    metrics = []
-    all_scores = []
-    for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-        scores = scorer.score_batch(i, args, batch, model)
-        all_scores.append(list(scores.cpu().numpy()[0]))
-        score = evaluate_scores(args, scores, batch)
-        metrics.append(score)
+        aggregated_metrics = []
+        for i, all_scores in enumerate(aggregated_scores):
+            metrics = []
+            for j, batch in enumerate(dataloader):
+                scores = [all_scores[j]]
+                metric = evaluate_scores(args, scores, batch)
+                metrics.append(metric)
+            aggregated_metrics.append(metrics)
+        aggregated_metrics = np.array(aggregated_metrics)
         if args.task == 'winoground':
-            text_score = sum([m[0] for m in metrics]) / len(metrics)
-            img_score = sum([m[1] for m in metrics]) / len(metrics)
-            group_score = sum([m[2] for m in metrics]) / len(metrics)
-            print(f'Text score: {text_score}')
-            print(f'Image score: {img_score}')
-            print(f'Group score: {group_score}')
+            text_scores = aggregated_metrics[:,:,0]
+            img_scores = aggregated_metrics[:,:,1]
+            group_scores = aggregated_metrics[:,:,2]
+
+            print(f'Text score: {np.mean(text_scores)}')
+            print(f'Image score: {np.mean(img_scores)}')
+            print(f'Group score: {np.mean(group_scores)}')
         else:
-            accuracy = sum(metrics) / len(metrics)
-            print(f'Retrieval Accuracy: {accuracy}')
-    # write all scores to csv
-    with open(f'./cache/{args.run_id}_scores.csv', 'w') as f:
-        writer = csv.writer(f)
-        writer.writerows(all_scores)
+            print(f'Retrieval Accuracy: {np.mean(aggregated_metrics)}')
+
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--task', type=str)
     parser.add_argument('--img2img', action='store_true')
-    parser.add_argument('--similarity', type=str, default='clip')
-    parser.add_argument('--seed', type=int, default=0)
-    parser.add_argument('--cache', action='store_true')
-    parser.add_argument('--cuda_device', type=int, default=0)
-    parser.add_argument('--batchsize', type=int, default=1)
-    parser.add_argument('--strength', type=float, default=0.8)
+    parser.add_argument('--strength', action='store_true')
+    parser.add_argument('--deep_aggregation', action='store_true')
+    parser.add_argument('--subset', action='store_true')
     args = parser.parse_args()
 
-    random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    torch.cuda.manual_seed(args.seed)
-    torch.backends.cudnn.deterministic = True
-    torch.cuda.set_device(args.cuda_device)
-
-    args.run_id = f'{args.task}/{"img2img" if args.img2img else "text2img"}_{args.similarity}_strength{args.strength}_seed{args.seed}'
-
-    if args.cache:
-        args.cache_dir = f'./cache/{args.run_id}'
-        if not os.path.exists(args.cache_dir):
-            os.makedirs(args.cache_dir)
-            
     main(args)

@@ -1,6 +1,6 @@
 import numpy as np
 
-RETRIEVAL_TASKS = ['imagecode', 'flickr30k']
+RETRIEVAL_TASKS = ['imagecode', 'flickr30k', 'imagenet']
 
 def evaluate_winoground(scores):
     c0_i0, c0_i1, c1_i0, c1_i1 = scores[0]
@@ -10,8 +10,9 @@ def evaluate_winoground(scores):
     return text_score, img_score, group_score
 
 def evaluate_retrieval(args, scores, img_idx):
-    img_idx = img_idx.cpu().numpy()
-    scores = scores.cpu().numpy()
+    if type(scores) != list:
+        img_idx = img_idx.cpu().numpy()
+        scores = scores.cpu().numpy()
     scores = np.stack(scores, axis=0)
     retrieval_accuracy = 0
     for i in range(scores.shape[0]):
