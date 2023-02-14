@@ -167,3 +167,5 @@ tags
 
 # DS_Store (MacOS)
 .DS_Store
+
+instruct-pix2pix/checkpoints
