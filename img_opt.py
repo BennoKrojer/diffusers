@@ -1,6 +1,6 @@
 import cv2
 import matplotlib.pyplot as plt
-import mediapy as media
+# import mediapy as media
 import numpy as np
 import torch
 import torch.nn as nn
@@ -10,17 +10,14 @@ from PIL import Image
 from tqdm.auto import tqdm
 
 # from diffusers import StableDiffusionPipeline
-from diffusers.models.vae import DiagonalGaussianDistribution
-from diffusers.schedulers import LMSDiscreteScheduler
+from src.diffusers.models.vae import DiagonalGaussianDistribution
+from src.diffusers.schedulers import LMSDiscreteScheduler
 
-from diffusers import StableDiffusionPipeline
+from src.diffusers import StableDiffusionPipeline
 
-model_id_or_path = "/checkpoints/voletiv/stable-diffusion-v1-4"
+model_id_or_path = "./stable-diffusion-v1-5"
 pipe = StableDiffusionPipeline.from_pretrained(
     model_id_or_path,
-    # revision="fp16", 
-    # torch_dtype=torch.float16,
-    use_auth_token=False
 )
 pipe = pipe.to("cuda")
 
@@ -122,7 +119,7 @@ def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample
                 # print(i, loss.item())
                 # media.show_images(latents.detach().cpu().permute(1, 0, 2, 3).reshape(-1, 64, 64), columns=len(latents))
                 s = decode_latents(pipe, latents.detach())
-                media.show_images(s, height=100)
+                # media.show_images(s, height=100)
                 samples.append(s)
 
     except KeyboardInterrupt:
