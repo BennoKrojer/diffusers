@@ -14,6 +14,9 @@ from src.diffusers.models.vae import DiagonalGaussianDistribution
 from src.diffusers.schedulers import LMSDiscreteScheduler
 
 from src.diffusers import StableDiffusionPipeline
+import imageio
+
+torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
 
 model_id_or_path = "./stable-diffusion-v1-5"
 pipe = StableDiffusionPipeline.from_pretrained(
@@ -147,7 +150,7 @@ def make_gif_from_imgs(frames, imsize=512, resize=1.0, fps=3, upto=None, repeat_
 torch.manual_seed(0)
 latents = torch.randn((10, 4, 64, 64), device=pipe.device, requires_grad=True)
 optim = torch.optim.Adam([latents], lr=1e-2)
-latents, losses, samples = img_train(latents, optim, pipe, "A 3D render of a single strawberry centered", 10000, 40.0)
+latents, losses, samples = img_train(latents, optim, pipe, "A 3D render of a single strawberry centered", 500, 40.0)
 
 gif = make_gif_from_imgs(samples, resize=4)
-imageio.mimwrite("/checkpoints/voletiv/a.gif", gif, fps=4)
+imageio.mimwrite("a.gif", gif, fps=4)
