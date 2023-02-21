@@ -34,7 +34,8 @@ def main(args):
             for i, batch in enumerate(dataloader):
                 if args.subset and i % 10 != 0:
                     continue
-                scores = sub_aggregated_scores[i//10]
+                index = i//10 if args.subset else i
+                scores = sub_aggregated_scores[index]
                 mean_scores = np.mean(scores, axis=1)
                 max_scores = np.max(scores, axis=1)
                 min_scores = np.min(scores, axis=1)
@@ -73,7 +74,10 @@ def main(args):
         for i, all_scores in enumerate(aggregated_scores):
             metrics = []
             for j, batch in enumerate(dataloader):
-                scores = [all_scores[j]]
+                if args.subset and j % 10 != 0:
+                    continue
+                index = j//10 if args.subset else j
+                scores = [all_scores[index]]
                 metric = evaluate_scores(args, scores, batch)
                 metrics.append(metric)
             aggregated_metrics.append(metrics)

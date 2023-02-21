@@ -24,13 +24,8 @@ import cProfile
 class Scorer:
     def __init__(self, args, clip_model=None, preprocess=None, gen_imagenet=None):
         self.similarity = args.similarity
-        if self.similarity == 'clip':
-            self.clip_model = clip_model
-            self.preprocess = preprocess
-        else:
-            vae = AutoencoderKL.from_pretrained('./stable-diffusion-v1-5', subfolder='vae', use_auth_token='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')
-            vae.to(device='cuda', dtype=torch.bfloat16)
-            self.vae_model = StableDiffusionImg2LatentPipeline(vae).to('cuda')
+        self.clip_model = clip_model
+        self.preprocess = preprocess
         self.cache_dir = args.cache_dir if args.cache else None
         self.gen_imagenet = gen_imagenet
 
