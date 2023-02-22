@@ -33,6 +33,7 @@ if is_transformers_available() and is_torch_available():
     from .pipeline_encode_text import StableDiffusionText2LatentPipeline
     from .pipeline_encode_img_and_text import StableDiffusionTextImg2LatentPipeline
     from .pipeline_stable_diffusion_img2img import StableDiffusionImg2ImgPipeline
+    from .pipeline_stable_diffusion_scoring import StableDiffusionScoringPipeline
     from .pipeline_stable_diffusion_inpaint import StableDiffusionInpaintPipeline
     from .pipeline_stable_diffusion_inpaint_legacy import StableDiffusionInpaintPipelineLegacy
     from .safety_checker import StableDiffusionSafetyChecker
