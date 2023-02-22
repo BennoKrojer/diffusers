@@ -317,6 +317,7 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
 
         # get the original timestep using init_timestep
         dists = []
+        latentss = []
         for num_inf_step in range(50, 0, -1): #TODO: hardcoded and not batched
             offset = self.scheduler.config.get("steps_offset", 0)
             init_timestep = int(num_inf_step) + offset
@@ -340,7 +341,7 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
 
             latents = init_latents
 
-            t_start = max(num_inf_step - init_timestep + offset, 0)
+            t_start = max(50 - init_timestep + offset, 0)
 
             # Some schedulers like PNDM have timesteps as arrays
             # It's more optimized to move all timesteps to correct device beforehand
@@ -358,17 +359,39 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
                 noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
                 noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
+            # latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
+            # latentss.append(latents)
+
+            # squared distance of the image residual and original image
+            # image_pred = image.view(batch_size * num_images_per_prompt, -1)
+            # image = init_image.view(batch_size * num_images_per_prompt, -1)
+            # dist = torch.norm(image_pred - image, dim=-1)
+            # dist *= torch.exp(torch.tensor(-7*t_start)) #TODO: make this a parameter
+
             # squared distance of the noise residual and original noise
-            noise_pred = noise_pred.view(batch_size * num_images_per_prompt, -1)
-            noise = noise.view(batch_size * num_images_per_prompt, -1)
-            noise_dist = torch.norm(noise_pred - noise, dim=-1)
-            # e^(-7t) is the decay factor used in the paper
-            noise_dist *= torch.exp(torch.tensor(-10*t_start)) #TODO: make this a parameter
-            dists.append(noise_dist)
+            if True:
+                noise_pred = noise_pred.view(batch_size * num_images_per_prompt, -1)
+                noise = noise.view(batch_size * num_images_per_prompt, -1)
+                dist = torch.norm(noise_pred - noise, dim=-1)
+                dist *= torch.exp(torch.tensor(-7*t_start)) #TODO: make this a parameter
+                dists.append(dist)
 
             # compute the previous noisy sample x_t -> x_t-1
             # latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
+
+        # latentss = torch.cat(latentss, dim=0)
+        # latentss = 1 / 0.18215 * latentss
+        # image = self.vae.decode(latentss).sample
+        # image = (image / 2 + 0.5).clamp(0, 1) # shape 50, 3, 256, 256
+        # image_pred = torch.flatten(image, start_dim=1) # shape 50, 196608
+        # # init image has shape 1, 3, 256, 256 so we need to duplicate it 50 times
+        # init_image = torch.cat([init_image] * 50, dim=0)
+        # init_image = torch.flatten(init_image, start_dim=1) # shape 50, 196608
+        # dists = torch.norm(image_pred - init_image, dim=-1)
+
+        # dists = [d * torch.exp(torch.tensor(-10*t_start)) for t_start, d in enumerate(dists)]
         dists = torch.cat(dists, dim=0)
+        print(dists)
         return dists
 
         latents = 1 / 0.18215 * latents
