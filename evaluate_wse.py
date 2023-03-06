@@ -63,6 +63,8 @@ def main(args):
     metrics = []
     all_scores = []
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
+        if args.subset and i % 10 != 0:
+            continue
         scores = scorer.score_batch(i, args, batch, model)
         all_scores.append(list(scores.cpu().numpy()[0]))
         score = evaluate_scores(args, scores, batch)
@@ -91,6 +93,7 @@ if __name__ == '__main__':
     parser.add_argument('--cache', action='store_true')
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=1)
+    parser.add_argument('--subset', action='store_true')
     args = parser.parse_args()
 
     random.seed(args.seed)

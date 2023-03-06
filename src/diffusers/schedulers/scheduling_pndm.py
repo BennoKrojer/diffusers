@@ -333,6 +333,31 @@ class PNDMScheduler(SchedulerMixin, ConfigMixin):
 
         return SchedulerOutput(prev_sample=prev_sample)
 
+    def get_alpha_beta_prod(
+        self,
+        model_output: torch.FloatTensor,
+        timestep: int,
+        sample: torch.FloatTensor,
+        return_dict: bool = True,
+    ) -> Union[SchedulerOutput, Tuple]:
+
+        prev_timestep = timestep - self.config.num_train_timesteps // self.num_inference_steps
+
+        if self.counter != 1:
+            self.ets = self.ets[-3:]
+            self.ets.append(model_output)
+        else:
+            prev_timestep = timestep
+            timestep = timestep + self.config.num_train_timesteps // self.num_inference_steps
+
+        alpha_prod_t = self.alphas_cumprod[timestep]
+        alpha_prod_t_prev = self.alphas_cumprod[prev_timestep] if prev_timestep >= 0 else self.final_alpha_cumprod
+        beta_prod_t = 1 - alpha_prod_t
+        beta_prod_t_prev = 1 - alpha_prod_t_prev
+        
+        return alpha_prod_t, beta_prod_t
+    
+
     def scale_model_input(self, sample: torch.FloatTensor, *args, **kwargs) -> torch.FloatTensor:
         """
         Ensures interchangeability with schedulers that need to scale the denoising model input depending on the

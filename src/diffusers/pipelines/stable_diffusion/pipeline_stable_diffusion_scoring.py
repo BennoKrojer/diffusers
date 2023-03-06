@@ -318,17 +318,20 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
         # get the original timestep using init_timestep
         dists = []
         latentss = []
-        for num_inf_step in range(50, 0, -1): #TODO: hardcoded and not batched
-            offset = self.scheduler.config.get("steps_offset", 0)
-            init_timestep = int(num_inf_step) + offset
-            init_timestep = min(init_timestep, num_inf_step)
 
-            timesteps = self.scheduler.timesteps[-init_timestep]
+
+        for strength in [0.8, 0.7, 0.6, 0.5, 0.4, 0.3]: #TODO: hardcoded and not batched
+            offset = self.scheduler.config.get("steps_offset", 0) # 1
+            init_timestep = int(50* strength) + offset # 51, 50, 49, 48, 41, 21, 11
+            init_timestep = min(init_timestep, 50) # 50, 49, 48, 47, 40, 20, 10
+
+
+            timesteps = self.scheduler.timesteps[-init_timestep] # gets 1st element, 2nd, ...
             timesteps = torch.tensor([timesteps] * batch_size * num_images_per_prompt, device=self.device)
 
             # add noise to latents using the timesteps
             noise = torch.randn(init_latents.shape, generator=generator, device=self.device, dtype=latents_dtype)
-            init_latents = self.scheduler.add_noise(init_latents, noise, timesteps)
+            init_latents_noisy = self.scheduler.add_noise(init_latents, noise, timesteps)
 
             # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
             # eta (η) is only used with the DDIMScheduler, it will be ignored for other schedulers.
@@ -339,13 +342,13 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
             if accepts_eta:
                 extra_step_kwargs["eta"] = eta
 
-            latents = init_latents
+            latents = init_latents_noisy
 
-            t_start = max(50 - init_timestep + offset, 0)
+            t_start = max(50 - init_timestep + offset, 0) # 1, 2, 3, 4, 11, 31, 41
 
             # Some schedulers like PNDM have timesteps as arrays
             # It's more optimized to move all timesteps to correct device beforehand
-            t = self.scheduler.timesteps[t_start].to(self.device)
+            t = self.scheduler.timesteps[t_start].to(self.device) 
 
             # expand the latents if we are doing classifier free guidance
             latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
@@ -360,6 +363,8 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
                 noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
             # latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
+            alpha_prod_t, beta_prod_t = self.scheduler.get_alpha_beta_prod(noise_pred, t, latents, **extra_step_kwargs)
+            init_latents_pred = (init_latents_noisy - beta_prod_t ** (0.5) * noise_pred) / alpha_prod_t ** (0.5)
             # latentss.append(latents)
 
             # squared distance of the image residual and original image
@@ -373,23 +378,43 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
                 noise_pred = noise_pred.view(batch_size * num_images_per_prompt, -1)
                 noise = noise.view(batch_size * num_images_per_prompt, -1)
                 dist = torch.norm(noise_pred - noise, dim=-1)
-                dist *= torch.exp(torch.tensor(-7*t_start)) #TODO: make this a parameter
+                dist *= torch.exp(torch.tensor(-0.1*t_start)) #TODO: make this a parameter
                 dists.append(dist)
 
             # compute the previous noisy sample x_t -> x_t-1
             # latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
+        # batchify the latents
+        # result = []
+        # for i in range(5):
+        #     batch_latentss = latentss[i*10:(i+1)*10]
+        #     batch_latentss = torch.cat(batch_latentss, dim=0)
+        #     batch_latentss = 1 / 0.18215 * batch_latentss
+        #     batch_image = self.vae.decode(batch_latentss).sample
+        #     batch_image = (batch_image / 2 + 0.5).clamp(0, 1) # shape 50, 3, 256, 256
+        #     batch_image_pred = torch.flatten(batch_image, start_dim=1) # shape 10, 196608
+        #     # init image has shape 1, 3, 256, 256 so we need to duplicate it 10 times
+        #     batch_init_image = torch.cat([init_image] * 10, dim=0)
+        #     batch_init_image = torch.flatten(batch_init_image, start_dim=1) # shape 10, 196608
+        #     batch_dists = torch.norm(batch_image_pred - batch_init_image, dim=-1)
 
-        # latentss = torch.cat(latentss, dim=0)
-        # latentss = 1 / 0.18215 * latentss
-        # image = self.vae.decode(latentss).sample
-        # image = (image / 2 + 0.5).clamp(0, 1) # shape 50, 3, 256, 256
-        # image_pred = torch.flatten(image, start_dim=1) # shape 50, 196608
-        # # init image has shape 1, 3, 256, 256 so we need to duplicate it 50 times
-        # init_image = torch.cat([init_image] * 50, dim=0)
-        # init_image = torch.flatten(init_image, start_dim=1) # shape 50, 196608
-        # dists = torch.norm(image_pred - init_image, dim=-1)
+        #     batch_dists = [d * torch.exp(torch.tensor(-3*t_start)) for t_start, d in enumerate(batch_dists)]
+        #     batch_dists = torch.stack(batch_dists, dim=0)
+        #     result.append(batch_dists)
+        dists = torch.cat(dists, dim=0)
+        print(dists)
+        return dists
 
-        # dists = [d * torch.exp(torch.tensor(-10*t_start)) for t_start, d in enumerate(dists)]
+        latentss = torch.cat(latentss, dim=0)
+        latentss = 1 / 0.18215 * latentss
+        image = self.vae.decode(latentss).sample
+        image = (image / 2 + 0.5).clamp(0, 1) # shape 50, 3, 256, 256
+        image_pred = torch.flatten(image, start_dim=1) # shape 50, 196608
+        # init image has shape 1, 3, 256, 256 so we need to duplicate it 50 times
+        init_image = torch.cat([init_image] * 50, dim=0)
+        init_image = torch.flatten(init_image, start_dim=1) # shape 50, 196608
+        dists = torch.norm(image_pred - init_image, dim=-1)
+
+        dists = [d * torch.exp(torch.tensor(-10*t_start)) for t_start, d in enumerate(dists)]
         dists = torch.cat(dists, dim=0)
         print(dists)
         return dists

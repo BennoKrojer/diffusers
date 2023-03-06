@@ -19,6 +19,8 @@ def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=51
         return Flickr30KDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagenet':
         return ImagenetDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'svo':
+        return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -34,22 +36,17 @@ def diffusers_preprocess(image):
 
 class SVOClassificationDataset(Dataset):
 
-    def __init__(self, transform, split, debug=False):
-        data_dir = '/home/mila/b/benno.krojer/scratch/svo'
-        super().__init__()
-        assert split in ['train', 'val']
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
         self.transform = transform
-        self.debug = debug
-        
         self.data = self.load_data(data_dir, split)
 
     def load_data(self, data_dir, split):
         dataset = []
-        split_file = os.path.join(data_dir, f'{split}.json')
+        split_file = os.path.join(data_dir, 'val.json')
         with open(split_file) as f:
             json_file = json.load(f)
 
-        for i, row in tqdm(enumerate(json_file), total=len(json_file)):
+        for i, row in enumerate(json_file):
             pos_id = str(row['pos_id'])
             neg_id = str(row['neg_id'])
             sentence = row['sentence']
@@ -59,9 +56,6 @@ class SVOClassificationDataset(Dataset):
 
             dataset.append((pos_file, neg_file, sentence, 0))
             dataset.append((neg_file, pos_file, sentence, 1))
-
-        if self.debug:
-            dataset = dataset[:120]
 
         return dataset
     
@@ -85,6 +79,12 @@ class ImagenetDataset(Dataset):
         self.resize = resize
         self.transform = transform
         self.classes = list(json.load(open(f'./imagenet_classes.json', 'r')).values())
+        if True:
+            prompted_classes = []
+            for c in self.classes:
+                class_text = 'a photo of a ' + c
+                prompted_classes.append(class_text)
+            self.classes = prompted_classes
         self.scoring_only = scoring_only
 
 
@@ -174,7 +174,7 @@ class ImageCoDeDataset(Dataset):
                         dataset.append((img_dir, img_files, int(img_idx), text))
                 else:
                     dataset.append((img_dir, img_files, int(img_idx), text))
-        
+
         return dataset
 
     def __len__(self):

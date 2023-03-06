@@ -16,13 +16,15 @@ from src.diffusers.schedulers import LMSDiscreteScheduler
 from src.diffusers import StableDiffusionPipeline
 import imageio
 
-torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
+import os
 
-model_id_or_path = "./stable-diffusion-v1-5"
-pipe = StableDiffusionPipeline.from_pretrained(
-    model_id_or_path,
-)
-pipe = pipe.to("cuda")
+import argparse
+
+from datasets import get_dataset
+from torch.utils.data import DataLoader
+
+from utils import evaluate_scores
+
 
 def decode_latents(pipe, latents):
     with torch.no_grad():
@@ -131,7 +133,7 @@ def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample
     return latents, [losses, losses_abs, losses_diff, losses_diff_x0], samples
 
 
-def make_gif_from_imgs(frames, imsize=512, resize=1.0, fps=3, upto=None, repeat_first=1, skip=1,
+def make_gif_from_imgs(frames, fname, imsize=512, resize=1.0, fps=3, upto=None, repeat_first=1, skip=1,
              f=0, s=0.75, t=2):
     imgs = []
     for i, img in tqdm(enumerate(frames[:upto:skip]), total=len(frames[:upto:skip])):
@@ -142,15 +144,67 @@ def make_gif_from_imgs(frames, imsize=512, resize=1.0, fps=3, upto=None, repeat_
         text = f"{i*10:05d}"
         img = cv2.putText(img=img, text=text, org=(0, 20), fontFace=f, fontScale=s, color=(0,0,0), thickness=t)
         imgs.append(img)
+        if i == len(frames[:upto:skip]) - 1:
+            # save last frame as file too
+            imageio.imwrite(f"{fname}.png", img, format='png')
+            
     # Save gif
     imgs = [imgs[0]]*repeat_first + imgs
-    return imgs
+    imageio.mimwrite(f'{fname}.gif', imgs, fps=4)
     
+parser = argparse.ArgumentParser()
+parser.add_argument('--task', type=str, default='flickr30k')
+parser.add_argument('--n_iters', type=int, default=500)
+parser.add_argument('--n_samples', type=int, default=10)
+parser.add_argument('--lr', type=float, default=1e-2)
+parser.add_argument('--cuda_device', type=int, default=0)
+args = parser.parse_args()
 
 torch.manual_seed(0)
-latents = torch.randn((10, 4, 64, 64), device=pipe.device, requires_grad=True)
-optim = torch.optim.Adam([latents], lr=1e-2)
-latents, losses, samples = img_train(latents, optim, pipe, "A 3D render of a single strawberry centered", 500, 40.0)
 
-gif = make_gif_from_imgs(samples, resize=4)
-imageio.mimwrite("a.gif", gif, fps=4)
+#print 
+model_id_or_path = "./stable-diffusion-v1-5"
+pipe = StableDiffusionPipeline.from_pretrained(
+    model_id_or_path,
+)
+pipe = pipe.to(f"cuda:{args.cuda_device}")
+
+random_latent = torch.randn((args.n_samples, 4, 64, 64), device=pipe.device, requires_grad=True)
+dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)
+dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
+
+metrics = []
+for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
+    imgs, texts = batch[0], batch[1]
+    imgs, imgs_resize = imgs[0], imgs[1]
+    imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+
+    scores = []
+    for txt_idx, text in enumerate(texts):
+        latents_copy = random_latent.clone().detach()
+        latents_copy.requires_grad = True
+        optim = torch.optim.Adam([latents_copy], lr=args.lr)
+        fname = f"cache/{args.task}/img_opt_txt2img_lr{args.lr}/{i}_{txt_idx}"
+        if not os.path.exists(f'cache/{args.task}/img_opt_txt2img_lr{args.lr}/'):
+            os.makedirs(f'cache/{args.task}/img_opt_txt2img_lr{args.lr}/')
+        latents, losses, samples = img_train(latents_copy, optim, pipe, list(text), args.n_iters, 40.0)
+        make_gif_from_imgs(samples, fname, resize=4)
+
+        for img_idx, img in enumerate(imgs):
+            resized_img = imgs_resize[img_idx].to(pipe.device)
+            resized_latent_dist = pipe.vae.encode(resized_img).latent_dist
+            resized_latents = resized_latent_dist.sample()
+            resized_latents = 0.18215 * resized_latents
+            resized_latents = resized_latents.reshape(resized_latents.shape[0], -1)
+
+            latents = latents.reshape(latents.shape[0], -1)
+
+            score = torch.norm(latents - resized_latents, dim=1).mean()
+            score = -score
+            scores.append(score.detach())
+            
+    scores = torch.stack(scores).unsqueeze(0)
+    scoring = evaluate_scores(args, scores, batch)
+    metrics.append(scoring)
+    accuracy = sum(metrics) / len(metrics)
+    print(f'Retrieval Accuracy: {accuracy}')
