@@ -1,6 +1,6 @@
 import numpy as np
 
-RETRIEVAL_TASKS = ['imagecode', 'flickr30k', 'imagenet']
+RETRIEVAL_TASKS = ['imagecode', 'flickr30k', 'imagenet', 'clevr', 'svo']
 
 def evaluate_winoground(scores):
     c0_i0, c0_i1, c1_i0, c1_i1 = scores[0]

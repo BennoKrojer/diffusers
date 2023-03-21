@@ -20,7 +20,7 @@ import imageio
 
 import argparse
 
-from datasets_loading import get_dataset
+from datasets import get_dataset
 from torch.utils.data import DataLoader
 
 from utils import evaluate_scores
@@ -51,7 +51,7 @@ def decode_latents(pipe, latents):
     return image
 
 
-def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample_freq=4, noise_level=0.5):
+def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample_freq=4):
     try:
         # expand the latents if we are doing classifier free guidance
         do_classifier_free_guidance = guidance_scale > 1.0
@@ -175,7 +175,8 @@ def make_gif_from_imgs(frames, fname, caption, imsize=512, resize=1.0, fps=3, up
 parser = argparse.ArgumentParser()
 parser.add_argument('--task', type=str, default='flickr30k')
 parser.add_argument('--n_iters', type=int, default=200)
-parser.add_argument('--lr', type=float, default=1e-2)
+parser.add_argument('--lr', type=float, default=5e-2)
+parser.add_argument('--noise_level', type=float, default=0.1)
 parser.add_argument('--cuda_device', type=int, default=0)
 parser.add_argument('--score_method', type=str, default='latent')
 parser.add_argument('--skip_factor', type=int, default=5)
@@ -193,24 +194,32 @@ pipe = pipe.to(f"cuda:{args.cuda_device}")
 if args.score_method == 'clip':
     clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda')
     transform = preprocess
-else:
-    transform = None
-
-dataset = get_dataset(args.task, f'datasets/{args.task}', transform=transform)
-dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
-
-if args.score_method == 'inception':
+elif args.score_method == 'inception':
     import torch
     import torchvision
     from torchvision import transforms
+    from torchvision.models.feature_extraction import create_feature_extractor
+    from torchvision.models.feature_extraction import get_graph_node_names
+
+
     inception_model = torchvision.models.inception_v3(pretrained=True)
-    inception_model.eval()
+    inception_model.eval().to(f"cuda:{args.cuda_device}")
+    # feature extractor
+    train_nodes, eval_nodes = get_graph_node_names(inception_model)
+    return_nodes = eval_nodes[:-1]
+    inception_model_feat = create_feature_extractor(inception_model, return_nodes=return_nodes)
     transform = transforms.Compose([
         transforms.Resize(299),
         transforms.CenterCrop(299),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
+else:
+    transform = None
+
+dataset = get_dataset(args.task, f'datasets/{args.task}', transform=transform)
+dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
+
 
 metrics = []
 for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
@@ -222,80 +231,19 @@ for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
 
     scores = []
     for txt_idx, text in enumerate(texts):        
+        for img_idx, img in enumerate(imgs):
+            resized_img = imgs_resize[img_idx]
+            resized_img = resized_img.squeeze(0).cpu().numpy()
+            fname = f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}_noise{args.noise_level}/{i}_{txt_idx}_{img_idx}'
+            latents = pkl.load(open(f'{fname}_latents.pkl', 'rb'))
 
-        for img_idx, img in tqdm(enumerate(imgs)):
-            resized_img = imgs_resize[img_idx].to(pipe.device)
-            
-            resized_latent_dist = pipe.vae.encode(resized_img).latent_dist
-            resized_latents = resized_latent_dist.sample()
-            resized_latents = 0.18215 * resized_latents
-            latents_copy = resized_latents.detach().clone()
-            latents_copy.requires_grad = True
-            
-            optim = torch.optim.Adam([latents_copy], lr=args.lr)
-            fname = f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}/{i}_{txt_idx}_{img_idx}'
-            if not os.path.exists(f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}/'):
-                os.makedirs(f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}/')
-            latents, losses, samples = img_train(latents_copy, optim, pipe, list(text), args.n_iters, 40.0)
-            # make_gif_from_imgs(samples, fname, text[0], resize=1)
+            latent = torch.tensor(latents[-1]).to(pipe.device)
+            sample = decode_latents(pipe, latent)
+            sample = np.moveaxis(sample, 0, 1).reshape(512, -1, 3)
+            sample = np.array(Image.fromarray((sample*255).astype(np.uint8)))
+            # img = np.concatenate([img[:, int(i*imsize/resize):int((i+1)*imsize/resize), :] for i in range(0, n_cols, 2)], axis=1)
+            out_file = f'cache/{args.task}/amt_img_opt_img2img_lr{args.lr}_noise{args.noise_level}/{i}_{txt_idx}_{img_idx}'
 
-            # log all losses to pickle file
-            with open(f'{fname}_losses.pkl', 'wb') as f:
-                pkl.dump(losses, f)
-
-            # log all_latents to pickle file
-            with open(f'{fname}_latents.pkl', 'wb') as f:
-                pkl.dump(latents, f)
-
-            # dump all images as png
-    #         if args.score_method == 'loss':
-    #             all_losses = [torch.tensor(x) for x in losses[2]]
-    #             score = sum(all_losses) / len(all_losses)
-    #         elif args.score_method == 'latent':
-    #             score = (latents - resized_latents)**2
-    #             score = score.mean()
-    #         elif args.score_method == 'pixel':
-    #             resized_img = resized_img / 2.0 + 0.5
-    #             resized_img = resized_img.permute(0, 2, 3, 1).cpu()
-    #             acc_scores = []
-    #             for i in range(len(samples)):
-    #                 score = (resized_img - samples[-1])**2
-    #                 score = score.mean()
-    #                 acc_scores.append(score)
-    #             score = sum(acc_scores) / len(acc_scores)
-    #         elif args.score_method == 'clip':
-    #             with torch.no_grad():
-    #                 img_emb = clip_model.encode_image(img).squeeze().float()
-    #                 acc_scores = []
-    #                 for i in range(len(samples)):
-    #                     sample = numpy_to_pil(samples[i])
-    #                     sample = torch.stack([preprocess(sample[0])]).cuda()
-    #                     sample_emb = clip_model.encode_image(sample).squeeze().float()
-    #                     score = torch.norm(img_emb - sample_emb, dim=-1)
-    #                     acc_scores.append(score)
-    #                 score = sum(acc_scores) / len(acc_scores)
-    #                 score = -score
-    #         elif args.score_method == 'inception':
-    #             with torch.no_grad():
-    #                 img = transform(img[0].cpu())
-    #                 img = img.unsqueeze(0)
-    #                 img = img.to(pipe.device)
-    #                 img = inception_model(img)
-    #                 acc_scores = []
-    #                 for i in range(len(samples)):
-    #                     sample = transform(samples[i][0].cpu())
-    #                     sample = sample.unsqueeze(0)
-    #                     sample = sample.to(pipe.device)
-    #                     sample = inception_model(sample)
-    #                     score = torch.norm(img - sample, dim=-1)
-    #                     acc_scores.append(score)
-    #                 score = sum(acc_scores) / len(acc_scores)
-
-    #         score = -score
-    #         scores.append(score.detach())
-            
-    # scores = torch.stack(scores).unsqueeze(0)
-    # scoring = evaluate_scores(args, scores, batch)
-    # metrics.append(scoring)
-    # accuracy = sum(metrics) / len(metrics)
-    # print(f'Retrieval Accuracy: {accuracy}')
+            #concatenate resized image and sample
+            combined = np.concatenate([resized_img, sample], axis=1)
+            imageio.imwrite(f'{out_file}.png', combined, format='png')

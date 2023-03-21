@@ -7,9 +7,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from PIL import Image
+import PIL
 from tqdm.auto import tqdm
 import os
 import clip
+import json
 
 # from diffusers import StableDiffusionPipeline
 from src.diffusers.models.vae import DiagonalGaussianDistribution
@@ -20,12 +22,12 @@ import imageio
 
 import argparse
 
-from datasets_loading import get_dataset
 from torch.utils.data import DataLoader
 
 from utils import evaluate_scores
 
 import pickle as pkl
+
 
 def numpy_to_pil(images):
     """
@@ -50,8 +52,17 @@ def decode_latents(pipe, latents):
         image = image.cpu().permute(0, 2, 3, 1).numpy()
     return image
 
+def diffusers_preprocess(image):
+    w, h = image.size
+    w, h = map(lambda x: x - x % 32, (w, h))  # resize to integer multiple of 32
+    image = image.resize((w, h), resample=PIL.Image.LANCZOS)
+    image = np.array(image).astype(np.float32) / 255.0
+    image = image[None].transpose(0, 3, 1, 2)
+    image = torch.from_numpy(image)
+    image = image.squeeze(0)
+    return 2.0 * image - 1.0
 
-def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample_freq=4, noise_level=0.5):
+def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample_freq=4):
     try:
         # expand the latents if we are doing classifier free guidance
         do_classifier_free_guidance = guidance_scale > 1.0
@@ -136,10 +147,10 @@ def img_train(latents, optim, pipe, prompt, n_iters, guidance_scale=40.0, sample
             if i % sample_freq == 0:
                 # print(i, loss.item())
                 # media.show_images(latents.detach().cpu().permute(1, 0, 2, 3).reshape(-1, 64, 64), columns=len(latents))
-                # s = decode_latents(pipe, latents.detach())
+                s = decode_latents(pipe, latents.detach())
                 # media.show_images(s, height=100)
-                # samples.append(s)
-                all_latents.append(latents.detach().clone().cpu().numpy())
+                samples.append(s)
+                # all_latents.append(latents.detach().clone().cpu().numpy())
 
     except KeyboardInterrupt:
         print("Ctrl+C!")
@@ -156,8 +167,6 @@ def make_gif_from_imgs(frames, fname, caption, imsize=512, resize=1.0, fps=3, up
         img = np.array(Image.fromarray((img*255).astype(np.uint8)).resize((int(img.shape[1]/resize), int(img.shape[0]/resize)), Image.Resampling.LANCZOS))
         # img = np.concatenate([img[:, int(i*imsize/resize):int((i+1)*imsize/resize), :] for i in range(0, n_cols, 2)], axis=1)
         text = f"{i*10:05d}"
-
-        imageio.imwrite(f"{fname}/{i}.png", img, format='png')
         
         img = cv2.putText(img=img, text=text, org=(0, 20), fontFace=f, fontScale=s, color=(0,0,0), thickness=t)
         # add a small white stripe at the top that contains the caption text
@@ -173,12 +182,11 @@ def make_gif_from_imgs(frames, fname, caption, imsize=512, resize=1.0, fps=3, up
     imageio.mimwrite(f'{fname}.gif', imgs, fps=4)
     
 parser = argparse.ArgumentParser()
-parser.add_argument('--task', type=str, default='flickr30k')
 parser.add_argument('--n_iters', type=int, default=200)
-parser.add_argument('--lr', type=float, default=1e-2)
+parser.add_argument('--lr', type=float, default=3e-2)
+parser.add_argument('--score_method', type=str, default='clip')
 parser.add_argument('--cuda_device', type=int, default=0)
-parser.add_argument('--score_method', type=str, default='latent')
-parser.add_argument('--skip_factor', type=int, default=5)
+parser.add_argument('--task', type=str, default='spatial')
 args = parser.parse_args()
 
 torch.manual_seed(0)
@@ -191,111 +199,72 @@ pipe = StableDiffusionPipeline.from_pretrained(
 pipe = pipe.to(f"cuda:{args.cuda_device}")
 
 if args.score_method == 'clip':
-    clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda')
+    clip_model, preprocess = clip.load('ViT-L/14@336px', device=f"cuda:{args.cuda_device}")
     transform = preprocess
 else:
     transform = None
 
-dataset = get_dataset(args.task, f'datasets/{args.task}', transform=transform)
-dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
+task = args.task
+clevr_json = json.load(open(f'/home/nlp/users/bkroje/clevr/output/{task}.json'))
 
-if args.score_method == 'inception':
-    import torch
-    import torchvision
-    from torchvision import transforms
-    inception_model = torchvision.models.inception_v3(pretrained=True)
-    inception_model.eval()
-    transform = transforms.Compose([
-        transforms.Resize(299),
-        transforms.CenterCrop(299),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+clip_correct = 0
+loss_correct = 0
+total = 0
 
-metrics = []
-for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-    if i % args.skip_factor != 0:
-        continue
-    imgs, texts = batch[0], batch[1]
-    imgs, imgs_resize = imgs[0], imgs[1]
-    imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+for img_path, texts in clevr_json.items():
 
-    scores = []
-    for txt_idx, text in enumerate(texts):        
+    img_path = f'/home/nlp/users/bkroje/clevr/output/images/{img_path}'
+    img = Image.open(img_path).convert('RGB')
+    resized_img = img.resize((512,512))
+    resized_img = diffusers_preprocess(resized_img).unsqueeze(0).to(pipe.device)
+    if transform is not None:
+        img = transform(img).unsqueeze(0).to(pipe.device)
 
-        for img_idx, img in tqdm(enumerate(imgs)):
-            resized_img = imgs_resize[img_idx].to(pipe.device)
-            
+    for text_correct, text_incorrect in texts:
+        loss_score_pair = []
+        clip_score_pair = []
+        if args.task == 'spatial':
+            text_correct, text_incorrect = text_incorrect, text_correct
+        for text in [text_correct, text_incorrect]:
             resized_latent_dist = pipe.vae.encode(resized_img).latent_dist
             resized_latents = resized_latent_dist.sample()
             resized_latents = 0.18215 * resized_latents
             latents_copy = resized_latents.detach().clone()
             latents_copy.requires_grad = True
-            
+
             optim = torch.optim.Adam([latents_copy], lr=args.lr)
-            fname = f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}/{i}_{txt_idx}_{img_idx}'
-            if not os.path.exists(f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}/'):
-                os.makedirs(f'cache/{args.task}/full_cache_img_opt_img2img_lr{args.lr}/')
-            latents, losses, samples = img_train(latents_copy, optim, pipe, list(text), args.n_iters, 40.0)
-            # make_gif_from_imgs(samples, fname, text[0], resize=1)
 
-            # log all losses to pickle file
-            with open(f'{fname}_losses.pkl', 'wb') as f:
-                pkl.dump(losses, f)
+            latents, losses, samples = img_train(latents_copy, optim, pipe, [text], args.n_iters, 40.0)
+            fname = f'{task}_{img_path.split("/")[-1].split(".")[0]}_{"correct" if text == text_correct else "incorrect"}'
+            make_gif_from_imgs(samples, fname, text, resize=1)
 
-            # log all_latents to pickle file
-            with open(f'{fname}_latents.pkl', 'wb') as f:
-                pkl.dump(latents, f)
+            all_losses = [torch.tensor(x) for x in losses[0]]
+            loss_score = sum(all_losses) / len(all_losses)
 
-            # dump all images as png
-    #         if args.score_method == 'loss':
-    #             all_losses = [torch.tensor(x) for x in losses[2]]
-    #             score = sum(all_losses) / len(all_losses)
-    #         elif args.score_method == 'latent':
-    #             score = (latents - resized_latents)**2
-    #             score = score.mean()
-    #         elif args.score_method == 'pixel':
-    #             resized_img = resized_img / 2.0 + 0.5
-    #             resized_img = resized_img.permute(0, 2, 3, 1).cpu()
-    #             acc_scores = []
-    #             for i in range(len(samples)):
-    #                 score = (resized_img - samples[-1])**2
-    #                 score = score.mean()
-    #                 acc_scores.append(score)
-    #             score = sum(acc_scores) / len(acc_scores)
-    #         elif args.score_method == 'clip':
-    #             with torch.no_grad():
-    #                 img_emb = clip_model.encode_image(img).squeeze().float()
-    #                 acc_scores = []
-    #                 for i in range(len(samples)):
-    #                     sample = numpy_to_pil(samples[i])
-    #                     sample = torch.stack([preprocess(sample[0])]).cuda()
-    #                     sample_emb = clip_model.encode_image(sample).squeeze().float()
-    #                     score = torch.norm(img_emb - sample_emb, dim=-1)
-    #                     acc_scores.append(score)
-    #                 score = sum(acc_scores) / len(acc_scores)
-    #                 score = -score
-    #         elif args.score_method == 'inception':
-    #             with torch.no_grad():
-    #                 img = transform(img[0].cpu())
-    #                 img = img.unsqueeze(0)
-    #                 img = img.to(pipe.device)
-    #                 img = inception_model(img)
-    #                 acc_scores = []
-    #                 for i in range(len(samples)):
-    #                     sample = transform(samples[i][0].cpu())
-    #                     sample = sample.unsqueeze(0)
-    #                     sample = sample.to(pipe.device)
-    #                     sample = inception_model(sample)
-    #                     score = torch.norm(img - sample, dim=-1)
-    #                     acc_scores.append(score)
-    #                 score = sum(acc_scores) / len(acc_scores)
+            with torch.no_grad():
+                img_emb = clip_model.encode_image(img).squeeze().float()
+                acc_scores = []
+                for i in range(len(samples)):
+                    sample = numpy_to_pil(samples[i])
+                    sample = torch.stack([preprocess(sample[0])]).to(pipe.device)
+                    sample_emb = clip_model.encode_image(sample).squeeze().float()
+                    score = torch.norm(img_emb - sample_emb, dim=-1)
+                    acc_scores.append(score)
+                clip_score = sum(acc_scores) / len(acc_scores)
 
-    #         score = -score
-    #         scores.append(score.detach())
-            
-    # scores = torch.stack(scores).unsqueeze(0)
-    # scoring = evaluate_scores(args, scores, batch)
-    # metrics.append(scoring)
-    # accuracy = sum(metrics) / len(metrics)
-    # print(f'Retrieval Accuracy: {accuracy}')
+            clip_score = -clip_score
+            loss_score = -loss_score
+            print(f"Loss score: {loss_score}")
+            print(f"Clip score: {clip_score}")
+            loss_score_pair.append(loss_score)
+            clip_score_pair.append(clip_score)
+
+        if loss_score_pair[0] > loss_score_pair[1]:
+            loss_correct += 1
+        if clip_score_pair[0] > clip_score_pair[1]:
+            clip_correct += 1
+        total += 1
+
+    print(f"Loss correct: {loss_correct}")
+    print(f"Clip correct: {clip_correct}")
+    print(f"Total: {total}")

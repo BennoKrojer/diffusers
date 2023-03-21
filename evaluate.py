@@ -12,7 +12,7 @@ import json
 import clip
 import random
 
-from datasets import get_dataset
+from datasets_loading import get_dataset
 from torch.utils.data import DataLoader
 from utils import evaluate_scores
 import csv
@@ -43,8 +43,6 @@ class Scorer:
 
         for txt_idx, text in enumerate(texts):
             if not args.img2img:
-                # check to see if the generated image already exists in self.cache_dir
-                # if so, save it into a variable called gen
                 if args.task == 'imagenet':
                     gen = self.gen_imagenet[txt_idx]
                 else:

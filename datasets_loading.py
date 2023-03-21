@@ -10,17 +10,21 @@ import numpy as np
 import torch
 from torchvision import datasets
 
-def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=512, scoring_only=False):
+def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=512, scoring_only=False, tokenizer=None):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode':
         return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'flickr30k':
         return Flickr30KDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'lora_flickr30k':
+        return LoRaFlickr30KDataset(root_dir, split, transform, resize=resize, tokenizer=tokenizer)
     elif dataset_name == 'imagenet':
         return ImagenetDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'svo':
         return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'clevr':
+        return CLEVRDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -33,43 +37,19 @@ def diffusers_preprocess(image):
     image = torch.from_numpy(image)
     image = image.squeeze(0)
     return 2.0 * image - 1.0
-
-class SVOClassificationDataset(Dataset):
-
-    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
-        self.transform = transform
-        self.data = self.load_data(data_dir, split)
-
-    def load_data(self, data_dir, split):
-        dataset = []
-        split_file = os.path.join(data_dir, 'val.json')
-        with open(split_file) as f:
-            json_file = json.load(f)
-
-        for i, row in enumerate(json_file):
-            pos_id = str(row['pos_id'])
-            neg_id = str(row['neg_id'])
-            sentence = row['sentence']
-            # get two different images
-            pos_file = os.path.join(data_dir, "images", pos_id)
-            neg_file = os.path.join(data_dir, "images", neg_id)
-
-            dataset.append((pos_file, neg_file, sentence, 0))
-            dataset.append((neg_file, pos_file, sentence, 1))
-
-        return dataset
-    
-    def __getitem__(self, idx):
-        file0, file1, text, target = self.data[idx]
-        image0 = self.transform(Image.open(file0).convert('RGB'))
-        image1 = self.transform(Image.open(file1).convert('RGB'))
-
-        return image0, image1, text, target, 1, ''
-
-
     
     def __len__(self):
         return len(self.data)
+
+lora_train_transforms = transforms.Compose(
+        [
+            transforms.Resize(512, interpolation=transforms.InterpolationMode.BILINEAR),
+            transforms.CenterCrop(512) if True else transforms.RandomCrop(512),
+            transforms.RandomHorizontalFlip() if True else transforms.Lambda(lambda x: x),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5], [0.5]),
+        ]
+    )
 
 class ImagenetDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, scoring_only=False):
@@ -87,10 +67,6 @@ class ImagenetDataset(Dataset):
             self.classes = prompted_classes
         self.scoring_only = scoring_only
 
-
-    def __len__(self):
-        return len(self.data)
-    
     def __getitem__(self, idx):
         if not self.scoring_only:
             img, class_id = self.data[idx]
@@ -201,7 +177,7 @@ class Flickr30KDataset(Dataset):
     def __init__(self, root_dir, split, transform, resize=512, scoring_only=False):
         self.root_dir = root_dir
         self.resize = resize
-        self.data = json.load(open(f'{root_dir}/top10_RN50x64.json', 'r'))
+        self.data = json.load(open(f'{root_dir}/val_top10_RN50x64.json', 'r'))
         self.data = list(self.data.items())
         self.data = self.remove_impossible(self.data)
         self.transform = transform
@@ -229,6 +205,8 @@ class Flickr30KDataset(Dataset):
         if not self.scoring_only:
             imgs = [Image.open(f'datasets/{img_path}').convert("RGB") for img_path in img_paths]
             imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+            #convert pillow to numpy array
+            # imgs_resize = [np.array(img) for img in imgs_resize]
             imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
 
             if self.transform:
@@ -239,3 +217,123 @@ class Flickr30KDataset(Dataset):
             return [text], img_idx
         else:
             return (imgs, imgs_resize), [text], img_idx
+
+class LoRaFlickr30KDataset(Dataset):
+    def __init__(self, root_dir, split, transform, resize=512, tokenizer=None):
+        self.root_dir = root_dir
+        self.resize = resize
+        self.data = json.load(open(f'{root_dir}/train_top10_RN50x64.json', 'r'))
+        self.data = list(self.data.items())
+        self.transform = lora_train_transforms
+        self.tokenizer = tokenizer
+    
+
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, idx):
+        ex = self.data[idx]
+        text = ex[0]
+        text = self.tokenizer([text], max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+        text = text.input_ids.squeeze(0)
+        img_paths = ex[1]
+        img_idx = 0
+        imgs = [Image.open(img_path).convert("RGB") for img_path in img_paths]
+        #convert pillow to numpy array
+        # imgs_resize = [np.array(img) for img in imgs]
+        imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+        imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
+
+        return imgs_resize, text, img_idx
+
+class SVOClassificationDataset(Dataset):
+
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
+        self.transform = transform
+        self.root_dir = root_dir
+        self.data = self.load_data(root_dir)
+        self.resize = resize
+        self.scoring_only = scoring_only
+
+    def load_data(self, data_dir):
+        dataset = []
+        split_file = os.path.join(data_dir, 'val.json')
+        with open(split_file) as f:
+            json_file = json.load(f)
+
+        for i, row in enumerate(json_file):
+            pos_id = str(row['pos_id'])
+            neg_id = str(row['neg_id'])
+            sentence = row['sentence']
+            # get two different images
+            pos_file = os.path.join(data_dir, "images", pos_id)
+            neg_file = os.path.join(data_dir, "images", neg_id)
+            dataset.append((pos_file, neg_file, sentence))
+
+        return dataset
+    
+    def __getitem__(self, idx):
+        file0, file1, text = self.data[idx]
+        img0 = Image.open(file0).convert("RGB")
+        img1 = Image.open(file1).convert("RGB")
+        if not self.scoring_only:
+            imgs = [img0, img1]
+            imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+            imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
+            if self.transform:
+                imgs = [self.transform(img) for img in imgs]
+            else:
+                imgs = [transforms.ToTensor()(img) for img in imgs]
+        if self.scoring_only:
+            return [text], 0
+        else:
+            return (imgs, imgs_resize), [text], 0
+        
+    def __len__(self):
+        return len(self.data)
+
+class CLEVRDataset(Dataset):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
+        root_dir = '../clevr/output'
+        self.root_dir = root_dir
+        subtasks = ['pair_binding_size', 'pair_binding_color', 'recognition_color', 'recognition_shape', 'spatial', 'binding_color_shape', 'binding_shape_color']
+        data_ = []
+        for subtask in subtasks:
+            self.data = json.load(open(f'{root_dir}/{subtask}.json', 'r')).items()
+            for k, v in self.data:
+                for i in range(len(v)):
+                    if 'subtask' == 'spatial':
+                        texts = [v[i][1], v[i][2]]
+                    else:
+                        texts = [v[i][0], v[i][1]]
+                    data_.append((k, texts))
+        self.data = data_
+        self.resize = resize
+        self.transform = transform
+        self.scoring_only = scoring_only
+
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, idx):
+        ex = self.data[idx]
+        cap0 = ex[1][0]
+        cap1 = ex[1][1]
+        img_id = ex[0]
+        img_path0 = f'{self.root_dir}/images/{img_id}'
+        if not self.scoring_only:
+            img0 = Image.open(img_path0).convert("RGB")
+            img0_resize = img0.resize((self.resize, self.resize))
+            img0_resize = diffusers_preprocess(img0_resize)
+
+            if self.transform:
+                img0 = self.transform(img0)
+            else:
+                img0 = transforms.ToTensor()(img0)
+            
+            imgs = [img0]
+        text = [cap0, cap1]
+        if self.scoring_only:
+            return text, 0
+        else:
+            return (imgs, [img0_resize]), text, 0

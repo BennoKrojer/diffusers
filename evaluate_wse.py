@@ -10,7 +10,7 @@ import argparse
 import json
 import random
 
-from datasets import get_dataset
+from datasets_loading import get_dataset
 from torch.utils.data import DataLoader
 from utils import evaluate_scores
 import csv
@@ -39,10 +39,17 @@ class Scorer:
         scores = []
         for txt_idx, text in enumerate(texts):
             for img_idx, resized_img in enumerate(imgs_resize):
-                dists = model(prompt=list(text), init_image=resized_img)
+                dists, images_pred = model(prompt=list(text), init_image=resized_img)
                 dists = dists.mean()
                 dists = -dists
                 scores.append(dists)
+
+                for n, image_pred in enumerate(images_pred):
+                    image_pred[0].save(f'{args.cache_dir}/_{i}_{img_idx}_{n}.png')
+                # save resized image too
+                resized_img = resized_img.cpu()
+                resized_img = to_pil_image(resized_img.squeeze())
+                resized_img.save(f'{args.cache_dir}/_{i}_{img_idx}_resized.png')
 
         scores = torch.stack(scores).permute(1, 0) if args.batchsize > 1 else torch.stack(scores).unsqueeze(0)
         return scores
@@ -102,7 +109,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
 
-    args.run_id = f'{args.task}/img2img"_{args.similarity}_seed{args.seed}'
+    args.run_id = f'{args.task}/wse_sanity_14mar_{args.similarity}_seed{args.seed}'
 
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'

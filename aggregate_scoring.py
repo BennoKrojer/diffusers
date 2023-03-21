@@ -1,6 +1,6 @@
 from utils import evaluate_scores
 import csv
-from datasets import get_dataset
+from datasets_loading import get_dataset
 from torch.utils.data import DataLoader
 import argparse
 import os
@@ -12,8 +12,8 @@ def main(args):
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False, num_workers=0)
 
     score_dir = f'./cache/{args.task}/{"img2img" if args.img2img else "txt2img"}{"_strength" if args.strength else ""}'
-
     csv_files = [f for f in os.listdir(score_dir) if f.endswith('.csv')]
+    print(csv_files)
 
     aggregated_scores = []
     for f in csv_files:

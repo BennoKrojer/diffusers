@@ -18,14 +18,16 @@ print(device)
 clip_version = 'RN50x64'
 clip_model, preprocess = clip.load(clip_version, device='cuda:0')
 
-base_dir = 'flickr30'
+base_dir = 'datasets/flickr30k'
 img_dir = base_dir + '/images/'
-data = open(f'{base_dir}/valid_ann.jsonl', 'r')
+data = open(f'{base_dir}/train_ann.jsonl', 'r')
 
 captions = []
-for line in data:
+image_files = []
+for j, line in enumerate(data):
     line = json.loads(line)
     sents = line['sentences']
+    image_files.append(img_dir + line['img_path'])
     for i, sent in enumerate(sents):
         captions.append((sent, img_dir + line['img_path']))
 print('Number of captions: ', len(captions))
@@ -34,14 +36,12 @@ def get_clip_features(captions):
     img_features = {}
     text_features = {}
     for i, caption in tqdm(enumerate(captions), total=len(captions)):
-        text = clip.tokenize(caption[0]).to(device)
+        text = clip.tokenize(caption[0], truncate=True).to(device)
         with torch.no_grad():
             text_feature = clip_model.encode_text(text)
             text_feature = text_feature / text_feature.norm(dim=1, keepdim=True)
         text_features[i] = text_feature
-    for i, img_path in tqdm(enumerate(glob(img_dir + '*.jpg'))):
-        if i > 5000:
-            break
+    for i, img_path in tqdm(enumerate(image_files), total=len(image_files)):
         image = preprocess(Image.open(img_path)).unsqueeze(0).to(device)
         with torch.no_grad():
             image_feature = clip_model.encode_image(image)
@@ -53,15 +53,17 @@ img_features, text_features = get_clip_features(captions)
 
 # for each text, find the closest image
 def get_ranked_images(text_features, img_features):
-    ranked_images = {}
     all_img_features = torch.cat(list(img_features.values()))
     keys = list(img_features.keys())
     all_text_features = torch.cat(list(text_features.values()))
     scores = torch.matmul(all_text_features, all_img_features.T)
     scores = scores.cpu().numpy()
-    for i, score in tqdm(enumerate(scores), total=len(scores)):
-        # ranked_images[i] = [keys[j] for j in score.argsort(descending=True)]
-        ranked_images[i] = sorted(keys, key=lambda item: score[keys.index(item)], reverse=True)
+    #get max indices for each text
+    maxs = scores.argsort(axis=1)[:, -20:]
+    # fill in ranked_images
+    ranked_images = {}
+    for i, max in enumerate(maxs):
+        ranked_images[i] = [keys[m] for m in max]
     return ranked_images
 
 ranked_images = get_ranked_images(text_features, img_features)
@@ -87,8 +89,15 @@ print('R10: ', r10 / len(captions))
 # create dictionary of top 10 images for each caption
 top10 = {}
 for i, ranked_image in tqdm(ranked_images.items(), total=len(ranked_images)):
-    top10[i] = ranked_image[:10]
+    #remove captions[i][1] from ranked_image[:10]
+    nearest_imgs = ranked_image[:10]
+    if captions[i][1] in nearest_imgs:
+        nearest_imgs.remove(captions[i][1])
+    else:
+        nearest_imgs = nearest_imgs[:9]
+
+    top10[captions[i][0]] = [captions[i][1]] + nearest_imgs
 
 # save dictionary
-with open(f'top10_{clip_version}.json', 'w') as f:
-    json.dump(top10, f)
+with open(f'{base_dir}/train_top10_{clip_version}.json', 'w') as f:
+    json.dump(top10, f, indent=4)
