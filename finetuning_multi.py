@@ -722,7 +722,7 @@ def main():
                             metrics.append(score)
                         accuracy = sum(metrics) / len(metrics)
                         print(f'Retrieval Accuracy: {accuracy}')
-                        tracker.log_metric('val_accuracy', accuracy, step=global_step)
+                        accelerator.trackers[0].log_metric('val_accuracy', accuracy, step=global_step)
 
                         del pipeline_img2img
                         torch.cuda.empty_cache()
