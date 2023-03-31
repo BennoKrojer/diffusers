@@ -367,7 +367,7 @@ def main():
         if not is_wandb_available():
             raise ImportError("Make sure to install wandb if you want to use it for logging during training.")
         import wandb
-        wandb.init(project='diffusers_finetuning_flickr30k', settings=wandb.Settings(start_method="fork"))
+        wandb.init(project=f"diffusers_finetuning_{args.task}", settings=wandb.Settings(start_method="fork"))
 
 
     # Make one log on every process with the configuration for debugging.
@@ -419,7 +419,7 @@ def main():
         args.pretrained_model_name_or_path, subfolder="unet", revision=args.revision
     )
     # freeze parameters of models to save more memory
-    # unet.requires_grad_(False)
+    unet.requires_grad_(False)
     vae.requires_grad_(False)
 
     text_encoder.requires_grad_(False)
@@ -507,18 +507,8 @@ def main():
     else:
         optimizer_cls = torch.optim.AdamW
 
-    # optimizer = optimizer_cls(
-    #     lora_layers.parameters(),
-    #     lr=args.learning_rate,
-    #     betas=(args.adam_beta1, args.adam_beta2),
-    #     weight_decay=args.adam_weight_decay,
-    #     eps=args.adam_epsilon,
-    # )
-
-    # add unet parameters to the optimizer and not lora_layers
-
     optimizer = optimizer_cls(
-        unet.parameters(),
+        lora_layers.parameters(),
         lr=args.learning_rate,
         betas=(args.adam_beta1, args.adam_beta2),
         weight_decay=args.adam_weight_decay,
@@ -531,7 +521,7 @@ def main():
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
     
-    train_dataset = get_dataset('lora_flickr30k', f'datasets/flickr30k',tokenizer=tokenizer)
+    train_dataset = get_dataset(f"lora_{args.task}", f"datasets/{args.task}",tokenizer=tokenizer)
 
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
@@ -541,7 +531,7 @@ def main():
         num_workers=args.dataloader_num_workers,
     )
 
-    val_dataset = get_dataset('flickr30k', f'datasets/flickr30k', transform=None)
+    val_dataset = get_dataset(f'{args.task}', f'datasets/{args.task}', transform=None)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0)
 
 
@@ -619,15 +609,16 @@ def main():
     progress_bar.set_description("Steps")
 
     val_sentences = json.load(open('datasets/flickr30k/val_top10_RN50x64.json')).keys()
+    # want a list of sentences, just a sanity check bc itll print them during training
     val_sentences = list(val_sentences)[:10]
     args.validation_prompt = val_sentences
-
-    args.validation_prompt = ['Two young guys with shaggy hair look at their hands while hanging out in the yard']
 
     for epoch in range(first_epoch, args.num_train_epochs):
         unet.train()
         train_loss = 0.0
         for step, batch in enumerate(train_dataloader):
+            if step > 3:
+                break
             # Skip steps until we reach the resumed step
             if args.resume_from_checkpoint and epoch == first_epoch and step < resume_step:
                 if step % args.gradient_accumulation_steps == 0:
@@ -712,32 +703,32 @@ def main():
                         logger.info(f"Saved state to {save_path}")
                         
                         ############ QUANTITAIVE EVALUATION #############
-                        # pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
-                        #     args.pretrained_model_name_or_path,
-                        #     unet=accelerator.unwrap_model(unet),
-                        #     revision=args.revision,
-                        #     torch_dtype=weight_dtype,
-                        # )
-                        # pipeline_img2img = pipeline_img2img.to(accelerator.device)
-                        # pipeline_img2img.set_progress_bar_config(disable=True)
+                        pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
+                            args.pretrained_model_name_or_path,
+                            unet=accelerator.unwrap_model(unet),
+                            revision=args.revision,
+                            torch_dtype=weight_dtype,
+                        )
+                        pipeline_img2img = pipeline_img2img.to(accelerator.device)
+                        pipeline_img2img.set_progress_bar_config(disable=True)
 
-                        # metrics = []
-                        # for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
-                        #     if k % 40 != 0:
-                        #         continue
-                        #     # measure time for the following line
-                        #     start = time.time()
-                        #     scores = score_batch(k, args, batch, pipeline_img2img)
-                        #     end = time.time()
-                        #     print(f'Elapsed time: {end - start}')
-                        #     score = evaluate_scores(args, scores, batch)
-                        #     metrics.append(score)
-                        # accuracy = sum(metrics) / len(metrics)
-                        # print(f'Retrieval Accuracy: {accuracy}')
-                        # wandb.log({"Retrieval Accuracy": accuracy})
+                        metrics = []
+                        for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
+                            if k > 4:
+                                break
+                            # measure time for the following line
+                            start = time.time()
+                            scores = score_batch(k, args, batch, pipeline_img2img)
+                            end = time.time()
+                            print(f'Elapsed time: {end - start}')
+                            score = evaluate_scores(args, scores, batch)
+                            metrics.append(score)
+                        accuracy = sum(metrics) / len(metrics)
+                        print(f'Retrieval Accuracy: {accuracy}')
+                        wandb.log({"Retrieval Accuracy": accuracy})
 
-                        # del pipeline_img2img
-                        # torch.cuda.empty_cache()
+                        del pipeline_img2img
+                        torch.cuda.empty_cache()
                         ############ QUANTITAIVE EVALUATION #############
 
                         logger.info(

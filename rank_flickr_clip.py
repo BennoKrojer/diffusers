@@ -34,32 +34,50 @@ print('Number of captions: ', len(captions))
 
 def get_clip_features(captions):
     img_features = {}
-    text_features = {}
-    for i, caption in tqdm(enumerate(captions), total=len(captions)):
-        text = clip.tokenize(caption[0], truncate=True).to(device)
+    text_features = []
+    tokenized = [clip.tokenize(caption[0], truncate=True).to(device) for caption in captions]
+    tokenized = torch.cat(tokenized)
+
+    #batchsize 64
+    for i in tqdm(range(0, len(tokenized), 64)):
         with torch.no_grad():
-            text_feature = clip_model.encode_text(text)
+            text_feature = clip_model.encode_text(tokenized[i:i+64])
             text_feature = text_feature / text_feature.norm(dim=1, keepdim=True)
-        text_features[i] = text_feature
-    for i, img_path in tqdm(enumerate(image_files), total=len(image_files)):
-        image = preprocess(Image.open(img_path)).unsqueeze(0).to(device)
+        text_features.append(text_feature)
+    text_features = torch.cat(text_features)
+    # batchsize 64
+    for i in tqdm(range(0, len(image_files), 64)):
+        images = torch.cat([preprocess(Image.open(img_path)).unsqueeze(0).to(device) for img_path in image_files[i:i+64]])
         with torch.no_grad():
-            image_feature = clip_model.encode_image(image)
+            image_feature = clip_model.encode_image(images)
             image_feature = image_feature / image_feature.norm(dim=1, keepdim=True)
-        img_features[img_path] = image_feature
+        for j, img_path in enumerate(image_files[i:i+64]):
+            img_features[img_path] = image_feature[j]
+    # for i, caption in tqdm(enumerate(captions), total=len(captions)):
+    #     with torch.no_grad():
+    #         text_feature = clip_model.encode_text(text)
+    #         text_feature = text_feature / text_feature.norm(dim=1, keepdim=True)
+    #     text_features[i] = text_feature
+    # for i, img_path in tqdm(enumerate(image_files), total=len(image_files)):
+    #     image = preprocess(Image.open(img_path)).unsqueeze(0).to(device)
+    #     with torch.no_grad():
+    #         image_feature = clip_model.encode_image(image)
+    #         image_feature = image_feature / image_feature.norm(dim=1, keepdim=True)
+    #     img_features[img_path] = image_feature
+
     return img_features, text_features
 
 img_features, text_features = get_clip_features(captions)
 
 # for each text, find the closest image
 def get_ranked_images(text_features, img_features):
-    all_img_features = torch.cat(list(img_features.values()))
+    all_img_features = torch.stack(list(img_features.values()))
     keys = list(img_features.keys())
-    all_text_features = torch.cat(list(text_features.values()))
-    scores = torch.matmul(all_text_features, all_img_features.T)
+    scores = torch.matmul(text_features, all_img_features.T)
     scores = scores.cpu().numpy()
+    scores = -scores
     #get max indices for each text
-    maxs = scores.argsort(axis=1)[:, -20:]
+    maxs = scores.argsort(axis=1)[:, :20]
     # fill in ranked_images
     ranked_images = {}
     for i, max in enumerate(maxs):

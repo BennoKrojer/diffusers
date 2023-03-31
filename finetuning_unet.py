@@ -24,6 +24,7 @@ import random
 from pathlib import Path
 from typing import Optional
 import cv2
+import clip
 
 import numpy as np
 import torch
@@ -38,6 +39,7 @@ from packaging import version
 from torchvision import transforms
 from tqdm.auto import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
+from collections import defaultdict
 
 import diffusers
 from diffusers import AutoencoderKL, DDPMScheduler, DiffusionPipeline, UNet2DConditionModel, StableDiffusionImg2ImgPipeline
@@ -310,7 +312,7 @@ def parse_args():
     )
 
     parser.add_argument("--task", type=str, default="flickr30k", help="The task to train on.")
-    parser.add_argument('--neg_prob', type=float, default=0.0, help='The probability of sampling a negative image.')
+    parser.add_argument('--neg_factor', type=float, default=0.0, help='The probability of sampling a negative image.')
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -320,6 +322,7 @@ def parse_args():
 
     return args
 
+clip_model, preprocess = clip.load('ViT-L/14@336px', device='cuda')
 
 def get_full_repo_name(model_id: str, organization: Optional[str] = None, token: Optional[str] = None):
     if token is None:
@@ -330,24 +333,47 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
     else:
         return f"{organization}/{model_id}"
 
-def score_batch(i, args, batch, model):
+def score_batch(i, args, batch, model, clip=False):
     """
     Takes a batch of images and captions and returns a score for each image-caption pair.
     """
-
+    scoring = not clip
     imgs, texts = batch[0], batch[1]
-    imgs, imgs_resize = imgs[0], imgs[1]
-    imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+    if type(imgs) == list:
+        imgs, imgs_resize = imgs[0], imgs[1]
+        imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+    else:
+        imgs = [img.cuda() for img in imgs]
+        imgs_resize = imgs
 
-    scores = []
+    scores_per_noise = defaultdict(list)
+    clip_scores = []
     for txt_idx, text in enumerate(texts):
         for img_idx, resized_img in enumerate(imgs_resize):
-            dists = model(prompt=list(text), image=resized_img)
-            dists = dists.mean()
-            dists = -dists
-            scores.append(dists)
+            if len(resized_img.shape) == 3:
+                resized_img = resized_img.unsqueeze(0)
+            if scoring:
+                dists = model(prompt=list(text), image=resized_img, scoring=scoring)
+                dists = [-dist for dist in dists]
+                for k, dist in enumerate(dists):
+                    scores_per_noise[k].append(dist)
+            else:
+                gen = model(prompt=list(text), image=resized_img, scoring=scoring, strength=0.6)
+                gen = torch.stack([preprocess(g) for g in gen]).to('cuda')
+                with torch.no_grad():
+                    img_latent = clip_model.encode_image(imgs[img_idx]).squeeze().float()
+                    gen_latent = clip_model.encode_image(gen).squeeze().float()
 
-    scores = torch.stack(scores).unsqueeze(0)
+                diff = img_latent - gen_latent
+                score = torch.norm(diff, p=2, dim=-1)
+                score = -score
+                clip_scores.append(score)
+
+    # scores = torch.stack(scores).unsqueeze(0)
+    if scoring:
+        scores = [torch.stack(scores_per_noise[k]).unsqueeze(0) for k in range(len(scores_per_noise))]
+    else:
+        scores = torch.stack(clip_scores).unsqueeze(0)
     return scores
 
 def main():
@@ -367,7 +393,7 @@ def main():
         if not is_wandb_available():
             raise ImportError("Make sure to install wandb if you want to use it for logging during training.")
         import wandb
-        wandb.init(project='diffusers_finetuning_flickr30k', settings=wandb.Settings(start_method="fork"))
+        wandb.init(project=f"diffusers_finetuning_{args.task}", settings=wandb.Settings(start_method="fork"))
 
 
     # Make one log on every process with the configuration for debugging.
@@ -451,39 +477,6 @@ def main():
     # => 32 layers
 
     # Set correct lora layers
-    lora_attn_procs = {}
-    for name in unet.attn_processors.keys():
-        cross_attention_dim = None if name.endswith("attn1.processor") else unet.config.cross_attention_dim
-        if name.startswith("mid_block"):
-            hidden_size = unet.config.block_out_channels[-1]
-        elif name.startswith("up_blocks"):
-            block_id = int(name[len("up_blocks.")])
-            hidden_size = list(reversed(unet.config.block_out_channels))[block_id]
-        elif name.startswith("down_blocks"):
-            block_id = int(name[len("down_blocks.")])
-            hidden_size = unet.config.block_out_channels[block_id]
-
-        lora_attn_procs[name] = LoRACrossAttnProcessor(
-            hidden_size=hidden_size, cross_attention_dim=cross_attention_dim
-        )
-
-    unet.set_attn_processor(lora_attn_procs)
-
-    if args.enable_xformers_memory_efficient_attention:
-        if is_xformers_available():
-            import xformers
-
-            xformers_version = version.parse(xformers.__version__)
-            if xformers_version == version.parse("0.0.16"):
-                logger.warn(
-                    "xFormers 0.0.16 cannot be used for training in some GPUs. If you observe problems during training, please update xFormers to at least 0.0.17. See https://huggingface.co/docs/diffusers/main/en/optimization/xformers for more details."
-                )
-            unet.enable_xformers_memory_efficient_attention()
-        else:
-            raise ValueError("xformers is not available. Make sure it is installed correctly")
-
-    lora_layers = AttnProcsLayers(unet.attn_processors)
-
     # Enable TF32 for faster training on Ampere GPUs,
     # cf https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices
     if args.allow_tf32:
@@ -507,16 +500,6 @@ def main():
     else:
         optimizer_cls = torch.optim.AdamW
 
-    # optimizer = optimizer_cls(
-    #     lora_layers.parameters(),
-    #     lr=args.learning_rate,
-    #     betas=(args.adam_beta1, args.adam_beta2),
-    #     weight_decay=args.adam_weight_decay,
-    #     eps=args.adam_epsilon,
-    # )
-
-    # add unet parameters to the optimizer and not lora_layers
-
     optimizer = optimizer_cls(
         unet.parameters(),
         lr=args.learning_rate,
@@ -531,7 +514,7 @@ def main():
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
     
-    train_dataset = get_dataset('lora_flickr30k', f'datasets/flickr30k',tokenizer=tokenizer)
+    train_dataset = get_dataset(f"lora_{args.task}", f"datasets/{args.task}",tokenizer=tokenizer, transform=preprocess)
 
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
@@ -541,9 +524,10 @@ def main():
         num_workers=args.dataloader_num_workers,
     )
 
-    val_dataset = get_dataset('flickr30k', f'datasets/flickr30k', transform=None)
+    val_dataset = get_dataset(f'{args.task}', f'datasets/{args.task}', transform=preprocess, split='val')
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0)
-
+    # val_train_dataset = get_dataset(f'{args.task}', f'datasets/{args.task}', transform=preprocess, split='train')
+    # val_train_dataloader = torch.utils.data.DataLoader(val_train_dataset, batch_size=1, shuffle=False, num_workers=0)
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
@@ -560,9 +544,11 @@ def main():
     )
 
     # Prepare everything with our `accelerator`.
-    lora_layers, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        lora_layers, optimizer, train_dataloader, lr_scheduler
+    unet, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+        unet, optimizer, train_dataloader, lr_scheduler
     )
+
+    val_dataloader = accelerator.prepare(val_dataloader)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
@@ -622,11 +608,10 @@ def main():
     val_sentences = list(val_sentences)[:10]
     args.validation_prompt = val_sentences
 
-    args.validation_prompt = ['Two young guys with shaggy hair look at their hands while hanging out in the yard']
-
     for epoch in range(first_epoch, args.num_train_epochs):
         unet.train()
         train_loss = 0.0
+        prev_latent_neg = None
         for step, batch in enumerate(train_dataloader):
             # Skip steps until we reach the resumed step
             if args.resume_from_checkpoint and epoch == first_epoch and step < resume_step:
@@ -638,17 +623,16 @@ def main():
                 # Convert images to latent space
 
                 imgs, text, img_idx = batch
-                if args.neg_prob > torch.rand(1):
-                    idx = torch.randint(1, len(imgs), (1,))
-                    imgs_neg = imgs[idx]
-                else:
-                    imgs_neg = None
+                idx = torch.randint(1, len(imgs), (1,))
+                imgs_neg = imgs[idx]
 
                 imgs = imgs[0]
 
                 latents = vae.encode(imgs.to(dtype=weight_dtype)).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
-                if imgs_neg is not None:
+                if prev_latent_neg is not None and torch.rand(1) < 0.5:
+                    latents_neg = prev_latent_neg
+                else:
                     latents_neg = vae.encode(imgs_neg.to(dtype=weight_dtype)).latent_dist.sample()
                     latents_neg = latents_neg * vae.config.scaling_factor
 
@@ -656,14 +640,13 @@ def main():
                 noise = torch.randn_like(latents)
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
-                timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
+                timesteps = torch.randint(int(0.1 * noise_scheduler.num_train_timesteps), int(0.6 * noise_scheduler.num_train_timesteps), (bsz,), device=latents.device)
                 timesteps = timesteps.long()
 
                 # Add noise to the latents according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
-                if imgs_neg is not None:
-                    noisy_latents_neg = noise_scheduler.add_noise(latents_neg, noise, timesteps)
+                noisy_latents_neg = noise_scheduler.add_noise(latents_neg, noise, timesteps)
 
                 # Get the text embedding for conditioning
                 encoder_hidden_states = text_encoder(text)[0]
@@ -679,21 +662,23 @@ def main():
                 # Predict the noise residual and compute loss
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                 loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
-                if imgs_neg is not None:
-                    model_pred_neg = unet(noisy_latents_neg, timesteps, encoder_hidden_states).sample
-                    loss_neg = F.mse_loss(model_pred_neg.float(), target.float(), reduction="mean")
-                    loss_neg = -loss_neg
-                    loss = (loss + loss_neg) / 2
+                model_pred_neg = unet(noisy_latents_neg, timesteps, encoder_hidden_states).sample
+                loss_neg = F.mse_loss(model_pred_neg.float(), target.float(), reduction="mean")
+                loss_neg = -loss_neg
+                loss = (1-args.neg_factor) * loss + args.neg_factor * loss_neg
 
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(loss.repeat(args.train_batch_size)).mean()
                 train_loss += avg_loss.item() / args.gradient_accumulation_steps
 
+                prev_latent_neg = latents_neg
+
                 # Backpropagate
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
-                    params_to_clip = lora_layers.parameters()
+                    params_to_clip = unet.parameters()
                     accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
+                    
                 optimizer.step()
                 lr_scheduler.step()
                 optimizer.zero_grad()
@@ -706,40 +691,97 @@ def main():
                 train_loss = 0.0
 
                 if global_step % args.checkpointing_steps == 0:
+                    accelerator.wait_for_everyone()
                     if accelerator.is_main_process:
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
-                        accelerator.save_state(save_path)
-                        logger.info(f"Saved state to {save_path}")
+                        if not os.path.exists(save_path):
+                            os.makedirs(save_path)
                         
                         ############ QUANTITAIVE EVALUATION #############
-                        # pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
-                        #     args.pretrained_model_name_or_path,
-                        #     unet=accelerator.unwrap_model(unet),
-                        #     revision=args.revision,
-                        #     torch_dtype=weight_dtype,
-                        # )
-                        # pipeline_img2img = pipeline_img2img.to(accelerator.device)
-                        # pipeline_img2img.set_progress_bar_config(disable=True)
+                        IDX2STRENGTH = {0: '0.8', 1: '0.6', 2: '0.4', 3: '0.2'}
+                        pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
+                            args.pretrained_model_name_or_path,
+                            unet=accelerator.unwrap_model(unet),
+                            revision=args.revision,
+                            torch_dtype=weight_dtype,
+                        )
+                        pipeline_img2img = pipeline_img2img.to(accelerator.device)
+                        pipeline_img2img.set_progress_bar_config(disable=True)
 
-                        # metrics = []
-                        # for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
-                        #     if k % 40 != 0:
+                        metrics_per_noise = defaultdict(list)
+                        metrics_clip = []
+                        metrics_per_noise_r5 = defaultdict(list)
+                        metrics_clip_r5 = []
+                        for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
+                            if k % 5 != 0:
+                                continue
+                            if k > 300:
+                                break
+                            with torch.no_grad():
+                                scores = score_batch(k, args, batch, pipeline_img2img)
+                            for noise_idx, score in enumerate(scores):
+                                r1,r5 = evaluate_scores(args, score, batch)
+                                metrics_per_noise[noise_idx].append(r1)
+                                metrics_per_noise_r5[noise_idx].append(r5)
+                            if k < 100:
+                                with torch.no_grad():
+                                    scores = score_batch(k, args, batch, pipeline_img2img, clip=True)
+                                r1,r5 = evaluate_scores(args, scores, batch)
+                                metrics_clip.append(r1)
+                                metrics_clip_r5.append(r5)
+
+                        for idx, noise_level in enumerate(IDX2STRENGTH.values()):
+                            metrics = metrics_per_noise[idx]
+                            accuracy = sum(metrics) / len(metrics)
+                            print(f'Validation Retrieval Accuracy (noise {noise_level}): {accuracy}')
+                            wandb.log({f"Validation Retrieval Accuracy (noise {noise_level})": accuracy})
+                        accuracy_clip = sum(metrics_clip) / len(metrics_clip)
+                        print(f'Validation Retrieval Accuracy (clip): {accuracy_clip}')
+                        wandb.log({"Validation Retrieval Accuracy (clip)": accuracy_clip})
+
+                        for idx, noise_level in enumerate(IDX2STRENGTH.values()):
+                            metrics = metrics_per_noise_r5[idx]
+                            accuracy = sum(metrics) / len(metrics)
+                            print(f'Validation Retrieval Accuracy R5 (noise {noise_level}): {accuracy}')
+                            wandb.log({f"Validation Retrieval Accuracy R5 (noise {noise_level})": accuracy})
+                        accuracy_clip = sum(metrics_clip_r5) / len(metrics_clip_r5)
+                        print(f'Validation Retrieval Accuracy R5 (clip): {accuracy_clip}')
+                        wandb.log({"Validation Retrieval Accuracy R5 (clip)": accuracy_clip})
+
+                        # metrics_per_noise = defaultdict(list)
+                        # metrics_per_noise_r5 = defaultdict(list)
+                        # train_dataloader.dataset.two_imgs = False
+                        # for k, batch in tqdm(enumerate(train_dataloader), total=len(train_dataloader)):
+                        #     if k % 5 != 0:
                         #         continue
-                        #     # measure time for the following line
-                        #     start = time.time()
-                        #     scores = score_batch(k, args, batch, pipeline_img2img)
-                        #     end = time.time()
-                        #     print(f'Elapsed time: {end - start}')
-                        #     score = evaluate_scores(args, scores, batch)
-                        #     metrics.append(score)
-                        # accuracy = sum(metrics) / len(metrics)
-                        # print(f'Retrieval Accuracy: {accuracy}')
-                        # wandb.log({"Retrieval Accuracy": accuracy})
+                        #     if k > 500:
+                        #         break
+                        #     with torch.no_grad():
+                        #         scores = score_batch(k, args, batch, pipeline_img2img)
+                        #     for noise_idx, score in enumerate(scores):
+                        #         r1,r5 = evaluate_scores(args, score, batch)
+                        #         metrics_per_noise[noise_idx].append(r1)
+                        #         metrics_per_noise_r5[noise_idx].append(r5)
 
-                        # del pipeline_img2img
-                        # torch.cuda.empty_cache()
+                        # train_dataloader.dataset.two_imgs = True
+
+                        # for idx, noise_level in enumerate(IDX2STRENGTH.values()):
+                        #     metrics = metrics_per_noise[idx]
+                        #     accuracy = sum(metrics) / len(metrics)
+                        #     print(f'Train Retrieval Accuracy (noise {noise_level}): {accuracy}')
+                        #     wandb.log({f"Train Retrieval Accuracy (noise {noise_level})": accuracy})
+                        # for idx, noise_level in enumerate(IDX2STRENGTH.values()):
+                        #     metrics = metrics_per_noise_r5[idx]
+                        #     accuracy = sum(metrics) / len(metrics)
+                        #     print(f'Train Retrieval Accuracy R5 (noise {noise_level}): {accuracy}')
+                        #     wandb.log({f"Train Retrieval Accuracy R5 (noise {noise_level})": accuracy})
+
+                        del pipeline_img2img
+                        torch.cuda.empty_cache()
                         ############ QUANTITAIVE EVALUATION #############
-
+                if global_step % (args.checkpointing_steps//2) == 0:
+                    accelerator.wait_for_everyone()
+                    if accelerator.is_main_process:
                         logger.info(
                             f"Running validation... \n Generating {args.num_validation_images} images with prompt:"
                             f" {args.validation_prompt}."
@@ -774,36 +816,12 @@ def main():
             logs = {"step_loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
             progress_bar.set_postfix(**logs)
 
-    # Save the lora layers
-    accelerator.wait_for_everyone()
-    if accelerator.is_main_process:
-        unet = unet.to(torch.float32)
-        unet.save_attn_procs(args.output_dir)
-
-        if args.push_to_hub:
-            save_model_card(
-                repo_name,
-                images=images,
-                base_model=args.pretrained_model_name_or_path,
-                dataset_name=args.dataset_name,
-                repo_folder=args.output_dir,
-            )
-            repo.push_to_hub(commit_message="End of training", blocking=False, auto_lfs_prune=True)
-
-    # Final inference
-    # Load previous pipeline
-    pipeline = DiffusionPipeline.from_pretrained(
-        args.pretrained_model_name_or_path, revision=args.revision, torch_dtype=weight_dtype
-    )
-    pipeline = pipeline.to(accelerator.device)
-
-    # load attention processors
-    pipeline.unet.load_attn_procs(args.output_dir)
-
-    # run inference
-
-    accelerator.end_training()
-
+        # Save the lora layers
+        accelerator.wait_for_everyone()
+        if accelerator.is_main_process:
+            save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+            accelerator.save_state(save_path)
+            logger.info(f"Saved state to {save_path}")
 
 if __name__ == "__main__":
     main()

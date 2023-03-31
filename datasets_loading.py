@@ -9,22 +9,25 @@ import PIL
 import numpy as np
 import torch
 from torchvision import datasets
+from glob import glob
 
-def get_dataset(dataset_name, root_dir, transform=None, split='valid', resize=512, scoring_only=False, tokenizer=None):
+def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val'):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode':
         return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'flickr30k':
-        return Flickr30KDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
+        return Flickr30KDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
     elif dataset_name == 'lora_flickr30k':
-        return LoRaFlickr30KDataset(root_dir, split, transform, resize=resize, tokenizer=tokenizer)
+        return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer)
     elif dataset_name == 'imagenet':
         return ImagenetDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'svo':
         return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'clevr':
         return CLEVRDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'pets':
+        return PetsDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -85,6 +88,51 @@ class ImagenetDataset(Dataset):
         else:
             return ([img], [img_resize]), self.classes, class_id
 
+class PetsDataset(Dataset):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
+        
+        self.root_dir = root_dir
+        # read all imgs in root_dir with glob
+        imgs = list(glob(root_dir + '/images/*.jpg'))
+        self.resize = resize
+        self.transform = transform
+        self.classes = list(open(f'{root_dir}/classes.txt', 'r').read().splitlines())
+        self.data = []
+        for img_path in imgs:
+            filename = img_path.split('/')[-1].split('_')
+            class_name = ' '.join(filename[:-1])
+            lower_case_class_name = class_name.lower()
+            class_id = self.classes.index(lower_case_class_name)
+            self.data.append((img_path, class_id))
+        prompted_classes = []
+        for c in self.classes:
+            class_text = 'a photo of a ' + c
+            prompted_classes.append(class_text)
+        self.classes = prompted_classes
+        self.scoring_only = scoring_only
+
+    def __getitem__(self, idx):
+        if not self.scoring_only:
+            img, class_id = self.data[idx]
+            img = Image.open(img)
+            img = img.convert("RGB")
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
+            if self.transform:
+                img = self.transform(img)
+            else:
+                img = transforms.ToTensor()(img)
+        else:
+            class_id = idx // 50
+
+        if self.scoring_only:
+            return self.classes, class_id
+        else:
+            return ([0], [img_resize]), self.classes, class_id
+
+    def __len__(self):
+        return len(self.data)
+
 class WinogroundDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, scoring_only=False):
         self.root_dir = root_dir
@@ -123,7 +171,7 @@ class WinogroundDataset(Dataset):
         if self.scoring_only:
             return text, img_id
         else:
-            return (imgs, [img0_resize, img1_resize]), text, img_id
+            return (0, [img0_resize, img1_resize]), text, img_id
 
 class ImageCoDeDataset(Dataset):
     def __init__(self, root_dir, split, transform, resize=512, scoring_only=False):
@@ -135,6 +183,7 @@ class ImageCoDeDataset(Dataset):
 
     @staticmethod
     def load_data(data_dir, split, static_only=True):
+        split = 'valid' if split == 'val' else split
         with open(f'{data_dir}/{split}_data.json') as f:
             json_file = json.load(f)
         img_path = f'{data_dir}/image-sets'
@@ -174,36 +223,31 @@ class ImageCoDeDataset(Dataset):
             return (imgs, imgs_resize), [text], img_dir, img_idx
 
 class Flickr30KDataset(Dataset):
-    def __init__(self, root_dir, split, transform, resize=512, scoring_only=False):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, first_query=True):
         self.root_dir = root_dir
         self.resize = resize
-        self.data = json.load(open(f'{root_dir}/val_top10_RN50x64.json', 'r'))
+        self.data = json.load(open(f'{root_dir}/{split}_top10_RN50x64.json', 'r'))
         self.data = list(self.data.items())
-        self.data = self.remove_impossible(self.data)
+        # get only every 5th example
+        if first_query:
+            self.data = self.data[::5]
         self.transform = transform
         self.scoring_only = scoring_only
-    
-
-    @staticmethod
-    def remove_impossible(data):
-        new_data = []
-        for caption, imgs in data:
-            correct, imgs = imgs[0], imgs[1]
-            if correct in imgs:
-                new_data.append((caption, [correct, imgs]))
-        return new_data
-
+        self.tokenizer = tokenizer
+        
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
         ex = self.data[idx]
         text = ex[0]
-        correct_path = ex[1][0]
-        img_paths = ex[1][1]
-        img_idx = img_paths.index(correct_path)
+        if self.tokenizer:
+            text = self.tokenizer([text], max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+            text = text.input_ids.squeeze(0)
+        img_paths = ex[1]
+        img_idx = 0
         if not self.scoring_only:
-            imgs = [Image.open(f'datasets/{img_path}').convert("RGB") for img_path in img_paths]
+            imgs = [Image.open(f'{img_path}').convert("RGB") for img_path in img_paths]
             imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
             #convert pillow to numpy array
             # imgs_resize = [np.array(img) for img in imgs_resize]
@@ -216,29 +260,35 @@ class Flickr30KDataset(Dataset):
         if self.scoring_only:
             return [text], img_idx
         else:
-            return (imgs, imgs_resize), [text], img_idx
+            return [0, imgs_resize], [text], img_idx
 
 class LoRaFlickr30KDataset(Dataset):
-    def __init__(self, root_dir, split, transform, resize=512, tokenizer=None):
+    def __init__(self, root_dir, transform, resize=512, tokenizer=None):
         self.root_dir = root_dir
         self.resize = resize
         self.data = json.load(open(f'{root_dir}/train_top10_RN50x64.json', 'r'))
         self.data = list(self.data.items())
-        self.transform = lora_train_transforms
+        self.transform = transform
         self.tokenizer = tokenizer
+        self.two_imgs = True
     
-
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
         ex = self.data[idx]
         text = ex[0]
-        text = self.tokenizer([text], max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
-        text = text.input_ids.squeeze(0)
         img_paths = ex[1]
         img_idx = 0
-        imgs = [Image.open(img_path).convert("RGB") for img_path in img_paths]
+        if self.two_imgs:
+            text = self.tokenizer([text], max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+            text = text.input_ids.squeeze(0)
+            img0 = Image.open(img_paths[0]).convert("RGB")
+            img_rand = Image.open(random.choice(img_paths[1:])).convert("RGB")
+            imgs = [img0, img_rand]
+        else:
+            imgs = [Image.open(img_path).convert("RGB") for img_path in img_paths]
+            text = [text]
         #convert pillow to numpy array
         # imgs_resize = [np.array(img) for img in imgs]
         imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
@@ -294,12 +344,12 @@ class SVOClassificationDataset(Dataset):
 
 class CLEVRDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, scoring_only=False):
-        root_dir = '../clevr/output'
+        root_dir = '../clevr/validation'
         self.root_dir = root_dir
         subtasks = ['pair_binding_size', 'pair_binding_color', 'recognition_color', 'recognition_shape', 'spatial', 'binding_color_shape', 'binding_shape_color']
         data_ = []
         for subtask in subtasks:
-            self.data = json.load(open(f'{root_dir}/{subtask}.json', 'r')).items()
+            self.data = json.load(open(f'{root_dir}/captions/{subtask}.json', 'r')).items()
             for k, v in self.data:
                 for i in range(len(v)):
                     if 'subtask' == 'spatial':
