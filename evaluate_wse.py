@@ -40,7 +40,9 @@ class Scorer:
         for txt_idx, text in enumerate(texts):
             for img_idx, resized_img in enumerate(imgs_resize):
                 print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0)
+                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps)
+                # dists to float32
+                dists = dists.to(torch.float32)
                 dists = dists.mean(dim=1)
                 dists = -dists
                 scores.append(dists)
@@ -74,6 +76,7 @@ def main(args):
 
     r1s = []
     r5s = []
+    max_more_than_onces = 0
     metrics = []
     all_scores = []
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
@@ -89,25 +92,29 @@ def main(args):
         if args.task == 'winoground':
             score = evaluate_scores(args, scores, batch)
             metrics.append(score)
-            text_score = sum([m[0] for m in metrics]) / len(metrics)
-            img_score = sum([m[1] for m in metrics]) / len(metrics)
-            group_score = sum([m[2] for m in metrics]) / len(metrics)
+            text_score = sum([m[0] for m in metrics]) / len(dataloader)
+            img_score = sum([m[1] for m in metrics]) / len(dataloader)
+            group_score = sum([m[2] for m in metrics]) / len(dataloader)
             print(f'Text score: {text_score}')
             print(f'Image score: {img_score}')
             print(f'Group score: {group_score}')
-        elif args.task in ['flickr30k', 'imagecode', 'imagenet']:
-            r1,r5,_ = evaluate_scores(args, scores, batch)
+        elif args.task in ['flickr30k', 'imagecode', 'imagenet', 'flickr30k_text']:
+            r1,r5, max_more_than_once = evaluate_scores(args, scores, batch)
             r1s.append(r1)
             r5s.append(r5)
+            max_more_than_onces += max_more_than_once
             r1 = sum(r1s) / len(r1s)
             r5 = sum(r5s) / len(r5s)
             print(f'R@1: {r1}')
             print(f'R@5: {r5}')
+            print(f'Max more than once: {max_more_than_onces}')
         else:
-            acc = evaluate_scores(args, scores, batch)
+            acc, max_more_than_once = evaluate_scores(args, scores, batch)
             metrics.append(acc)
             acc = sum(metrics) / len(metrics)
+            max_more_than_onces += max_more_than_once
             print(f'Accuracy: {acc}')
+            print(f'Max more than once: {max_more_than_onces}')
     # write all scores to csv
     with open(f'./cache/{args.run_id}_scores.csv', 'w') as f:
         writer = csv.writer(f)
@@ -123,6 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=1)
     parser.add_argument('--subset', action='store_true')
+    parser.add_argument('--sampling_steps', type=int, default=200)
     args = parser.parse_args()
 
     random.seed(args.seed)

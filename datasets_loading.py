@@ -18,6 +18,8 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
         return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'flickr30k':
         return Flickr30KDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
+    elif dataset_name == 'flickr30k_text':
+        return Flickr30KTextRetrievalDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
     elif dataset_name == 'lora_flickr30k':
         return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer)
     elif dataset_name == 'imagenet':
@@ -261,6 +263,43 @@ class Flickr30KDataset(Dataset):
             return [text], img_idx
         else:
             return [0, imgs_resize], [text], img_idx
+
+class Flickr30KTextRetrievalDataset(Dataset):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, first_query=True):
+        self.root_dir = 'datasets/flickr30k'
+        self.resize = resize
+        self.data = json.load(open(f'{self.root_dir}/{split}_top10_RN50x64_text.json', 'r'))
+        self.data = list(self.data.items()) # dictionary from img_path to list of 10 captions
+        self.transform = transform
+        self.scoring_only = scoring_only
+        self.tokenizer = tokenizer
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        ex = self.data[idx]
+        img_path = ex[0]
+        text = ex[1]
+        if self.tokenizer:
+            text = self.tokenizer(text, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+            text = text.input_ids.squeeze(0)
+        if not self.scoring_only:
+            img = Image.open(f'{img_path}').convert("RGB")
+            img_resize = img.resize((self.resize, self.resize))
+            #convert pillow to numpy array
+            # imgs_resize = [np.array(img) for img in imgs_resize]
+            img_resize = diffusers_preprocess(img_resize)
+
+            if self.transform:
+                img = self.transform(img)
+            else:
+                img = transforms.ToTensor()(img)
+        if self.scoring_only:
+            return [text], img_path
+        else:
+            return [0, [img_resize]], text, 0
+    
 
 class LoRaFlickr30KDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, tokenizer=None):

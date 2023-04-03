@@ -1,12 +1,16 @@
 import numpy as np
 
-RETRIEVAL_TASKS = ['imagecode', 'flickr30k', 'imagenet', 'clevr', 'svo', 'pets']
+RETRIEVAL_TASKS = ['imagecode', 'flickr30k', 'imagenet', 'clevr', 'svo', 'pets', 'flickr30k_text']
 
 def evaluate_winoground(scores):
-    c0_i0, c0_i1, c1_i0, c1_i1 = scores[0]
-    text_score = 1 if c0_i0 > c1_i0 and c1_i1 > c0_i1 else 0
-    img_score = 1 if c0_i0 > c0_i1 and c1_i1 > c1_i0 else 0
-    group_score = 1 if text_score and img_score else 0
+    text_score, img_score, group_score = 0, 0, 0
+    for score_ in scores:
+        c0_i0, c0_i1, c1_i0, c1_i1 = score_
+        text_score_ = 1 if c0_i0 > c1_i0 and c1_i1 > c0_i1 else 0
+        img_score_ = 1 if c0_i0 > c0_i1 and c1_i1 > c1_i0 else 0
+        group_score += 1 if text_score_ and img_score_ else 0 
+        text_score += text_score_
+        img_score += img_score_ 
     return text_score, img_score, group_score
 
 def evaluate_retrieval(args, scores, img_idx):
@@ -25,7 +29,7 @@ def evaluate_retrieval(args, scores, img_idx):
         if img_idx[i] == np.argmax(scores[i]):
             retrieval_accuracy += 1
     # R5 calculation too
-    if args.task in ['flickr30k', 'imagecode', 'imagenet']:
+    if args.task in ['flickr30k', 'imagecode', 'imagenet', 'flickr30k_text']:
         r5 = 0
         for i in range(scores.shape[0]):
             if img_idx[i] in np.argsort(scores[i])[-5:]:
@@ -35,7 +39,7 @@ def evaluate_retrieval(args, scores, img_idx):
         return retrieval_accuracy, r5, max_more_than_once
     else:
         retrieval_accuracy /= scores.shape[0]
-        return retrieval_accuracy
+        return retrieval_accuracy, max_more_than_once
 
 def evaluate_scores(args, scores, batch):
     if args.task == 'winoground':
