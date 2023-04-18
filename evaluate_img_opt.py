@@ -43,9 +43,9 @@ class Scorer:
                     resized_img = resized_img.unsqueeze(0)
                 
                 print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, gray_baseline=args.gray_baseline)
+                dists = model.optimize_input(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, optim_steps=args.optim_steps, optim_lr=args.optim_lr, distance=args.distance)
                 dists = dists.to(torch.float32)
-                dists = dists.mean(dim=1)
+                dists = dists.mean(dim=-1)
                 dists = -dists
                 scores.append(dists)
         model.reset_sampling()
@@ -59,7 +59,7 @@ def main(args):
     accelerator = Accelerator()
     model_id = "stabilityai/stable-diffusion-2-1-base"
     scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
-    model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
+    model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float32)
     model = model.to(accelerator.device)
 
     scorer = Scorer(args)
@@ -81,8 +81,8 @@ def main(args):
         scores = scorer.score_batch(i, args, batch, model)
         scores = scores.contiguous()
         accelerator.wait_for_everyone()
-        print(scores)
         scores = accelerator.gather(scores)
+        print(scores)
         batch[-1] = accelerator.gather(batch[-1])
         if accelerator.is_main_process:
             if args.task == 'winoground':
@@ -116,6 +116,7 @@ def main(args):
                     f.write(f"Sample size {len(metrics)}\n")
             elif args.task == 'clevr':
                 acc_list, max_more_than_once = evaluate_scores(args, scores, batch)
+                print(acc_list)
                 metrics += acc_list
                 acc = sum(metrics) / len(metrics)
                 max_more_than_onces += max_more_than_once
@@ -157,9 +158,11 @@ if __name__ == '__main__':
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=4)
     parser.add_argument('--subset', action='store_true')
-    parser.add_argument('--sampling_steps', type=int, default=250)
+    parser.add_argument('--sampling_steps', type=int, default=50)
+    parser.add_argument('--optim_steps', type=int, default=5)
+    parser.add_argument('--optim_lr', type=float, default=0.01)
     parser.add_argument('--img_retrieval', action='store_true')
-    parser.add_argument('--gray_baseline', action='store_true')
+    parser.add_argument('--distance', type=str, default='loss')
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -168,7 +171,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
 
-    args.run_id = f'{args.task}_diffusion_classifier_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}'
+    args.run_id = f'{args.task}_img_opt_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_distance{args.distance}_optim_steps{args.optim_steps}_optim_lr{args.optim_lr}'
 
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'

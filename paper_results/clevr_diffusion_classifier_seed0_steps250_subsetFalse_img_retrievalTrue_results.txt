@@ -1,0 +1,10 @@
+Accuracy: 0.7214108910891089
+Max more than once: 4
+Sample size 8080
+pair_binding_size accuracy: 0.6577777777777778
+recognition_color accuracy: 0.9055793991416309
+binding_shape_color accuracy: 0.596078431372549
+pair_binding_color accuracy: 0.8253275109170306
+spatial accuracy: 0.46733668341708545
+binding_color_shape accuracy: 0.5670995670995671
+recognition_shape accuracy: 0.8811475409836066

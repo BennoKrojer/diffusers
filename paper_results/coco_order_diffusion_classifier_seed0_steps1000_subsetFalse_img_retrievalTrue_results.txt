@@ -1,0 +1,2 @@
+Accuracy: 0.23541666666666666
+Max more than once: 1

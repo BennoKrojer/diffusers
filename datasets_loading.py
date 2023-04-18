@@ -10,12 +10,15 @@ import numpy as np
 import torch
 from torchvision import datasets
 from glob import glob
+from aro.dataset_zoo import VG_Relation, VG_Attribution, COCO_Order, Flickr30k_Order
 
 def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val'):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode':
         return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'imagecode_video':
+        return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only, static=False)
     elif dataset_name == 'flickr30k':
         return Flickr30KDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
     elif dataset_name == 'flickr30k_text':
@@ -24,12 +27,24 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
         return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer)
     elif dataset_name == 'imagenet':
         return ImagenetDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
-    elif dataset_name == 'svo':
-        return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'svo_verb':
+        return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only, neg_type='verb')
+    elif dataset_name == 'svo_subj':
+        return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only, neg_type='subj')
+    elif dataset_name == 'svo_obj':
+        return SVOClassificationDataset(root_dir, transform, resize=resize, scoring_only=scoring_only, neg_type='obj')
     elif dataset_name == 'clevr':
         return CLEVRDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'pets':
         return PetsDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
+    elif dataset_name == 'vg_relation':
+        return VG_Relation(image_preprocess=transform, download=True, root_dir=root_dir)
+    elif dataset_name == 'vg_attribution':
+        return VG_Attribution(image_preprocess=transform, download=True, root_dir=root_dir)
+    elif dataset_name == 'coco_order':
+        return COCO_Order(image_preprocess=transform, download=True, root_dir=root_dir)
+    elif dataset_name == 'flickr30k_order':
+        return Flickr30k_Order(image_preprocess=transform, download=True, root_dir=root_dir)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -43,8 +58,6 @@ def diffusers_preprocess(image):
     image = image.squeeze(0)
     return 2.0 * image - 1.0
     
-    def __len__(self):
-        return len(self.data)
 
 lora_train_transforms = transforms.Compose(
         [
@@ -118,19 +131,18 @@ class PetsDataset(Dataset):
             img, class_id = self.data[idx]
             img = Image.open(img)
             img = img.convert("RGB")
-            img_resize = img.resize((self.resize, self.resize))
-            img_resize = diffusers_preprocess(img_resize)
             if self.transform:
-                img = self.transform(img)
+                img_resize = self.transform(img).unsqueeze(0)
             else:
-                img = transforms.ToTensor()(img)
+                img_resize = img.resize((self.resize, self.resize))
+                img_resize = diffusers_preprocess(img_resize)
         else:
             class_id = idx // 50
 
         if self.scoring_only:
             return self.classes, class_id
         else:
-            return ([0], [img_resize]), self.classes, class_id
+            return [0, img_resize], self.classes, class_id
 
     def __len__(self):
         return len(self.data)
@@ -156,19 +168,14 @@ class WinogroundDataset(Dataset):
         if not self.scoring_only:
             img0 = Image.open(img_path0).convert("RGB")
             img1 = Image.open(img_path1).convert("RGB")
-            img0_resize = img0.resize((self.resize, self.resize))
-            img1_resize = img1.resize((self.resize, self.resize))
-            img0_resize = diffusers_preprocess(img0_resize)
-            img1_resize = diffusers_preprocess(img1_resize)
-
             if self.transform:
-                img0 = self.transform(img0)
-                img1 = self.transform(img1)
+                img0_resize = self.transform(img0).unsqueeze(0)
+                img1_resize = self.transform(img1).unsqueeze(0)
             else:
-                img0 = transforms.ToTensor()(img0)
-                img1 = transforms.ToTensor()(img1)
-            
-            imgs = [img0, img1]
+                img0_resize = img0.resize((self.resize, self.resize))
+                img1_resize = img1.resize((self.resize, self.resize))
+                img0_resize = diffusers_preprocess(img0_resize)
+                img1_resize = diffusers_preprocess(img1_resize)
         text = [cap0, cap1]
         if self.scoring_only:
             return text, img_id
@@ -176,10 +183,10 @@ class WinogroundDataset(Dataset):
             return (0, [img0_resize, img1_resize]), text, img_id
 
 class ImageCoDeDataset(Dataset):
-    def __init__(self, root_dir, split, transform, resize=512, scoring_only=False):
-        self.root_dir = root_dir
+    def __init__(self, root_dir, split, transform, resize=512, scoring_only=False, static=True):
+        self.root_dir = 'datasets/imagecode'
         self.resize = resize
-        self.dataset = self.load_data(root_dir, split)
+        self.dataset = self.load_data(self.root_dir, split, static_only=static)
         self.transform = transform
         self.scoring_only = scoring_only
 
@@ -211,18 +218,17 @@ class ImageCoDeDataset(Dataset):
         img_dir, img_files, img_idx, text = self.dataset[idx]
         if not self.scoring_only:
             imgs = [Image.open(img_path).convert("RGB") for img_path in img_files]
-            imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
-            imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
-
             if self.transform:
-                imgs = [self.transform(img) for img in imgs]
+                imgs_resize = [self.transform(img).unsqueeze(0) for img in imgs]
             else:
-                imgs = [transforms.ToTensor()(img) for img in imgs]
+                imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+                imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
 
         if self.scoring_only:
             return text, img_dir, img_idx
         else:
-            return (imgs, imgs_resize), [text], img_dir, img_idx
+            return (0, imgs_resize), [text], img_dir, img_idx
+
 
 class Flickr30KDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, first_query=True):
@@ -286,19 +292,17 @@ class Flickr30KTextRetrievalDataset(Dataset):
             text = text.input_ids.squeeze(0)
         if not self.scoring_only:
             img = Image.open(f'{img_path}').convert("RGB")
-            img_resize = img.resize((self.resize, self.resize))
-            #convert pillow to numpy array
-            # imgs_resize = [np.array(img) for img in imgs_resize]
-            img_resize = diffusers_preprocess(img_resize)
-
             if self.transform:
-                img = self.transform(img)
+                img_resize = self.transform(img).unsqueeze(0)
             else:
-                img = transforms.ToTensor()(img)
+                img_resize = img.resize((self.resize, self.resize))
+                img_resize = diffusers_preprocess(img_resize)
+
         if self.scoring_only:
             return [text], img_path
         else:
             return [0, [img_resize]], text, 0
+
     
 
 class LoRaFlickr30KDataset(Dataset):
@@ -337,20 +341,22 @@ class LoRaFlickr30KDataset(Dataset):
 
 class SVOClassificationDataset(Dataset):
 
-    def __init__(self, root_dir, transform, resize=512, scoring_only=False):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False, neg_type='verb'):
         self.transform = transform
-        self.root_dir = root_dir
-        self.data = self.load_data(root_dir)
+        self.root_dir = 'datasets/svo'
+        self.data = self.load_data(self.root_dir, neg_type=neg_type)
         self.resize = resize
         self.scoring_only = scoring_only
 
-    def load_data(self, data_dir):
+    def load_data(self, data_dir, neg_type='verb'):
         dataset = []
-        split_file = os.path.join(data_dir, 'val.json')
+        split_file = os.path.join(data_dir, 'svo.json')
         with open(split_file) as f:
             json_file = json.load(f)
 
         for i, row in enumerate(json_file):
+            if row['neg_type'] != neg_type:
+                continue
             pos_id = str(row['pos_id'])
             neg_id = str(row['neg_id'])
             sentence = row['sentence']
@@ -367,16 +373,17 @@ class SVOClassificationDataset(Dataset):
         img1 = Image.open(file1).convert("RGB")
         if not self.scoring_only:
             imgs = [img0, img1]
-            imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
-            imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
             if self.transform:
-                imgs = [self.transform(img) for img in imgs]
+                imgs_resize = [self.transform(img).unsqueeze(0) for img in imgs]
             else:
-                imgs = [transforms.ToTensor()(img) for img in imgs]
+                imgs_resize = [img.resize((self.resize, self.resize)) for img in imgs]
+                imgs_resize = [diffusers_preprocess(img) for img in imgs_resize]
+
         if self.scoring_only:
             return [text], 0
         else:
-            return (imgs, imgs_resize), [text], 0
+            return (0, imgs_resize), [text], 0
+
         
     def __len__(self):
         return len(self.data)
@@ -395,7 +402,7 @@ class CLEVRDataset(Dataset):
                         texts = [v[i][1], v[i][2]]
                     else:
                         texts = [v[i][0], v[i][1]]
-                    data_.append((k, texts))
+                    data_.append((k, texts, subtask))
         self.data = data_
         self.resize = resize
         self.transform = transform
@@ -409,20 +416,18 @@ class CLEVRDataset(Dataset):
         cap0 = ex[1][0]
         cap1 = ex[1][1]
         img_id = ex[0]
+        subtask = ex[2]
         img_path0 = f'{self.root_dir}/images/{img_id}'
         if not self.scoring_only:
             img0 = Image.open(img_path0).convert("RGB")
-            img0_resize = img0.resize((self.resize, self.resize))
-            img0_resize = diffusers_preprocess(img0_resize)
-
             if self.transform:
-                img0 = self.transform(img0)
+                img0_resize = self.transform(img0).unsqueeze(0)
             else:
-                img0 = transforms.ToTensor()(img0)
-            
-            imgs = [img0]
+                img0_resize = img0.resize((self.resize, self.resize))
+                img0_resize = diffusers_preprocess(img0_resize)
+
         text = [cap0, cap1]
         if self.scoring_only:
             return text, 0
         else:
-            return (imgs, [img0_resize]), text, 0
+            return (0, [img0_resize]), text, subtask, 0

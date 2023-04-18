@@ -1,0 +1,11 @@
+Accuracy: 0.5951966152314584
+Max more than once: 15
+binding_shape_color accuracy: 0.5069686411149826
+binding_color_shape accuracy: 0.5287456445993032
+spatial accuracy: 0.49564459930313587
+pair_binding_color accuracy: 0.5296167247386759
+pair_binding_size accuracy: 0.35452961672473865
+recognition_shape accuracy: 0.7874564459930313
+recognition_color accuracy: 0.9634146341463414
+
+96.3 + 78.7 + 35.4 + 52.9 + 49.6 + 52.9 + 50.7 = 416.5 / 7 = 59.5

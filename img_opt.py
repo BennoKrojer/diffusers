@@ -10,10 +10,8 @@ from PIL import Image
 from tqdm.auto import tqdm
 
 # from diffusers import StableDiffusionPipeline
-from src.diffusers.models.vae import DiagonalGaussianDistribution
-from src.diffusers.schedulers import LMSDiscreteScheduler
+from diffusers import AutoencoderKL, UNet2DConditionModel, EulerDiscreteScheduler, StableDiffusionImg2ImgPipeline
 
-from src.diffusers import StableDiffusionPipeline
 import imageio
 
 import os
@@ -163,11 +161,10 @@ args = parser.parse_args()
 torch.manual_seed(0)
 
 #print 
-model_id_or_path = "./stable-diffusion-v1-5"
-pipe = StableDiffusionPipeline.from_pretrained(
-    model_id_or_path,
-)
-pipe = pipe.to(f"cuda:{args.cuda_device}")
+model_id = "stabilityai/stable-diffusion-2-1-base"
+scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
+model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
+model = model.to(accelerator.device)
 
 random_latent = torch.randn((args.n_samples, 4, 64, 64), device=pipe.device, requires_grad=True)
 dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)

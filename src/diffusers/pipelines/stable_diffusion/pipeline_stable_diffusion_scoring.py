@@ -5,6 +5,7 @@ import numpy as np
 import torch
 
 import PIL
+from PIL import Image
 from transformers import CLIPFeatureExtractor, CLIPTextModel, CLIPTokenizer
 
 from ...configuration_utils import FrozenDict
@@ -27,6 +28,30 @@ def preprocess(image):
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
     return 2.0 * image - 1.0
+
+def decode_latents(pipe, latents):
+    with torch.no_grad():
+        # scale and decode the image latents with vae
+        latents = 1 / 0.18215 * latents
+        # image = pipe.vae.decode(latents.to(self.vae.dtype)).sample
+        image = pipe.vae.decoder(pipe.vae.post_quant_conv(latents.to(pipe.vae.dtype)))
+
+        image = (image / 2 + 0.5).clamp(0, 1)
+        image = image.cpu().permute(0, 2, 3, 1).numpy()
+    return image
+
+def numpy_to_pil(images):
+    """
+    Convert a numpy image or a batch of images to a PIL image.
+    """
+    if images.ndim == 3:
+        images = images[None, ...]
+    images = (images * 255).round().astype("uint8")
+    pil_images = [Image.fromarray(image) for image in images]
+
+    return pil_images
+
+
 
 
 class StableDiffusionScoringPipeline(DiffusionPipeline):
@@ -317,7 +342,7 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
 
         # get the original timestep using init_timestep
         dists = []
-        latentss = []
+        images = []
 
 
         for strength in [0.8, 0.7, 0.6, 0.5, 0.4, 0.3]: #TODO: hardcoded and not batched
@@ -330,55 +355,75 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
             timesteps = torch.tensor([timesteps] * batch_size * num_images_per_prompt, device=self.device)
 
             # add noise to latents using the timesteps
-            noise = torch.randn(init_latents.shape, generator=generator, device=self.device, dtype=latents_dtype)
-            init_latents_noisy = self.scheduler.add_noise(init_latents, noise, timesteps)
+            for i in range(5):
+                noise = torch.randn(init_latents.shape, generator=generator, device=self.device, dtype=latents_dtype)
+                init_latents_noisy = self.scheduler.add_noise(init_latents, noise, timesteps)
 
-            # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
-            # eta (η) is only used with the DDIMScheduler, it will be ignored for other schedulers.
-            # eta corresponds to η in DDIM paper: https://arxiv.org/abs/2010.02502
-            # and should be between [0, 1]
-            accepts_eta = "eta" in set(inspect.signature(self.scheduler.step).parameters.keys())
-            extra_step_kwargs = {}
-            if accepts_eta:
-                extra_step_kwargs["eta"] = eta
+                # prepare extra kwargs for the scheduler step, since not all schedulers have the same signature
+                # eta (η) is only used with the DDIMScheduler, it will be ignored for other schedulers.
+                # eta corresponds to η in DDIM paper: https://arxiv.org/abs/2010.02502
+                # and should be between [0, 1]
+                accepts_eta = "eta" in set(inspect.signature(self.scheduler.step).parameters.keys())
+                extra_step_kwargs = {}
+                if accepts_eta:
+                    extra_step_kwargs["eta"] = eta
 
-            latents = init_latents_noisy
+                latents = init_latents_noisy
 
-            t_start = max(50 - init_timestep + offset, 0) # 1, 2, 3, 4, 11, 31, 41
+                t_start = max(50 - init_timestep + offset, 0) # 1, 2, 3, 4, 11, 31, 41
 
-            # Some schedulers like PNDM have timesteps as arrays
-            # It's more optimized to move all timesteps to correct device beforehand
-            t = self.scheduler.timesteps[t_start].to(self.device) 
+                # Some schedulers like PNDM have timesteps as arrays
+                # It's more optimized to move all timesteps to correct device beforehand
+                t = self.scheduler.timesteps[t_start].to(self.device) 
 
-            # expand the latents if we are doing classifier free guidance
-            latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
-            latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
-    
-            # predict the noise residual
-            noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=text_embeddings).sample
+                # expand the latents if we are doing classifier free guidance
+                latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
+                latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
+        
+                # predict the noise residual
+                noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=text_embeddings).sample
 
-            # perform guidance
-            if do_classifier_free_guidance:
-                noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
-                noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+                # perform guidance
+                if do_classifier_free_guidance:
+                    noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+                    noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
-            # latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
-            alpha_prod_t, beta_prod_t = self.scheduler.get_alpha_beta_prod(noise_pred, t, latents, **extra_step_kwargs)
-            init_latents_pred = (init_latents_noisy - beta_prod_t ** (0.5) * noise_pred) / alpha_prod_t ** (0.5)
-            # latentss.append(latents)
+                # latents = self.scheduler.step(noise_pred, t, latents, **extra_step_kwargs).prev_sample
+                # alpha_prod_t, beta_prod_t = self.scheduler.get_alpha_beta_prod(noise_pred, t, latents, **extra_step_kwargs)
+                # init_latents_pred = (init_latents_noisy - beta_prod_t ** (0.5) * noise_pred) / alpha_prod_t ** (0.5)
 
-            # squared distance of the image residual and original image
-            # image_pred = image.view(batch_size * num_images_per_prompt, -1)
-            # image = init_image.view(batch_size * num_images_per_prompt, -1)
-            # dist = torch.norm(image_pred - image, dim=-1)
-            # dist *= torch.exp(torch.tensor(-7*t_start)) #TODO: make this a parameter
+                # dist = torch.norm(init_latents_pred.flatten() - init_latents.flatten(), dim=-1)
+                # dist *= torch.exp(torch.tensor(7*(t_start/50))) #TODO: make this a parameter
+                # dists.append(dist)
 
-            # squared distance of the noise residual and original noise
-            if True:
+                # sample = decode_latents(self, init_latents_pred)
+                # # image = numpy_to_pil(sample)
+                # images.append(sample)
+
+
+                # latentss = 1 / 0.18215 * latentss
+                # image = self.vae.decode(latentss).sample
+                # image = (image / 2 + 0.5).clamp(0, 1) # shape 50, 3, 256, 256
+                # image_pred = torch.flatten(image, start_dim=1) # shape 50, 196608
+                # # init image has shape 1, 3, 256, 256 so we need to duplicate it 50 times
+                # init_image = torch.cat([init_image] * 50, dim=0)
+                # init_image = torch.flatten(init_image, start_dim=1) # shape 50, 196608
+                # dists = torch.norm(image_pred - init_image, dim=-1)
+
+                # latentss.append(latents)
+
+                # squared distance of the image residual and original image
+                # image_pred = image.view(batch_size * num_images_per_prompt, -1)
+                # image = init_image.view(batch_size * num_images_per_prompt, -1)
+                # dist = torch.norm(image_pred - image, dim=-1)
+                # dist *= torch.exp(torch.tensor(-7*t_start)) #TODO: make this a parameter
+
+                # squared distance of the noise residual and original noise
+                # if True:
                 noise_pred = noise_pred.view(batch_size * num_images_per_prompt, -1)
                 noise = noise.view(batch_size * num_images_per_prompt, -1)
                 dist = torch.norm(noise_pred - noise, dim=-1)
-                dist *= torch.exp(torch.tensor(-0.1*t_start)) #TODO: make this a parameter
+                # dist *= torch.exp(torch.tensor(-0.1*t_start)) #TODO: make this a parameter
                 dists.append(dist)
 
             # compute the previous noisy sample x_t -> x_t-1
@@ -400,7 +445,7 @@ class StableDiffusionScoringPipeline(DiffusionPipeline):
         #     batch_dists = [d * torch.exp(torch.tensor(-3*t_start)) for t_start, d in enumerate(batch_dists)]
         #     batch_dists = torch.stack(batch_dists, dim=0)
         #     result.append(batch_dists)
-        dists = torch.cat(dists, dim=0)
+        dists = torch.stack(dists, dim=0)
         print(dists)
         return dists
 
