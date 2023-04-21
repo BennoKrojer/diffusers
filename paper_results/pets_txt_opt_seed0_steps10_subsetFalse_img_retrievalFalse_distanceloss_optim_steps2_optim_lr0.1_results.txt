@@ -1,0 +1,3 @@
+Accuracy: 0.0
+Max more than once: 0
+Sample size 12

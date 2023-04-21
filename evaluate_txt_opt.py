@@ -16,6 +16,12 @@ from utils import evaluate_scores
 import csv
 from accelerate import Accelerator
 
+import numpy as np
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+
 import cProfile
 
 class Scorer:
@@ -26,6 +32,16 @@ class Scorer:
         # self.vae_model = StableDiffusionImg2LatentPipeline(vae).to('cuda')
         self.cache_dir = args.cache_dir if args.cache else None
 
+    def get_class_embs(self, args, batch, model):
+        imgs, texts = batch[0], batch[1]
+        self.class2emb = {}
+
+        for text in texts:
+            with torch.no_grad():
+                emb = model.global_emb(text)
+            self.class2emb[text] = emb
+
+        self.overall_avg = torch.stack(list(self.class2emb.values())).mean(dim=0)
 
     def score_batch(self, i, args, batch, model):
         """
@@ -37,16 +53,54 @@ class Scorer:
         imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
 
         scores = []
-        for txt_idx, text in enumerate(texts):
-            for img_idx, resized_img in enumerate(imgs_resize):
-                if len(resized_img.shape) == 3:
-                    resized_img = resized_img.unsqueeze(0)
-                
-                print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-                dists = model.optimize_text_input(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, optim_steps=args.optim_steps, optim_lr=args.optim_lr, distance=args.distance)
-                dists = dists.to(torch.float32)
-                dists = dists.mean(dim=-1)
-                dists = -dists
+        for img_idx, resized_img in enumerate(imgs_resize):
+            if len(resized_img.shape) == 3:
+                resized_img = resized_img.unsqueeze(0)
+            
+            print(f'Batch {i}, Image {img_idx}')
+            optimized_embs = model.optimize_text_input(prompt=['a photo of a'], image=resized_img, init_prompt_embed=self.overall_avg, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, optim_steps=args.optim_steps, optim_lr=args.optim_lr, distance=args.distance)
+            optimized_embs = optimized_embs.to(torch.float32).squeeze()
+            amount = optimized_embs.shape[0]
+            # optimized_embs = optimized_embs.mean(dim=0)
+            last_emb = optimized_embs[-1]
+
+            # visualize all class embs with t-SNE
+            # tsne = TSNE(n_components=2, random_state=0)
+            # embs = torch.stack(list(self.class2emb.values())).squeeze()
+            # # add self.overall_avg to embs and also the optimized_embs
+            # embs = torch.cat([embs, self.overall_avg, optimized_embs], dim=0)
+            # embs = embs.cpu().numpy()
+            # embs = tsne.fit_transform(embs)
+            # plt.scatter(embs[:, 0], embs[:, 1])
+            # # give the optimized emb color red
+            # for k in range(amount):
+            #     plt.scatter(embs[-1-k, 0], embs[-1-k, 1], color='red')
+            # # give the overall_avg emb color green
+            # plt.scatter(embs[-1-amount, 0], embs[-1-amount, 1], color='green')
+            # plt.savefig(f'./paper_results/{args.run_id}_tsne_{i}.png')
+            # # clear the plot
+            # plt.clf()
+
+            # now the same with PCA
+            pca = PCA(n_components=2)
+            embs = torch.stack(list(self.class2emb.values())).squeeze()
+            # add self.overall_avg to embs and also the optimized_embs
+            embs = torch.cat([embs, self.overall_avg, optimized_embs], dim=0)
+            embs = embs.cpu().numpy()
+            embs = pca.fit_transform(embs)
+            plt.scatter(embs[:, 0], embs[:, 1])
+            # give the optimized emb color red
+            for k in range(amount):
+                plt.scatter(embs[-1-k, 0], embs[-1-k, 1], color='red')
+            # give the overall_avg emb color green
+            plt.scatter(embs[-1-amount, 0], embs[-1-amount, 1], color='green')
+            plt.savefig(f'./paper_results/{args.run_id}_pca_{i}.png')
+            # clear the plot
+            plt.clf()
+
+            for txt_idx, text in enumerate(texts):
+                emb = self.class2emb[text]
+                dists = torch.norm(optimized_embs - emb, p=2)
                 scores.append(dists)
         model.reset_sampling()
 
@@ -78,6 +132,8 @@ def main(args):
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
         if args.subset and i % 10 != 0:
             continue
+        if i == 0:
+            scorer.get_class_embs(args, batch, model)
         scores = scorer.score_batch(i, args, batch, model)
         scores = scores.contiguous()
         accelerator.wait_for_everyone()
@@ -160,7 +216,7 @@ if __name__ == '__main__':
     parser.add_argument('--subset', action='store_true')
     parser.add_argument('--sampling_steps', type=int, default=50)
     parser.add_argument('--optim_steps', type=int, default=5)
-    parser.add_argument('--optim_lr', type=float, default=0.01)
+    parser.add_argument('--optim_lr', type=float, default=1)
     parser.add_argument('--img_retrieval', action='store_true')
     parser.add_argument('--distance', type=str, default='loss')
     args = parser.parse_args()
@@ -171,7 +227,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
 
-    args.run_id = f'{args.task}_img_opt_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_distance{args.distance}_optim_steps{args.optim_steps}_optim_lr{args.optim_lr}'
+    args.run_id = f'{args.task}_txt_opt_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_distance{args.distance}_optim_steps{args.optim_steps}_optim_lr{args.optim_lr}'
 
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'

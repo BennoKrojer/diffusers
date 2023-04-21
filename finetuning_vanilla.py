@@ -137,7 +137,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="sd-model-finetuned-lora",
+        default="vanilla_finetuning",
         help="The output directory where the model predictions and checkpoints will be written.",
     )
     parser.add_argument(
@@ -336,18 +336,24 @@ def score_batch(i, args, batch, model):
     """
 
     imgs, texts = batch[0], batch[1]
-    imgs, imgs_resize = imgs[0], imgs[1]
-    imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+    _, imgs_resize = imgs[0], imgs[1]
 
+    batchsize = imgs_resize[0].shape[0]
     scores = []
     for txt_idx, text in enumerate(texts):
         for img_idx, resized_img in enumerate(imgs_resize):
-            dists = model(prompt=list(text), image=resized_img)
-            dists = dists.mean()
+            if len(resized_img.shape) == 3:
+                resized_img = resized_img.unsqueeze(0)
+            
+            print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
+            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=10, unconditional=True)
+            dists = dists.to(torch.float32)
+            dists = dists.mean(dim=1)
             dists = -dists
             scores.append(dists)
+    model.reset_sampling()
 
-    scores = torch.stack(scores).unsqueeze(0)
+    scores = torch.stack(scores).permute(1, 0) if batchsize > 1 else torch.stack(scores).unsqueeze(0)
     return scores
 
 def main():
@@ -367,7 +373,7 @@ def main():
         if not is_wandb_available():
             raise ImportError("Make sure to install wandb if you want to use it for logging during training.")
         import wandb
-        wandb.init(project='diffusers_finetuning_flickr30k', settings=wandb.Settings(start_method="fork"))
+        wandb.init(project='vanilla_finetuning_2.1', settings=wandb.Settings(start_method="fork"))
 
 
     # Make one log on every process with the configuration for debugging.
@@ -437,53 +443,6 @@ def main():
     vae.to(accelerator.device, dtype=weight_dtype)
     text_encoder.to(accelerator.device, dtype=weight_dtype)
 
-    # now we will add new LoRA weights to the attention layers
-    # It's important to realize here how many attention weights will be added and of which sizes
-    # The sizes of the attention layers consist only of two different variables:
-    # 1) - the "hidden_size", which is increased according to `unet.config.block_out_channels`.
-    # 2) - the "cross attention size", which is set to `unet.config.cross_attention_dim`.
-
-    # Let's first see how many attention processors we will have to set.
-    # For Stable Diffusion, it should be equal to:
-    # - down blocks (2x attention layers) * (2x transformer layers) * (3x down blocks) = 12
-    # - mid blocks (2x attention layers) * (1x transformer layers) * (1x mid blocks) = 2
-    # - up blocks (2x attention layers) * (3x transformer layers) * (3x down blocks) = 18
-    # => 32 layers
-
-    # Set correct lora layers
-    lora_attn_procs = {}
-    for name in unet.attn_processors.keys():
-        cross_attention_dim = None if name.endswith("attn1.processor") else unet.config.cross_attention_dim
-        if name.startswith("mid_block"):
-            hidden_size = unet.config.block_out_channels[-1]
-        elif name.startswith("up_blocks"):
-            block_id = int(name[len("up_blocks.")])
-            hidden_size = list(reversed(unet.config.block_out_channels))[block_id]
-        elif name.startswith("down_blocks"):
-            block_id = int(name[len("down_blocks.")])
-            hidden_size = unet.config.block_out_channels[block_id]
-
-        lora_attn_procs[name] = LoRACrossAttnProcessor(
-            hidden_size=hidden_size, cross_attention_dim=cross_attention_dim
-        )
-
-    unet.set_attn_processor(lora_attn_procs)
-
-    if args.enable_xformers_memory_efficient_attention:
-        if is_xformers_available():
-            import xformers
-
-            xformers_version = version.parse(xformers.__version__)
-            if xformers_version == version.parse("0.0.16"):
-                logger.warn(
-                    "xFormers 0.0.16 cannot be used for training in some GPUs. If you observe problems during training, please update xFormers to at least 0.0.17. See https://huggingface.co/docs/diffusers/main/en/optimization/xformers for more details."
-                )
-            unet.enable_xformers_memory_efficient_attention()
-        else:
-            raise ValueError("xformers is not available. Make sure it is installed correctly")
-
-    lora_layers = AttnProcsLayers(unet.attn_processors)
-
     # Enable TF32 for faster training on Ampere GPUs,
     # cf https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices
     if args.allow_tf32:
@@ -506,14 +465,6 @@ def main():
         optimizer_cls = bnb.optim.AdamW8bit
     else:
         optimizer_cls = torch.optim.AdamW
-
-    # optimizer = optimizer_cls(
-    #     lora_layers.parameters(),
-    #     lr=args.learning_rate,
-    #     betas=(args.adam_beta1, args.adam_beta2),
-    #     weight_decay=args.adam_weight_decay,
-    #     eps=args.adam_epsilon,
-    # )
 
     # add unet parameters to the optimizer and not lora_layers
 
@@ -542,7 +493,7 @@ def main():
     )
 
     val_dataset = get_dataset('flickr30k', f'datasets/flickr30k', transform=None)
-    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=0)
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0)
 
 
     # Scheduler and math around the number of training steps.
@@ -560,8 +511,8 @@ def main():
     )
 
     # Prepare everything with our `accelerator`.
-    lora_layers, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        lora_layers, optimizer, train_dataloader, lr_scheduler
+    unet, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+        unet, optimizer, train_dataloader, lr_scheduler
     )
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
@@ -692,7 +643,7 @@ def main():
                 # Backpropagate
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
-                    params_to_clip = lora_layers.parameters()
+                    params_to_clip = unet.parameters()
                     accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
                 optimizer.step()
                 lr_scheduler.step()
@@ -705,39 +656,55 @@ def main():
                 accelerator.log({"train_loss": train_loss}, step=global_step)
                 train_loss = 0.0
 
+                accelerator.wait_for_everyone()
+
                 if global_step % args.checkpointing_steps == 0:
                     if accelerator.is_main_process:
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
-                        accelerator.save_state(save_path)
+                        if not os.path.exists(save_path):
+                            os.makedirs(save_path)
+                        # accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
                         
                         ############ QUANTITAIVE EVALUATION #############
-                        # pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
-                        #     args.pretrained_model_name_or_path,
-                        #     unet=accelerator.unwrap_model(unet),
-                        #     revision=args.revision,
-                        #     torch_dtype=weight_dtype,
-                        # )
-                        # pipeline_img2img = pipeline_img2img.to(accelerator.device)
-                        # pipeline_img2img.set_progress_bar_config(disable=True)
+                        pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
+                            args.pretrained_model_name_or_path,
+                            unet=accelerator.unwrap_model(unet),
+                            revision=args.revision,
+                            torch_dtype=weight_dtype,
+                        )
+                        pipeline_img2img = pipeline_img2img.to(accelerator.device)
+                        pipeline_img2img.set_progress_bar_config(disable=True)
 
-                        # metrics = []
-                        # for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
-                        #     if k % 40 != 0:
-                        #         continue
-                        #     # measure time for the following line
-                        #     start = time.time()
-                        #     scores = score_batch(k, args, batch, pipeline_img2img)
-                        #     end = time.time()
-                        #     print(f'Elapsed time: {end - start}')
-                        #     score = evaluate_scores(args, scores, batch)
-                        #     metrics.append(score)
-                        # accuracy = sum(metrics) / len(metrics)
-                        # print(f'Retrieval Accuracy: {accuracy}')
-                        # wandb.log({"Retrieval Accuracy": accuracy})
 
-                        # del pipeline_img2img
-                        # torch.cuda.empty_cache()
+                        r1s = []
+                        r5s = []
+                        max_more_than_onces = 0
+                        for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
+                            if k % 20 != 0:
+                                continue
+                            # measure time for the following line
+                            scores = score_batch(k, args, batch, pipeline_img2img)
+                            score = evaluate_scores(args, scores, batch)
+
+                            r1,r5, max_more_than_once = evaluate_scores(args, scores, batch)
+                            r1s += r1
+                            r5s += r5
+                            max_more_than_onces += max_more_than_once
+                            r1 = sum(r1s) / len(r1s)
+                            r5 = sum(r5s) / len(r5s)
+                            print(f'R@1: {r1}')
+                            print(f'R@5: {r5}')
+                            print(f'Max more than once: {max_more_than_onces}')
+                            with open(f'{save_path}/results.txt', 'w') as f:
+                                f.write(f'R@1: {r1}\n')
+                                f.write(f'R@5: {r5}\n')
+                                f.write(f'Max more than once: {max_more_than_onces}\n')
+                                f.write(f"Sample size {len(r1s)}\n")
+                        wandb.log({'R@1': r1, 'R@5': r5, 'Max more than once': max_more_than_onces})
+
+                        del pipeline_img2img
+                        torch.cuda.empty_cache()
                         ############ QUANTITAIVE EVALUATION #############
 
                         logger.info(
@@ -753,19 +720,19 @@ def main():
                         )
                         pipeline = pipeline.to(accelerator.device)
                         pipeline.set_progress_bar_config(disable=True)
+                        for seed in range(6):
+                            generator = torch.Generator(device=accelerator.device).manual_seed(seed)
 
-                        generator = torch.Generator(device=accelerator.device).manual_seed(args.seed)
-
-                        for kk, prompt in enumerate(args.validation_prompt):
-                            pil_image = pipeline(prompt, num_inference_steps=30, generator=generator).images[0]
-                            # save pil img to output folder with prompt written on image at top
-                            image = np.array(pil_image)
-                            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                            image = cv2.putText(
-                                image, prompt, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA
-                            )
-                            img_path = os.path.join(save_path, f"validation_{kk}.png")
-                            cv2.imwrite(img_path, image)
+                            for kk, prompt in enumerate(args.validation_prompt):
+                                pil_image = pipeline(prompt, num_inference_steps=30, generator=generator).images[0]
+                                # save pil img to output folder with prompt written on image at top
+                                image = np.array(pil_image)
+                                image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                                image = cv2.putText(
+                                    image, prompt, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA
+                                )
+                                img_path = os.path.join(save_path, f"validation_{kk}_{seed}.png")
+                                cv2.imwrite(img_path, image)
                             
                         del pipeline
                         torch.cuda.empty_cache()
@@ -777,31 +744,9 @@ def main():
     # Save the lora layers
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        unet = unet.to(torch.float32)
-        unet.save_attn_procs(args.output_dir)
-
-        if args.push_to_hub:
-            save_model_card(
-                repo_name,
-                images=images,
-                base_model=args.pretrained_model_name_or_path,
-                dataset_name=args.dataset_name,
-                repo_folder=args.output_dir,
-            )
-            repo.push_to_hub(commit_message="End of training", blocking=False, auto_lfs_prune=True)
-
-    # Final inference
-    # Load previous pipeline
-    pipeline = DiffusionPipeline.from_pretrained(
-        args.pretrained_model_name_or_path, revision=args.revision, torch_dtype=weight_dtype
-    )
-    pipeline = pipeline.to(accelerator.device)
-
-    # load attention processors
-    pipeline.unet.load_attn_procs(args.output_dir)
-
-    # run inference
-
+        save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+        accelerator.save_state(save_path)
+        logger.info(f"Saved state to {save_path}")
     accelerator.end_training()
 
 
