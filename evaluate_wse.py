@@ -113,7 +113,7 @@ def main(args):
                     f.write(f'R@1: {r1}\n')
                     f.write(f'R@5: {r5}\n')
                     f.write(f'Max more than once: {max_more_than_onces}\n')
-                    f.write(f"Sample size {len(metrics)}\n")
+                    f.write(f"Sample size {len(r1s)}\n")
             elif args.task == 'clevr':
                 acc_list, max_more_than_once = evaluate_scores(args, scores, batch)
                 metrics += acc_list

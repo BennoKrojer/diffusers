@@ -12,7 +12,7 @@ from torchvision import datasets
 from glob import glob
 from aro.dataset_zoo import VG_Relation, VG_Attribution, COCO_Order, Flickr30k_Order
 
-def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val'):
+def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode':
@@ -24,7 +24,7 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
     elif dataset_name == 'flickr30k_text':
         return Flickr30KTextRetrievalDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
     elif dataset_name == 'lora_flickr30k':
-        return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer)
+        return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer, max_train_samples=max_train_samples)
     elif dataset_name == 'imagenet':
         return ImagenetDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'svo_verb':
@@ -306,11 +306,14 @@ class Flickr30KTextRetrievalDataset(Dataset):
     
 
 class LoRaFlickr30KDataset(Dataset):
-    def __init__(self, root_dir, transform, resize=512, tokenizer=None):
+    def __init__(self, root_dir, transform, resize=512, tokenizer=None, max_train_samples=None):
         self.root_dir = root_dir
         self.resize = resize
+        self.max_train_samples = max_train_samples
         self.data = json.load(open(f'{root_dir}/train_top10_RN50x64.json', 'r'))
         self.data = list(self.data.items())
+        if self.max_train_samples is not None:
+            self.data = self.data[:self.max_train_samples]
         self.transform = transform
         self.tokenizer = tokenizer
         self.two_imgs = True
