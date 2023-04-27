@@ -20,7 +20,7 @@ clip_model, preprocess = clip.load(clip_version, device='cuda:0')
 
 base_dir = 'datasets/flickr30k'
 img_dir = base_dir + '/images/'
-data = open(f'{base_dir}/valid_ann.jsonl', 'r')
+data = open(f'{base_dir}/train_ann.jsonl', 'r')
 
 captions = []
 image_files = []
@@ -152,9 +152,9 @@ for img_path, ranked_text in tqdm(ranked_texts.items(), total=len(ranked_texts))
         if len(best_non_groundtruth_captions) == 9:
             break
     
-    for caption in captions_list[:1]:
+    for caption in captions_list:
         top10[img_path] = [caption] + best_non_groundtruth_captions
 
 # save dictionary
-# with open(f'{base_dir}/valid_top10_{clip_version}_text.json', 'w') as f:
-#     json.dump(top10, f, indent=4)
+with open(f'{base_dir}/train_top10_{clip_version}_text.json', 'w') as f:
+    json.dump(top10, f, indent=4)

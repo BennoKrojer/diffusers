@@ -12,7 +12,7 @@ from torchvision import datasets
 from glob import glob
 from aro.dataset_zoo import VG_Relation, VG_Attribution, COCO_Order, Flickr30k_Order
 
-def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None):
+def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None, hard_neg=False):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode':
@@ -22,7 +22,7 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
     elif dataset_name == 'flickr30k':
         return Flickr30KDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
     elif dataset_name == 'flickr30k_text':
-        return Flickr30KTextRetrievalDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
+        return Flickr30KTextRetrievalDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer, hard_neg=hard_neg)
     elif dataset_name == 'lora_flickr30k':
         return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer, max_train_samples=max_train_samples)
     elif dataset_name == 'imagenet':
@@ -271,14 +271,19 @@ class Flickr30KDataset(Dataset):
             return [0, imgs_resize], [text], img_idx
 
 class Flickr30KTextRetrievalDataset(Dataset):
-    def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, first_query=True):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, hard_neg=False):
         self.root_dir = 'datasets/flickr30k'
         self.resize = resize
         self.data = json.load(open(f'{self.root_dir}/{split}_top10_RN50x64_text.json', 'r'))
-        self.data = list(self.data.items()) # dictionary from img_path to list of 10 captions
+        if split == 'val':
+            self.data = list(self.data.items()) # dictionary from img_path to list of 10 captions
+        self.all_captions = []
+        for img_path, captions in self.data:
+            self.all_captions.extend(captions)
         self.transform = transform
         self.scoring_only = scoring_only
         self.tokenizer = tokenizer
+        self.hard_neg = hard_neg
 
     def __len__(self):
         return len(self.data)
@@ -290,17 +295,22 @@ class Flickr30KTextRetrievalDataset(Dataset):
         if self.tokenizer:
             text = self.tokenizer(text, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
             text = text.input_ids.squeeze(0)
-        if not self.scoring_only:
-            img = Image.open(f'{img_path}').convert("RGB")
-            if self.transform:
-                img_resize = self.transform(img).unsqueeze(0)
+            text0 = text[0]
+            if self.hard_neg:
+                text_rand = text[np.random.randint(1, len(text))]
             else:
-                img_resize = img.resize((self.resize, self.resize))
-                img_resize = diffusers_preprocess(img_resize)
-
-        if self.scoring_only:
-            return [text], img_path
+                # get text from self.all_captions
+                text_rand = self.all_captions[np.random.randint(0, len(self.all_captions))]
+                text_rand = self.tokenizer(text_rand, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+                text_rand = text_rand.input_ids.squeeze(0)
+            text = torch.stack([text0, text_rand])
+        img = Image.open(f'{img_path}').convert("RGB")
+        if self.transform:
+            img_resize = self.transform(img).unsqueeze(0)
         else:
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
+
             return [0, [img_resize]], text, 0
 
     

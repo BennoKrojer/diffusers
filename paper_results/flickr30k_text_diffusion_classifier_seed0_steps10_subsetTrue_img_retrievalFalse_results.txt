@@ -1,0 +1,4 @@
+R@1: 0.5555555555555556
+R@5: 0.875
+Max more than once: 3
+Sample size 72

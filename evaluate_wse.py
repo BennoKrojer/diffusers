@@ -65,7 +65,7 @@ def main(args):
     scorer = Scorer(args)
     dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)
 
-    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=True, num_workers=0)
+    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=0)
 
     model, dataloader = accelerator.prepare(model, dataloader)
 
@@ -76,7 +76,7 @@ def main(args):
     ids = []
     clevr_dict = {}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-        if args.subset and i % 10 != 0:
+        if args.subset and i % 15 != 0:
             continue
         scores = scorer.score_batch(i, args, batch, model)
         scores = scores.contiguous()
