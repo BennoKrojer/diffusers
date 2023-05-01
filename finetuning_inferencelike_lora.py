@@ -266,8 +266,8 @@ def parse_args():
     )
 
     parser.add_argument('--neg_prob', type=float, default=0.0, help='The probability of sampling a negative image.')
-    parser.add_argument('--neg_loss_factor', type=float, default=0.2)
-    parser.add_argument('--task', type=str, default='flickr30k_text')
+    parser.add_argument('--neg_loss_factor', type=float, default=0.4)
+    parser.add_argument('--task', type=str, default='flickr30k_neg')
     parser.add_argument('--hard_neg', action='store_true')
     parser.add_argument('--relativistic', action='store_true')
 
@@ -275,7 +275,6 @@ def parse_args():
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
     if env_local_rank != -1 and env_local_rank != args.local_rank:
         args.local_rank = env_local_rank
-
 
     return args
 
@@ -305,7 +304,7 @@ def score_batch(i, args, batch, model):
                 resized_img = resized_img.unsqueeze(0)
             
             print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=10, unconditional=False)
+            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=4, unconditional=False)
             dists = dists.to(torch.float32)
             dists = dists.mean(dim=1)
             dists = -dists
@@ -485,9 +484,11 @@ def main():
         num_workers=args.dataloader_num_workers,
     )
 
-    val_dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, split='val')
+    val_dataset = get_dataset('flickr30k_text', f'datasets/flickr30k_text', transform=None, split='val')
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0)
 
+    val_dataset2 = get_dataset('vg_attribution', f'datasets/vg_attribution', transform=None)
+    val_dataloader2 = torch.utils.data.DataLoader(val_dataset2, batch_size=8, shuffle=False, num_workers=0)
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
@@ -584,21 +585,19 @@ def main():
             with accelerator.accumulate(unet):
                 # Convert images to latent space
 
-                img, texts, _ = batch
-                if args.neg_prob > torch.rand(1):
-                    idx = torch.randint(1, texts.shape[1], (1,))[0]
-                    txt_neg = texts[:,idx,:]
-                else:
-                    txt_neg = None
+                imgs, texts, _ = batch
+                img, img_neg = imgs[1][0], imgs[1][1]
 
-                img = img[1][0]
-                text = texts[:,0,:]
+                text, txt_neg, txt_empty = texts[:,0,:], texts[:,1,:], texts[:,2,:]
 
                 latents = vae.encode(img.to(dtype=weight_dtype)).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
+                latents_neg = vae.encode(img_neg.to(dtype=weight_dtype)).latent_dist.sample()
+                latents_neg = latents_neg * vae.config.scaling_factor
 
                 # Sample noise that we'll add to the latents
                 noise = torch.randn_like(latents)
+                noise_neg = noise.clone()
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
                 timesteps = torch.randint(0, noise_scheduler.num_train_timesteps, (bsz,), device=latents.device)
@@ -607,34 +606,44 @@ def main():
                 # Add noise to the latents according to the noise magnitude at each timestep
                 # (this is the forward diffusion process)
                 noisy_latents = noise_scheduler.add_noise(latents, noise, timesteps)
+                noisy_latents_neg = noise_scheduler.add_noise(latents_neg, noise_neg, timesteps)
 
                 # Get the text embedding for conditioning
                 encoder_hidden_states = text_encoder(text)[0]
-                if txt_neg is not None:
-                    encoder_hidden_states_neg = text_encoder(txt_neg)[0]
+                encoder_hidden_states_neg = text_encoder(txt_neg)[0]
+                encoder_hidden_states_empty = text_encoder(txt_empty)[0]
 
-                # Get the target for loss depending on the prediction type
-                if noise_scheduler.config.prediction_type == "epsilon":
-                    target = noise
-                elif noise_scheduler.config.prediction_type == "v_prediction":
-                    target = noise_scheduler.get_velocity(latents, noise, timesteps)
-                else:
-                    raise ValueError(f"Unknown prediction type {noise_scheduler.config.prediction_type}")
+                target = noise
+                target_neg = noise_neg
 
                 # Predict the noise residual and compute loss
-                model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
-                loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
-                if txt_neg is not None:
-                    model_pred_neg = unet(noisy_latents, timesteps, encoder_hidden_states_neg).sample
-                    if args.relativistic:
-                        loss_neg = F.mse_loss(model_pred_neg.float(), model_pred.float(), reduction="mean")
-                    else:
-                        loss_neg = F.mse_loss(model_pred_neg.float(), target.float(), reduction="mean")
-                    loss_neg = torch.clamp(loss_neg, max=args.neg_loss_factor*loss.item())
-                    loss_neg = -loss_neg
-                    wandb.log({"loss_neg": loss_neg.item()})
-                    wandb.log({"loss": loss.item()})
-                    loss = loss_neg + loss
+                model_pred_pp = unet(noisy_latents, timesteps, encoder_hidden_states).sample
+                score_pp = F.mse_loss(model_pred_pp.float(), target.float(), reduction="mean")
+
+                model_pred_nn = unet(noisy_latents_neg, timesteps, encoder_hidden_states_neg).sample
+                score_nn = F.mse_loss(model_pred_nn.float(), target_neg.float(), reduction="mean")
+
+                model_pred_pn = unet(noisy_latents, timesteps, encoder_hidden_states_neg).sample
+                score_pn = F.mse_loss(model_pred_pn.float(), target.float(), reduction="mean")
+                score_pn = torch.clamp(score_pn, max=args.neg_loss_factor*score_pp)
+
+                model_pred_np = unet(noisy_latents_neg, timesteps, encoder_hidden_states).sample
+                score_np = F.mse_loss(model_pred_np.float(), target_neg.float(), reduction="mean")
+                score_np = torch.clamp(score_np, max=args.neg_loss_factor*score_nn)
+
+                with torch.no_grad():
+                    model_pred_p_uncond = unet(noisy_latents, timesteps, encoder_hidden_states_empty).sample
+                    score_p_uncond = F.mse_loss(model_pred_p_uncond.float(), target.float(), reduction="mean")
+                    model_pred_n_uncond = unet(noisy_latents_neg, timesteps, encoder_hidden_states_empty).sample
+                    score_n_uncond = F.mse_loss(model_pred_n_uncond.float(), target_neg.float(), reduction="mean")
+
+                diff_10 = score_pp - score_pn
+                diff_01 = (score_pp - score_p_uncond) - (score_np - score_n_uncond)
+
+                diff_10_n = score_nn - score_np
+                diff_01_n = (score_nn - score_n_uncond) - (score_pn - score_p_uncond)
+
+                loss = diff_10 + diff_01 + diff_10_n + diff_01_n
 
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(loss.repeat(args.train_batch_size)).mean()
@@ -684,8 +693,7 @@ def main():
                                 continue
                             # measure time for the following line
                             scores = score_batch(k, args, batch, pipeline_img2img)
-                            score = evaluate_scores(args, scores, batch)
-
+                            args.task = 'flickr30k_text'
                             r1,r5, max_more_than_once = evaluate_scores(args, scores, batch)
                             r1s += r1
                             r5s += r5
@@ -741,6 +749,41 @@ def main():
                         del pipeline
                         torch.cuda.empty_cache()
 
+                elif global_step % args.checkpointing_steps == 250 and accelerator.is_main_process:
+                    save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+                    if not os.path.exists(save_path):
+                        os.makedirs(save_path)
+                    ############ QUANTITAIVE EVALUATION #############
+                    pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
+                        args.pretrained_model_name_or_path,
+                        unet=accelerator.unwrap_model(unet),
+                        revision=args.revision,
+                        torch_dtype=weight_dtype,
+                    )
+                    pipeline_img2img = pipeline_img2img.to(accelerator.device)
+                    pipeline_img2img.set_progress_bar_config(disable=True)
+
+
+                    metrics = []
+                    max_more_than_onces = 0
+                    for k, batch in tqdm(enumerate(val_dataloader2), total=len(val_dataloader2)):
+                        if k % 15 != 0:
+                            continue
+                        # measure time for the following line
+                        scores = score_batch(k, args, batch, pipeline_img2img)
+
+                        args.task = 'vg_attribution'
+                        acc, max_more_than_once = evaluate_scores(args, scores, batch)
+                        metrics += acc
+                        acc = sum(metrics) / len(metrics)
+                        max_more_than_onces += max_more_than_once
+                        print(f'Accuracy: {acc}')
+                        print(f'Max more than once: {max_more_than_onces}')
+                        with open(f'{save_path}/results.txt', 'w') as f:
+                            f.write(f'Accuracy: {acc}\n')
+                            f.write(f'Max more than once: {max_more_than_onces}\n')
+                            f.write(f"Sample size {len(metrics)}\n")
+                    wandb.log({'Accuracy': acc, 'Max more than once': max_more_than_onces})
 
             logs = {"step_loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
             progress_bar.set_postfix(**logs)

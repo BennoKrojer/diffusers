@@ -61,6 +61,8 @@ def main(args):
     scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
     model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
     model = model.to(accelerator.device)
+    if args.lora_dir != '':
+        model.unet.load_attn_procs(args.lora_dir)
 
     scorer = Scorer(args)
     dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)
@@ -76,7 +78,7 @@ def main(args):
     ids = []
     clevr_dict = {}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-        if args.subset and i % 15 != 0:
+        if args.subset and i % 8 != 0:
             continue
         scores = scorer.score_batch(i, args, batch, model)
         scores = scores.contiguous()
@@ -160,6 +162,7 @@ if __name__ == '__main__':
     parser.add_argument('--sampling_steps', type=int, default=250)
     parser.add_argument('--img_retrieval', action='store_true')
     parser.add_argument('--gray_baseline', action='store_true')
+    parser.add_argument('--lora_dir', type=str, default='')
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -168,7 +171,15 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
 
-    args.run_id = f'{args.task}_diffusion_classifier_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}'
+    if args.lora_dir:
+        if "vanilla" in args.lora_dir:
+            lora_type = "vanilla"
+        elif "relativistic" in args.lora_dir:
+            lora_type = "relativistic"
+        elif "inferencelike" in args.lora_dir:
+            lora_type = "inferencelike"
+
+    args.run_id = f'{args.task}_diffusion_classifier_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}'
 
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'

@@ -23,6 +23,8 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
         return Flickr30KDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer)
     elif dataset_name == 'flickr30k_text':
         return Flickr30KTextRetrievalDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer, hard_neg=hard_neg)
+    elif dataset_name == 'flickr30k_neg':
+        return Flickr30KNegativesDataset(root_dir, transform, scoring_only=scoring_only, split=split, tokenizer=tokenizer, hard_neg=hard_neg)
     elif dataset_name == 'lora_flickr30k':
         return LoRaFlickr30KDataset(root_dir, transform, tokenizer=tokenizer, max_train_samples=max_train_samples)
     elif dataset_name == 'imagenet':
@@ -142,7 +144,7 @@ class PetsDataset(Dataset):
         if self.scoring_only:
             return self.classes, class_id
         else:
-            return [0, img_resize], self.classes, class_id
+            return [0, [img_resize]], self.classes, class_id
 
     def __len__(self):
         return len(self.data)
@@ -313,7 +315,61 @@ class Flickr30KTextRetrievalDataset(Dataset):
 
             return [0, [img_resize]], text, 0
 
-    
+class Flickr30KNegativesDataset(Dataset):
+    def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, hard_neg=False):
+        self.root_dir = 'datasets/flickr30k'
+        self.resize = resize
+        self.data = json.load(open(f'{self.root_dir}/{split}_top10_RN50x64_text.json', 'r'))
+        if split == 'val':
+            self.data = list(self.data.items()) # dictionary from img_path to list of 10 captions
+        self.all_captions = []
+        for img_path, captions in self.data:
+            self.all_captions.extend(captions)
+
+        self.txt2img = json.load(open(f'{self.root_dir}/{split}_top10_RN50x64.json', 'r'))
+        self.transform = transform
+        self.scoring_only = scoring_only
+        self.tokenizer = tokenizer
+        self.hard_neg = hard_neg
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        ex = self.data[idx]
+        img_path = ex[0]
+        strings = ex[1]
+        if self.tokenizer:
+            text = self.tokenizer(strings, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+            text = text.input_ids.squeeze(0)
+            text0 = text[0]
+            if self.hard_neg:
+                rand_idx = np.random.randint(5, len(text))
+                text_rand = text[rand_idx]
+                string_rand = strings[rand_idx]
+                img_rand = self.txt2img[string_rand][0]
+            else:
+                # get text from self.all_captions
+                text_rand = self.all_captions[np.random.randint(0, len(self.all_captions))]
+                img_rand = self.txt2img[text_rand][0]
+                text_rand = self.tokenizer(text_rand, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+                text_rand = text_rand.input_ids.squeeze(0)
+            img_rand = Image.open(f'{img_rand}').convert("RGB")
+            img_rand_resize = img_rand.resize((self.resize, self.resize))
+            img_rand_resize = diffusers_preprocess(img_rand_resize)
+            empty_text = ''
+            empty_text = self.tokenizer(empty_text, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+            empty_text = empty_text.input_ids.squeeze(0)
+            text = torch.stack([text0, text_rand, empty_text])
+        img = Image.open(f'{img_path}').convert("RGB")
+        if self.transform:
+            img_resize = self.transform(img).unsqueeze(0)
+        else:
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
+
+            return [0, [img_resize, img_rand_resize]], text, 0
+ 
 
 class LoRaFlickr30KDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, tokenizer=None, max_train_samples=None):

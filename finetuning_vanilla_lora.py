@@ -673,7 +673,7 @@ def main():
                         r5s = []
                         max_more_than_onces = 0
                         for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
-                            if k % 8 != 0:
+                            if k % 15 != 0:
                                 continue
                             # measure time for the following line
                             scores = score_batch(k, args, batch, pipeline_img2img)
@@ -712,7 +712,7 @@ def main():
                         )
                         pipeline = pipeline.to(accelerator.device)
                         pipeline.set_progress_bar_config(disable=True)
-                        for seed in range(6):
+                        for seed in range(3):
                             generator = torch.Generator(device=accelerator.device).manual_seed(seed)
 
                             for kk, prompt in enumerate(args.validation_prompt):
