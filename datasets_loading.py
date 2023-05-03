@@ -15,6 +15,8 @@ from aro.dataset_zoo import VG_Relation, VG_Attribution, COCO_Order, Flickr30k_O
 def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None, hard_neg=False):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
+    if dataset_name == 'mmbias':
+        return BiasDataset(root_dir, resize=resize)
     elif dataset_name == 'imagecode':
         return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode_video':
@@ -148,6 +150,53 @@ class PetsDataset(Dataset):
 
     def __len__(self):
         return len(self.data)
+    
+class BiasDataset(Dataset):
+    def __init__(self, root_dir, resize=512):
+        self.root_dir = root_dir #datasets/mmbias/
+        self.resize = resize
+        self.phrases = json.load(open(f'{root_dir}/textual_phrases.txt'))
+        self.texts = self.phrases['pleasant_phrases']
+        self.texts.extend(self.phrases['unpleasant_phrases'])
+        # texts is ['good','texts',...,'bad','texts']
+        self.classes = ['Christian','Muslim','Jewish','Hindu','American','Arab','Heterosexual','LGBT']
+        
+        self.data = []
+        # Religion
+        self.christian_imgs = list(glob(f'{root_dir}/data/Images/Religion/Christian/*.jpg'))
+        self.data.extend([(img_path,0) for img_path in self.christian_imgs])
+        self.muslim_imgs = list(glob(f'{root_dir}/data/Images/Religion/Muslim/*.jpg'))
+        self.data.extend([(img_path,1) for img_path in self.muslim_imgs])
+        # self.jewish_imgs = list(glob(f'{root_dir}/data/Images/Religion/Jewish/*.jpg'))
+        # self.data.extend([(img_path,2) for img_path in self.jewish_imgs])
+        # self.hindu_imgs = list(glob(f'{root_dir}/data/Images/Religion/Hindu/*.jpg'))
+        # self.data.extend([(img_path,3) for img_path in self.hindu_imgs])
+        # # Nationality
+        # self.american_imgs = list(glob(f'{root_dir}/data/Images/Nationality/American/*.jpg'))
+        # self.data.extend([(img_path,4) for img_path in self.american_imgs])
+        # self.arab_imgs = list(glob(f'{root_dir}/data/Images/Nationality/Arab/*.jpg'))
+        # self.data.extend([(img_path,5) for img_path in self.arab_imgs])
+        # # Sexuality
+        # self.hetero_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/Heterosexual/*.jpg'))
+        # self.data.extend([(img_path,6) for img_path in self.hetero_imgs])
+        # self.lgbt_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/LGBT/*.jpg'))
+        # self.data.extend([(img_path,7) for img_path in self.lgbt_imgs])
+        
+        # for testing purposes only just keep first and last 5 words and first and last 2 imgs
+        self.texts = self.texts[:2]+self.texts[-2:]
+        self.data = self.data[:2]+self.data[-2:]
+
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, idx):
+        img, class_id = self.data[idx]
+        img = Image.open(img)
+        img = img.convert("RGB")
+        img_resize = img.resize((self.resize, self.resize))
+        img_resize = diffusers_preprocess(img_resize)
+        return (0, [img_resize]), self.texts, class_id
+
 
 class WinogroundDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, scoring_only=False):

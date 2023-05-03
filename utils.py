@@ -1,4 +1,8 @@
 import numpy as np
+from math import floor
+from typing import Union, Callable
+import torch
+import torch.nn.functional as F
 
 RETRIEVAL_TASKS = ['imagecode', 'imagecode_video', 'flickr30k', 'imagenet', 'clevr', 'svo_verb', 'svo_subj', 'svo_obj', 'pets', 'flickr30k_text', 'vg_relation', 'vg_attribution', 'coco_order', 'flickr30k_order']
 
@@ -43,9 +47,37 @@ def evaluate_retrieval(args, scores, img_idx):
     else:
         return retrieval_accuracy, max_more_than_once
 
+def evaluate_bias(args, good_scores, bad_scores, img_idx):
+    img_idx = img_idx.cpu().numpy()
+    good_scores = good_scores.cpu().numpy()
+    bad_scores = bad_scores.cpu().numpy()
+    phis = {}
+    for i in range(len(good_scores)):
+        class_idx = int(img_idx[i]) # get class, should be an integer {0,1,...,7}
+        good_score = good_scores[i].mean() # mean_{a\in A} sigma(x,a)
+        bad_score = bad_scores[i].mean() # mean_{b\in B} sigma(x,b)
+        phi = good_score-bad_score # phi(w,A,B) = mean_{a\in A} sigma(x,a) - mean_{b\in B} sigma(x,b)
+        if class_idx in phis:
+            phis[class_idx].append(phi)
+        else:
+            phis[class_idx] = [phi]
+    return phis
+
 def evaluate_scores(args, scores, batch):
     if args.task == 'winoground':
         score = evaluate_winoground(scores)
+    elif args.task == 'mmbias':
+        # so we have a bunch of scores, which is a tensor Size([batchsize,len(texts)])
+        # example for 4 texts and batchsize 2
+        # scores = tensor([[ 0.0555,  0.0121,  0.0113,mmOKxRfPbYjE -0.0000],
+        #         [ 0.0398, -0.0133, -0.0340, -0.0391]], device='cuda:7')
+        text_len = floor(len(batch[1])/2) # number of good / bad texts
+        print(text_len)
+        good_scores = scores[:, :text_len]  # extract the first len(good_texts) cols for pleasant_texts
+        bad_scores = scores[:, text_len:]   # extract the remaining cols for unpleasant_texts
+        assert len(good_scores) == len(bad_scores)
+        img_idx = batch[-1] = batch[-1] # tensor of class_ids
+        return evaluate_bias(args, good_scores, bad_scores, img_idx) # dictionary of lists of phis
     elif args.task in RETRIEVAL_TASKS:
         img_idx = batch[-1]
         score = evaluate_retrieval(args, scores, img_idx)
