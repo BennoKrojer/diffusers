@@ -13,11 +13,12 @@ import random
 
 from datasets_loading import get_dataset
 from torch.utils.data import DataLoader
-from utils import evaluate_scores, save_bias_scores, save_bias_results
+from utils import evaluate_scores
 import csv
 from accelerate import Accelerator
 
 import cProfile
+import matplotlib.pyplot as plt
 
 class Scorer:
     def __init__(self, args, clip_model=None, preprocess=None):
@@ -27,6 +28,12 @@ class Scorer:
         # self.vae_model = StableDiffusionImg2LatentPipeline(vae).to('cuda')
         self.cache_dir = args.cache_dir if args.cache else None
 
+        flickr_stuff = json.load(open('datasets/flickr30k/val_top10_RN50x64.json'))
+        self.texts = flickr_stuff.keys()
+        # get 50 random texts
+        self.texts = random.sample(self.texts, 10)
+        print(self.texts)
+
 
     def score_batch(self, i, args, batch, model):
         """
@@ -35,42 +42,65 @@ class Scorer:
 
         imgs, texts = batch[0], batch[1]
         imgs, imgs_resize = imgs[0], imgs[1]
-        imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+        imgs, imgs_resize = [img.to('cuda:7') for img in imgs], [img.to('cuda:7') for img in imgs_resize]
 
         scores = []
-        for txt_idx, text in enumerate(texts):
-            for img_idx, resized_img in enumerate(imgs_resize):
-                if len(resized_img.shape) == 3:
-                    resized_img = resized_img.unsqueeze(0)
-                
+        for img_idx, resized_img in enumerate(imgs_resize[:5]):
+            if len(resized_img.shape) == 3:
+                resized_img = resized_img.unsqueeze(0)
+            intermediate_scores = []
+            for txt_idx, text in enumerate(texts + self.texts): 
+                if txt_idx > 0:
+                    text = [text]   
                 print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, gray_baseline=args.gray_baseline)
+                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=False, gray_baseline=args.gray_baseline)
                 dists = dists.to(torch.float32)
-                dists = dists.mean(dim=1)
-                dists = -dists
-                scores.append(dists)
-        model.reset_sampling()
+                intermediate_scores.append(dists.squeeze().detach().cpu())
+            uncond_dist = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=True, gray_baseline=args.gray_baseline)
+            uncond_dist = uncond_dist.to(torch.float32)
+            intermediate_scores.append(uncond_dist.squeeze().detach().cpu())
+            scores.append(intermediate_scores)
+        data = np.array(scores)
 
-        scores = torch.stack(scores).permute(1, 0) if args.batchsize > 1 else torch.stack(scores).unsqueeze(0)
-        return scores
-        
+        x_labels = [f'Image {i+1}' for i in range(data.shape[0])]
+
+        # Create 2x2 grid of scatter plots
+        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
+        axes = axes.flatten()
+
+        for i, ax in enumerate(axes):
+            # Set colors for the scatter plot points
+            colors = ['red'] * data.shape[1]
+            colors[0] = 'green'
+            colors[-1] = 'blue'
+            ax.scatter(np.arange(data.shape[1]), data[i, :], color=colors)
+            ax.set_xlabel('Caption Index')
+            ax.set_ylabel('Denoising Error')
+            ax.set_title(f'Denoising Errors for {x_labels[i]}')
+            ax.set_ylim(data[i, :].min() - 0.1, data[i, :].max() + 0.1)
+
+        fig.tight_layout()
+
+        # Save the plot as a file (e.g. PNG format)
+        plt.savefig('scatter_plots_2x2.png', dpi=300, bbox_inches='tight')
+
 
 def main(args):
 
-    accelerator = Accelerator()
+    # accelerator = Accelerator()
     model_id = "stabilityai/stable-diffusion-2-1-base"
     scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
-    model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
-    model = model.to(accelerator.device)
+    model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler)
+    model = model.to('cuda:7')
     if args.lora_dir != '':
         model.unet.load_attn_procs(args.lora_dir)
 
     scorer = Scorer(args)
-    dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, targets=args.targets)
+    dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None)
 
-    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=0)
+    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=True, num_workers=0)
 
-    model, dataloader = accelerator.prepare(model, dataloader)
+    # model, dataloader = accelerator.prepare(model, dataloader)
 
     r1s = []
     r5s = []
@@ -78,14 +108,14 @@ def main(args):
     metrics = []
     ids = []
     clevr_dict = {}
-    bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
+    bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[]}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
         if args.subset and i % 15 != 0:
             continue
         scores = scorer.score_batch(i, args, batch, model)
         scores = scores.contiguous()
         accelerator.wait_for_everyone()
-        # print(scores)
+        print(scores)
         scores = accelerator.gather(scores)
         batch[-1] = accelerator.gather(batch[-1])
         if accelerator.is_main_process:
@@ -140,15 +170,13 @@ def main(args):
                     print(f'{subtask} accuracy: {sum(clevr_dict[subtask]) / len(clevr_dict[subtask])}')
                     with open(f'./paper_results/{args.run_id}_results.txt', 'a') as f:
                         f.write(f'{subtask} accuracy: {sum(clevr_dict[subtask]) / len(clevr_dict[subtask])}\n')
-            elif args.task == 'mmbias':                
+            elif args.task == 'mmbias':
                 phis = evaluate_scores(args,scores,batch)
                 for class_idx, phi_list in phis.items():
-                    if type(phi_list[0]) != float: # convert from numpy to regular float for json purposes
-                        phi_list = [a.item() for a in phi_list]
                     bias_scores[class_idx].extend(phi_list)
-                if (i+1)%5==0:
-                    print(bias_scores)
-                    save_bias_scores(f'./paper_results/{args.run_id}_interim_results{i}.json',bias_scores)
+                christian = bias_scores[0]
+                muslim = bias_scores[1]
+                print(f'Batch {i} Christian-Muslim bias score {(np.mean(christian)-np.mean(muslim))/(np.concatenate((christian,muslim)).std())}')
             else:
                 acc, max_more_than_once = evaluate_scores(args, scores, batch)
                 metrics += acc
@@ -161,20 +189,22 @@ def main(args):
                     f.write(f'Max more than once: {max_more_than_onces}\n')
                     f.write(f"Sample size {len(metrics)}\n")
     if args.task == 'mmbias':
-        print("\n\n-------------------------We're done!-------------------------\nBias Scores:")
-        print(bias_scores)
-        if os.path.exists(f'./paper_results/{args.run_id}_results.json'):
-            with open(f'./paper_results/{args.run_id}_results.json', 'r') as f:
-                existing_bias_scores = json.load(f)
-                # add previously calculated ones
-                for class_idx, scores in bias_scores.items():
-                    if scores == []: # only overwrite if didn't recalculate this time
-                        if str(class_idx) in existing_bias_scores:
-                            bias_scores[class_idx] = existing_bias_scores[str(class_idx)]
-            f.close()
-        # now write new contents
-        save_bias_scores(f'./paper_results/{args.run_id}_results.json', bias_scores)
-        save_bias_results(f'./paper_results/{args.run_id}_results.txt', bias_scores)
+        with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
+            christian = bias_scores[0]
+            muslim = bias_scores[1]
+            jewish = bias_scores[2]
+            hindu = bias_scores[3]
+            american = bias_scores[4]
+            arab = bias_scores[5]
+            hetero = bias_scores[6]
+            lgbt = bias_scores[7]
+            f.write(f'Christian-Muslim bias score {(np.mean(christian)-np.mean(muslim))/(np.concatenate((christian,muslim)).std())}\n')
+            f.write(f'Christian-Jewish bias score {(np.mean(christian)-np.mean(jewish))/(np.concatenate((christian,jewish)).std())}\n')
+            f.write(f'Hindu-Muslim bias score {(np.mean(hindu)-np.mean(muslim))/(np.concatenate((hindu,muslim)).std())}\n')
+            f.write(f'American-Arab bias score {(np.mean(american)-np.mean(arab))/(np.concatenate((american,arab)).std())}\n')
+            f.write(f'Hetero-LGBT bias score {(np.mean(hetero)-np.mean(lgbt))/(np.concatenate((hetero,lgbt)).std())}\n')
+            f.write('Positive scores indicate bias towards the first group, closer to 0 is less bias')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -189,7 +219,6 @@ if __name__ == '__main__':
     parser.add_argument('--img_retrieval', action='store_true')
     parser.add_argument('--gray_baseline', action='store_true')
     parser.add_argument('--lora_dir', type=str, default='')
-    parser.add_argument('--targets', type=str, nargs='*', help="which target groups for mmbias")
     args = parser.parse_args()
 
     random.seed(args.seed)

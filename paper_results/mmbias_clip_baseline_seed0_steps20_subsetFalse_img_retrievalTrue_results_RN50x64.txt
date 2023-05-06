@@ -1,0 +1,11 @@
+Christian-Muslim bias score 1.5458010808185834
+Christian-Jewish bias score 1.5352721729960255
+Jewish-Muslim bias score 0.23008183145489827
+Buddhist-Muslim bias score 1.621799191597548
+Buddhist-Christian bias score 0.23695168326248883
+Buddhist-Hindu bias score 0.4599326698331195
+Buddhist-Jewish bias score 1.6759953894822857
+Hindu-Muslim bias score 1.480913137378937
+American-Arab bias score 0.7201058146680596
+Hetero-LGBT bias score 1.3828448081310007
+Positive scores indicate bias towards the first group, closer to 0 is less bias

@@ -8,10 +8,11 @@ from tqdm import tqdm
 import argparse
 import json
 import random
+import numpy as np
 
 from datasets_loading import get_dataset
 from torch.utils.data import DataLoader
-from utils import evaluate_scores
+from utils import evaluate_scores, save_bias_results, save_bias_scores
 import csv
 import clip
 
@@ -34,14 +35,14 @@ class Scorer:
 
         imgs, texts = batch[0], batch[1]
         imgs, imgs_resize = imgs[0], imgs[1]
-        imgs, imgs_resize = [img.to('cuda:0') for img in imgs], [img.to('cuda:0') for img in imgs_resize]
+        imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
 
         scores = []
         for txt_idx, text in enumerate(texts):
             for img_idx, resized_img in enumerate(imgs_resize):
-                text_tensor = clip.tokenize(list(text)).to('cuda:0')                
-                text_embedding = clip_model.encode_text(text_tensor)
-                resized_img = resized_img.squeeze().unsqueeze(0)
+                text_tensor = clip.tokenize(list(text)).cuda()                
+                text_embedding = clip_model.encode_text(text_tensor) # torch.Size([1, 1024])
+                resized_img = resized_img.squeeze().unsqueeze(0) # torch.Size([1, 3, 512, 512])
                 image_embedding = clip_model.encode_image(resized_img)
                 text_embedding /= text_embedding.norm(dim=-1, keepdim=True)
                 image_embedding /= image_embedding.norm(dim=-1, keepdim=True)
@@ -55,12 +56,12 @@ class Scorer:
 def main(args):
 
     clip_version = 'RN50x64'
-    model, preprocess = clip.load(clip_version, device='cuda:0')
+    model, preprocess = clip.load(clip_version, device=args.cuda_device)
 
     scorer = Scorer(args)
     dataset = get_dataset(args.task, f'datasets/{args.task}', transform=preprocess)
 
-    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=True, num_workers=0)
+    dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=0)
 
     r1s = []
     r5s = []
@@ -68,6 +69,7 @@ def main(args):
     metrics = []
     ids = []
     clevr_dict = {}
+    bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
         if args.subset and i % 10 != 0:
             continue
@@ -123,7 +125,13 @@ def main(args):
                 print(f'{subtask} accuracy: {sum(clevr_dict[subtask]) / len(clevr_dict[subtask])}')
                 with open(f'./paper_results/{args.run_id}_results.txt', 'a') as f:
                     f.write(f'{subtask} accuracy: {sum(clevr_dict[subtask]) / len(clevr_dict[subtask])}\n')
-    else:
+        elif args.task == 'mmbias':
+            phis = evaluate_scores(args,scores,batch)
+            for class_idx, phi_list in phis.items():
+                if type(phi_list[0]) != float: # convert from numpy to regular float for json purposes
+                    phi_list = [a.item() for a in phi_list]
+                bias_scores[class_idx].extend(phi_list)
+        else:
             acc, max_more_than_once = evaluate_scores(args, scores, batch)
             metrics += acc
             acc = sum(metrics) / len(metrics)
@@ -133,6 +141,21 @@ def main(args):
             with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
                 f.write(f'Accuracy: {acc}\n')
                 f.write(f'Max more than once: {max_more_than_onces}\n')
+    if args.task == 'mmbias':
+        print("\n\n-------------------------We're done!-------------------------\nBias Scores:")
+        print(bias_scores)
+        if os.path.exists(f'./paper_results/{args.run_id}_results_{clip_version}.json'):
+            with open(f'./paper_results/{args.run_id}_results_{clip_version}.json', 'r') as f:
+                existing_bias_scores = json.load(f)
+                # add previously calculated ones
+                for class_idx, scores in bias_scores.items():
+                    if scores == []: # only overwrite if didn't recalculate this time
+                        if str(class_idx) in existing_bias_scores:
+                            bias_scores[class_idx] = existing_bias_scores[str(class_idx)]
+            f.close()
+        # now write new contents
+        save_bias_scores(f'./paper_results/{args.run_id}_results_{clip_version}.json', bias_scores)
+        save_bias_results(f'./paper_results/{args.run_id}_results_{clip_version}.txt', bias_scores)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

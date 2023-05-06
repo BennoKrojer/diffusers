@@ -1,0 +1,11 @@
+Christian-Muslim bias score 1.2961030936610856
+Christian-Jewish bias score nan
+Jewish-Muslim bias score nan
+Buddhist-Muslim bias score nan
+Buddhist-Christian bias score nan
+Buddhist-Hindu bias score nan
+Buddhist-Jewish bias score nan
+Hindu-Muslim bias score nan
+American-Arab bias score nan
+Hetero-LGBT bias score nan
+Positive scores indicate bias towards the first group, closer to 0 is less bias

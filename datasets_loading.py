@@ -11,12 +11,14 @@ import torch
 from torchvision import datasets
 from glob import glob
 from aro.dataset_zoo import VG_Relation, VG_Attribution, COCO_Order, Flickr30k_Order
+import pandas as pd
+import ast
 
-def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None, hard_neg=False):
+def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None, hard_neg=False, targets=None):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     if dataset_name == 'mmbias':
-        return BiasDataset(root_dir, resize=resize)
+        return BiasDataset(root_dir, resize=resize, transform=transform, targets=targets)
     elif dataset_name == 'imagecode':
         return ImageCoDeDataset(root_dir, split, transform, resize=resize, scoring_only=scoring_only)
     elif dataset_name == 'imagecode_video':
@@ -49,6 +51,10 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
         return COCO_Order(image_preprocess=transform, download=True, root_dir=root_dir)
     elif dataset_name == 'flickr30k_order':
         return Flickr30k_Order(image_preprocess=transform, download=True, root_dir=root_dir)
+    elif dataset_name == 'mscoco':
+        return MSCOCODataset(root_dir, transform, resize=resize, split=split, tokenizer=tokenizer)
+    elif dataset_name == 'mscoco_val':
+        return ValidMSCOCODataset(root_dir, transform, resize=resize, split='val', tokenizer=tokenizer)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -152,40 +158,52 @@ class PetsDataset(Dataset):
         return len(self.data)
     
 class BiasDataset(Dataset):
-    def __init__(self, root_dir, resize=512):
+    def __init__(self, root_dir, resize=512, transform=None, targets=None):
         self.root_dir = root_dir #datasets/mmbias/
         self.resize = resize
+        self.transform = transform
         self.phrases = json.load(open(f'{root_dir}/textual_phrases.txt'))
         self.texts = self.phrases['pleasant_phrases']
-        self.texts.extend(self.phrases['unpleasant_phrases'])
-        # texts is ['good','texts',...,'bad','texts']
-        self.classes = ['Christian','Muslim','Jewish','Hindu','American','Arab','Heterosexual','LGBT']
-        
+        self.texts.extend(self.phrases['unpleasant_phrases']) # texts is ['good','texts',...,'bad','texts']
+        self.classes = ['Christian','Muslim','Jewish','Hindu','American','Arab','Heterosexual','LGBT','Buddhist']
+        if not targets: # use all classes by default
+            targets=self.classes
         self.data = []
-        # Religion
-        self.christian_imgs = list(glob(f'{root_dir}/data/Images/Religion/Christian/*.jpg'))
-        self.data.extend([(img_path,0) for img_path in self.christian_imgs])
-        self.muslim_imgs = list(glob(f'{root_dir}/data/Images/Religion/Muslim/*.jpg'))
-        self.data.extend([(img_path,1) for img_path in self.muslim_imgs])
-        # self.jewish_imgs = list(glob(f'{root_dir}/data/Images/Religion/Jewish/*.jpg'))
-        # self.data.extend([(img_path,2) for img_path in self.jewish_imgs])
-        # self.hindu_imgs = list(glob(f'{root_dir}/data/Images/Religion/Hindu/*.jpg'))
-        # self.data.extend([(img_path,3) for img_path in self.hindu_imgs])
-        # # Nationality
-        # self.american_imgs = list(glob(f'{root_dir}/data/Images/Nationality/American/*.jpg'))
-        # self.data.extend([(img_path,4) for img_path in self.american_imgs])
-        # self.arab_imgs = list(glob(f'{root_dir}/data/Images/Nationality/Arab/*.jpg'))
-        # self.data.extend([(img_path,5) for img_path in self.arab_imgs])
-        # # Sexuality
-        # self.hetero_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/Heterosexual/*.jpg'))
-        # self.data.extend([(img_path,6) for img_path in self.hetero_imgs])
-        # self.lgbt_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/LGBT/*.jpg'))
-        # self.data.extend([(img_path,7) for img_path in self.lgbt_imgs])
         
-        # for testing purposes only just keep first and last 5 words and first and last 2 imgs
-        self.texts = self.texts[:2]+self.texts[-2:]
-        self.data = self.data[:2]+self.data[-2:]
-
+        # Religion
+        if 'Christian' in targets:
+            self.christian_imgs = list(glob(f'{root_dir}/data/Images/Religion/Christian/*.jpg'))
+            self.data.extend([(img_path,0) for img_path in self.christian_imgs])
+        if 'Muslim' in targets:
+            self.muslim_imgs = list(glob(f'{root_dir}/data/Images/Religion/Muslim/*.jpg'))
+            self.data.extend([(img_path,1) for img_path in self.muslim_imgs])
+        if 'Jewish' in targets:
+            self.jewish_imgs = list(glob(f'{root_dir}/data/Images/Religion/Jewish/*.jpg'))
+            self.data.extend([(img_path,2) for img_path in self.jewish_imgs])
+        if 'Hindu' in targets:
+            self.hindu_imgs = list(glob(f'{root_dir}/data/Images/Religion/Hindu/*.jpg'))
+            self.data.extend([(img_path,3) for img_path in self.hindu_imgs])
+        if 'Buddhist' in targets:
+            self.buddhist_imgs = list(glob(f'{root_dir}/data/Images/Religion/Buddhist/*.jpg'))
+            self.data.extend([(img_path,8) for img_path in self.buddhist_imgs])
+        # Nationality
+        if 'American' in targets:
+            self.american_imgs = list(glob(f'{root_dir}/data/Images/Nationality/American/*.jpg'))
+            self.data.extend([(img_path,4) for img_path in self.american_imgs])
+        if 'Arab' in targets:
+            self.arab_imgs = list(glob(f'{root_dir}/data/Images/Nationality/Arab/*.jpg'))
+            self.data.extend([(img_path,5) for img_path in self.arab_imgs])
+        # Sexuality
+        if 'Hetero' in targets:
+            self.hetero_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/Heterosexual/*.jpg'))
+            self.data.extend([(img_path,6) for img_path in self.hetero_imgs])
+        if 'LBGT' in targets:
+            self.lgbt_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/LGBT/*.jpg'))
+            self.data.extend([(img_path,7) for img_path in self.lgbt_imgs])
+        # uncommment for just subset
+        # self.data = self.data[::5]
+        # self.texts = self.texts[::3]
+        
     def __len__(self):
         return len(self.data)
     
@@ -193,8 +211,11 @@ class BiasDataset(Dataset):
         img, class_id = self.data[idx]
         img = Image.open(img)
         img = img.convert("RGB")
-        img_resize = img.resize((self.resize, self.resize))
-        img_resize = diffusers_preprocess(img_resize)
+        if self.transform:
+                img_resize = self.transform(img).unsqueeze(0)
+        else:
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
         return (0, [img_resize]), self.texts, class_id
 
 
@@ -281,6 +302,88 @@ class ImageCoDeDataset(Dataset):
             return (0, imgs_resize), [text], img_dir, img_idx
 
 
+
+class MSCOCODataset(Dataset):
+    def __init__(self, root_dir, transform, resize=512, split='val', tokenizer=None, hard_neg=True, tsv_path='aro/temp_data/train_neg_clip.tsv'):
+        self.root_dir = 'datasets/mscoco/train2014'
+        self.resize = resize
+        self.data = pd.read_csv(tsv_path, delimiter='\t')
+        self.transform = transform
+        self.split = split
+        self.tokenizer = tokenizer
+        self.hard_neg = hard_neg
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        row = self.data.iloc[idx]
+        img_path = row['filepath']
+        # only get filename
+        img_path = img_path.split('/')[-1]
+        if 'train2014' in img_path:
+            img_path = f"{self.root_dir}/{img_path}"
+        else:
+            img_path = f"datasets/coco_order/val2014/{img_path}"
+        text = row['title']
+        neg_captions =  ast.literal_eval(row['neg_caption'])
+        neg_caption = neg_captions[np.random.randint(0, len(neg_captions))]
+        
+        if self.tokenizer:
+            text = self.tokenizer(text, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+            text0 = text.input_ids.squeeze(0)
+            # text0 = text[0]
+            if self.hard_neg:
+                text_rand = self.tokenizer(neg_caption, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+                text_rand = text_rand.input_ids.squeeze(0)
+                text = torch.stack([text0, text_rand])
+            else:
+                text = text0
+        
+        img = Image.open(img_path).convert("RGB")
+        if self.transform:
+            img_resize = self.transform(img).unsqueeze(0)
+        else:
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
+
+        return [0, [img_resize]], text, 0
+
+
+class ValidMSCOCODataset(Dataset):
+    def __init__(self, root_dir, transform, resize=512, split='val', tokenizer=None, hard_neg=True, tsv_path='aro/temp_data/valid_neg_clip.tsv'):
+        self.root_dir = 'datasets/mscoco/'
+        self.resize = resize
+        self.data = pd.read_csv(tsv_path, delimiter='\t')
+        self.transform = transform
+        self.split = split
+        self.tokenizer = tokenizer
+        self.hard_neg = hard_neg
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        row = self.data.iloc[idx]
+        img_path = row['filepath']
+        # only get filename
+        img_path = img_path.split('/')[-1]
+        img_path = f"datasets/coco_order/val2014/{img_path}"
+        text = row['title']
+        neg_captions =  ast.literal_eval(row['neg_caption'])
+        neg_caption = neg_captions[np.random.randint(0, len(neg_captions))]
+        text = [text, neg_caption]
+                
+        img = Image.open(img_path).convert("RGB")
+        if self.transform:
+            img_resize = self.transform(img).unsqueeze(0)
+        else:
+            img_resize = img.resize((self.resize, self.resize))
+            img_resize = diffusers_preprocess(img_resize)
+
+        return [0, [img_resize]], text, 0
+
+
 class Flickr30KDataset(Dataset):
     def __init__(self, root_dir, transform, resize=512, scoring_only=False, split='val', tokenizer=None, first_query=True):
         self.root_dir = root_dir
@@ -348,7 +451,7 @@ class Flickr30KTextRetrievalDataset(Dataset):
             text = text.input_ids.squeeze(0)
             text0 = text[0]
             if self.hard_neg:
-                text_rand = text[np.random.randint(1, len(text))]
+                text_rand = text[np.random.randint(5, len(text))]
             else:
                 # get text from self.all_captions
                 text_rand = self.all_captions[np.random.randint(0, len(self.all_captions))]

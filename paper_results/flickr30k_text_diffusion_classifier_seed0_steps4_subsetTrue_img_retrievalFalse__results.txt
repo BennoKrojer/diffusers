@@ -1,0 +1,4 @@
+R@1: 0.453125
+R@5: 0.8046875
+Max more than once: 14
+Sample size 128

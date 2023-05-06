@@ -14,7 +14,7 @@
 
 import inspect
 from typing import Callable, List, Optional, Union
-
+import os
 import numpy as np
 import PIL
 import torch
@@ -38,6 +38,7 @@ from ..pipeline_utils import DiffusionPipeline
 from . import StableDiffusionPipelineOutput
 from .safety_checker import StableDiffusionSafetyChecker
 import torch
+import pickle
 
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
@@ -210,7 +211,16 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         )
         self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
         self.register_to_config(requires_safety_checker=requires_safety_checker)
-        self.noise_samples = []
+        #check if noise_samples is cached under ~./diffusers/noise_samples.pkl
+        if os.path.exists(os.path.expanduser("~/diffusers/noise_samples.pkl")):
+            with open(os.path.expanduser("~/diffusers/noise_samples.pkl"), "rb") as f:
+                self.noise_samples = pickle.load(f)
+                print('Loaded noise samples from cache with shape: ', self.noise_samples.shape)
+        else:
+            # if not, generate noise_samples a list of random gaussian samples of shape (4,64,64) and cache them
+            self.noise_samples = torch.randn(1000,4, 64, 64)
+            with open(os.path.expanduser("~/diffusers/noise_samples.pkl"), "wb") as f:
+                pickle.dump(self.noise_samples, f)
         self.strengths = []
         self.cached_prompt_embeds = None
 
@@ -287,6 +297,46 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             ):
                 return torch.device(module._hf_hook.execution_device)
         return self.device
+
+    def global_emb(self, prompt):
+        device = self._execution_device
+        text_inputs = self.tokenizer(
+                prompt,
+                padding="max_length",
+                max_length=self.tokenizer.model_max_length,
+                truncation=True,
+                return_tensors="pt",
+            )
+        text_input_ids = text_inputs.input_ids
+        # get index of when id is 49407 (end of text token)
+        end_idx = (text_input_ids == 49407).nonzero(as_tuple=False)[0][-1]
+        untruncated_ids = self.tokenizer(prompt, padding="longest", return_tensors="pt").input_ids
+
+        if untruncated_ids.shape[-1] >= text_input_ids.shape[-1] and not torch.equal(
+            text_input_ids, untruncated_ids
+        ):
+            removed_text = self.tokenizer.batch_decode(
+                untruncated_ids[:, self.tokenizer.model_max_length - 1 : -1]
+            )
+            logger.warning(
+                "The following part of your input was truncated because CLIP can only handle sequences up to"
+                f" {self.tokenizer.model_max_length} tokens: {removed_text}"
+            )
+
+        if hasattr(self.text_encoder.config, "use_attention_mask") and self.text_encoder.config.use_attention_mask:
+            attention_mask = text_inputs.attention_mask.to(device)
+        else:
+            attention_mask = None
+
+        prompt_embeds = self.text_encoder(
+            text_input_ids.to(device),
+            attention_mask=attention_mask,
+        )
+
+        prompt_embeds = prompt_embeds[0]
+        # get prompt only from start to end idx
+        prompt_embeds = prompt_embeds[:, end_idx, :]
+        return prompt_embeds
 
     # Copied from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion.StableDiffusionPipeline._encode_prompt
     def _encode_prompt(
@@ -563,17 +613,15 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             init_latents = torch.cat([init_latents], dim=0)
 
         shape = init_latents.shape
-        if len(self.noise_samples) < sampling_step + 1:
-            # if unconditional:
-            #     # if unconditional, we want to generate noise for the first half of the batch and the second half gets the same noise
-            #     shape = [shape[0] // 2] + list(shape[1:])
-            #     noise = randn_tensor(shape, generator=generator, device=device, dtype=dtype)
-            #     noise = torch.cat([noise, noise], dim=0)
-            # else:
-            noise = randn_tensor(shape, generator=generator, device=device, dtype=dtype)
-            self.noise_samples.append(noise)
-        else:
-            noise = self.noise_samples[sampling_step]
+
+        # get slice of self.noise_samples based on sampling_step
+        # so if batchsize is 8, and sampling step is 0, we want to get the noise samples from index 0 eight times
+        # if sampling step is 1, we want to get the noise samples from index 1 eight times
+        # etc
+        noise = self.noise_samples[sampling_step] # (4,64,64)
+        noise = noise.unsqueeze(0).repeat(8, 1, 1, 1)  # (8, 4, 64, 64)
+        # to device
+        noise = noise.to(device=device, dtype=dtype)
 
         # get latents
          # make it optimizable
@@ -587,6 +635,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         self,
         prompt=None,
         image=None,
+        init_prompt_embed=None,
         strength=0.8,
         num_inference_steps=50,
         guidance_scale=7.5,
@@ -636,16 +685,25 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
                 negative_prompt_embeds=negative_prompt_embeds,
             )
 
+            # prompt embeds is a list of tensors of shape (1, 77, embed_dim)
+            # replace 5th element of prompt_embeds init_prompt, so (-,5,-) is the init_prompt_embed
+            if init_prompt_embed is not None:
+                prompt_embeds[:, 5, :] = init_prompt_embed
+            
             # 4. Preprocess image
             image = preprocess(image)
 
-        dists = []
+        optimized_embs = []
         first_num_inference_steps = num_inference_steps
 
         # sample N strengths between 0.1 and 0.9
         if len(self.strengths) == 0:
             rate = int(100 / sampling_steps)
             self.timesteps = list(range(450, 550, rate))
+
+        prompt_embeds_copy = prompt_embeds.clone().detach().requires_grad_(True)
+        optim = torch.optim.Adam([prompt_embeds_copy], lr=optim_lr)
+
         for sampling_step, t in enumerate(self.timesteps):
             # copy t batchsize times to tensor
             latent_timestep = torch.tensor([t] * batch_size, device=device)
@@ -655,30 +713,23 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             latent_model_input = torch.cat([latents] * 2) if unconditional else latents
             latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
 
-            prompt_embeds = prompt_embeds.clone().detach().requires_grad_(True)
-            optim = torch.optim.SGD([prompt_embeds], lr=optim_lr)
-            prompt_copy = prompt_embeds.clone()
+            # prompt_copy = prompt_embeds.clone()
         
             losses = []
             for _ in range(optim_steps):
                 # predict the noise residual
-                noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=prompt_embeds).sample
+                noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=prompt_embeds_copy).sample
 
                 optim.zero_grad()
                 loss = F.mse_loss(noise_pred, noise)
                 loss.backward()
+                # zero out all gradients except for the 5th token that we replaced above
+                prompt_embeds_copy.grad[:, :5, :] = 0
+                prompt_embeds_copy.grad[:, 6:, :] = 0
                 optim.step()
-                if distance == 'loss':
-                    losses.append(loss)
             
-            if distance == 'loss':
-                dist = torch.tensor(losses).mean()
-            else:
-                dist = torch.norm(init_latents - init_latents_copy, p=2, dim=1)
-
-            dist = dist.to(device)
-            dists.append(dist)
-
+                optimized_emb = prompt_embeds_copy[:, 5, :].detach().clone()
+                optimized_embs.append(optimized_emb)
             # # perform guidance
             # if unconditional:
             #     noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
@@ -696,9 +747,8 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             #     dist = torch.norm(noise - noise_pred, p=2, dim=1)
             #     dists.append(dist)
 
-        dists = torch.stack(dists)
-        return dists
-        
+        optimized_embs = torch.stack(optimized_embs, dim=0)
+        return optimized_embs
 
     def optimize_input(
         self,
@@ -778,12 +828,10 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             losses = []
             for _ in range(optim_steps):
                 # predict the noise residual
-                with torch.no_grad():
-                    noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=prompt_embeds).sample
-
+                noise_pred = self.unet(latent_model_input, t, encoder_hidden_states=prompt_embeds).sample
                 optim.zero_grad()
-                loss = ((noise_pred - noise) * init_latents).mean()
-                loss.backward()
+                loss = F.mse_loss(noise_pred, noise)
+                loss.backward(retain_graph=True)
                 optim.step()
                 if distance == 'loss':
                     losses.append(loss)
@@ -825,7 +873,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         image: Union[torch.FloatTensor, PIL.Image.Image] = None,
         strength: float = 0.8,
         num_inference_steps: Optional[int] = 50,
-        guidance_scale: Optional[float] = 7.5,
+        guidance_scale: Optional[float] = 0.0,
         negative_prompt: Optional[Union[str, List[str]]] = None,
         num_images_per_prompt: Optional[int] = 1,
         eta: Optional[float] = 0.0,
@@ -836,7 +884,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         return_dict: bool = True,
         callback: Optional[Callable[[int, int, torch.FloatTensor], None]] = None,
         callback_steps: int = 1,
-        scoring: bool = False,
+        scoring: bool = True,
         sampling_steps = 200,
         unconditional = False,
         gray_baseline = False,
@@ -948,9 +996,9 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             for sampling_step, t in enumerate(self.timesteps):
                 # copy t batchsize times to tensor
                 latent_timestep = torch.tensor([t] * batch_size, device=device)
-                latents, noise = self.prepare_latents(image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator, sampling_step, unconditional)
+                latents, noise, _ = self.prepare_latents(image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator, sampling_step, unconditional)
                 if gray_baseline:
-                    gray_latents, gray_noise = self.prepare_latents(gray_image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator, sampling_step, unconditional)
+                    gray_latents, gray_noise, _ = self.prepare_latents(gray_image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator, sampling_step, unconditional)
 
                 # expand the latents if we are doing classifier free guidance
                 latent_model_input = torch.cat([latents] * 2) if unconditional else latents
@@ -974,6 +1022,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
 
                     dist = torch.norm(noise - noise_pred_text, p=2, dim=1)
                     base_dist = torch.norm(noise - noise_pred_uncond, p=2, dim=1)
+                    # dists.append(base_dist) #TODO: undo!
                     dists.append(dist - base_dist)
                 elif gray_baseline:
                     noise = noise.flatten(1)

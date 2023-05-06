@@ -267,9 +267,10 @@ def parse_args():
 
     parser.add_argument('--neg_prob', type=float, default=0.0, help='The probability of sampling a negative image.')
     parser.add_argument('--neg_loss_factor', type=float, default=0.2)
-    parser.add_argument('--task', type=str, default='flickr30k_text')
+    parser.add_argument('--task', type=str, default='mscoco')
     parser.add_argument('--hard_neg', action='store_true')
     parser.add_argument('--relativistic', action='store_true')
+    parser.add_argument('--unhinged', action='store_true')
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -305,7 +306,7 @@ def score_batch(i, args, batch, model):
                 resized_img = resized_img.unsqueeze(0)
             
             print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=10, unconditional=False)
+            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=4, unconditional=False)
             dists = dists.to(torch.float32)
             dists = dists.mean(dim=1)
             dists = -dists
@@ -485,8 +486,18 @@ def main():
         num_workers=args.dataloader_num_workers,
     )
 
-    val_dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, split='val')
+
+    val_dataset = get_dataset('mscoco_val', f'datasets/{args.task}', transform=None, split='val')
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0)
+
+    val_dataset2 = get_dataset('flickr30k_text', f'datasets/flickr30k_text', transform=None, split='val')
+    val_dataloader2 = torch.utils.data.DataLoader(val_dataset2, batch_size=8, shuffle=False, num_workers=0)
+
+    val_dataset3 = get_dataset('vg_attribution', f'datasets/vg_attribution', transform=None)
+    val_dataloader3 = torch.utils.data.DataLoader(val_dataset3, batch_size=8, shuffle=False, num_workers=0)
+
+    # val_dataset3 = get_dataset('coco_order', f'datasets/coco_order', transform=None)
+    # val_dataloader3 = torch.utils.data.DataLoader(val_dataset3, batch_size=8, shuffle=False, num_workers=0)
 
 
     # Scheduler and math around the number of training steps.
@@ -586,8 +597,8 @@ def main():
 
                 img, texts, _ = batch
                 if args.neg_prob > torch.rand(1):
-                    idx = torch.randint(1, texts.shape[1], (1,))[0]
-                    txt_neg = texts[:,idx,:]
+                    # idx = torch.randint(1, texts.shape[1], (1,))[0]
+                    txt_neg = texts[:,1,:]
                 else:
                     txt_neg = None
 
@@ -627,14 +638,23 @@ def main():
                 if txt_neg is not None:
                     model_pred_neg = unet(noisy_latents, timesteps, encoder_hidden_states_neg).sample
                     if args.relativistic:
-                        loss_neg = F.mse_loss(model_pred_neg.float(), model_pred.float(), reduction="mean")
+                        diff_neg = F.mse_loss(model_pred_neg.float(), model_pred.float(), reduction="mean")
                     else:
-                        loss_neg = F.mse_loss(model_pred_neg.float(), target.float(), reduction="mean")
-                    loss_neg = torch.clamp(loss_neg, max=args.neg_loss_factor*loss.item())
+                        diff_neg = F.mse_loss(model_pred_neg.float(), target.float(), reduction="mean")
+                    if not args.unhinged:
+                        loss_neg = torch.clamp(diff_neg, max=args.neg_loss_factor*loss.item())
+                    else:
+                        loss_neg = diff_neg
                     loss_neg = -loss_neg
+                    # diff = torch.sigmoid(diff)
+                    # diff_neg = torch.sigmoid(diff_neg)
+                        
+                    # loss = F.binary_cross_entropy(diff, torch.zeros_like(diff))
+                    # loss_neg = F.binary_cross_entropy(diff_neg, torch.ones_like(diff_neg))
+
                     wandb.log({"loss_neg": loss_neg.item()})
-                    wandb.log({"loss": loss.item()})
                     loss = loss_neg + loss
+                wandb.log({"loss": loss.item()})
 
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(loss.repeat(args.train_batch_size)).mean()
@@ -658,12 +678,12 @@ def main():
 
                 accelerator.wait_for_everyone()
 
-                if global_step % args.checkpointing_steps == 0:
+                if global_step % args.checkpointing_steps == 250:
                     if accelerator.is_main_process:
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
                         if not os.path.exists(save_path):
                             os.makedirs(save_path)
-                        logger.info(f"Saved state to {save_path}")
+                        # logger.info(f"Saved state to {save_path}")
                         
                         ############ QUANTITAIVE EVALUATION #############
                         pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
@@ -679,7 +699,8 @@ def main():
                         r1s = []
                         r5s = []
                         max_more_than_onces = 0
-                        for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
+                        args.task = 'flickr30k_text'
+                        for k, batch in tqdm(enumerate(val_dataloader2), total=len(val_dataloader2)):
                             if k % 15 != 0:
                                 continue
                             # measure time for the following line
@@ -702,10 +723,9 @@ def main():
                                 f.write(f"Sample size {len(r1s)}\n")
                         wandb.log({'R@1': r1, 'R@5': r5, 'Max more than once': max_more_than_onces})
 
-                        if r1 > best_r1:
-                            # save model state to output_dir
-                            logger.info(f"Saving model checkpoint to {save_path}")
-                            accelerator.save_state(save_path)
+                        # if r1 > best_r1:
+                        # save model state to output_dir
+                        
 
                         del pipeline_img2img
                         torch.cuda.empty_cache()
@@ -741,6 +761,81 @@ def main():
                         del pipeline
                         torch.cuda.empty_cache()
 
+                elif (global_step % args.checkpointing_steps == 0 or global_step in [10, 20, 50, 100, 150, 200, 300, 400, 600   ]) and accelerator.is_main_process:
+                    save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+                    if not os.path.exists(save_path):
+                        os.makedirs(save_path)
+                    logger.info(f"Saving model checkpoint to {save_path}")
+                    accelerator.save_state(save_path)
+                    ############ QUANTITAIVE EVALUATION #############
+                    pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
+                        args.pretrained_model_name_or_path,
+                        unet=accelerator.unwrap_model(unet),
+                        revision=args.revision,
+                        torch_dtype=weight_dtype,
+                    )
+                    pipeline_img2img = pipeline_img2img.to(accelerator.device)
+                    pipeline_img2img.set_progress_bar_config(disable=True)
+
+
+                    metrics = []
+                    max_more_than_onces = 0
+                    for k, batch in tqdm(enumerate(val_dataloader), total=len(val_dataloader)):
+                        if k % 15 != 0:
+                            continue
+                        # measure time for the following line
+                        scores = score_batch(k, args, batch, pipeline_img2img)
+
+                        args.task = 'mscoco_val'
+                        acc, max_more_than_once = evaluate_scores(args, scores, batch)
+                        metrics += acc
+                        acc = sum(metrics) / len(metrics)
+                        max_more_than_onces += max_more_than_once
+                        print(f'MSCOCO Val Accuracy: {acc}')
+                        print(f'Max more than once: {max_more_than_onces}')
+                        with open(f'{save_path}/results.txt', 'w') as f:
+                            f.write(f'MSCOCO Val Accuracy: {acc}\n')
+                            f.write(f'Max more than once: {max_more_than_onces}\n')
+                            f.write(f"Sample size {len(metrics)}\n")
+                    wandb.log({'MSCOCO Val Accuracy': acc, 'Max more than once': max_more_than_onces})
+                    del pipeline_img2img
+                    torch.cuda.empty_cache()
+            
+                elif global_step % args.checkpointing_steps == 450 and accelerator.is_main_process:
+                    save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+                    if not os.path.exists(save_path):
+                        os.makedirs(save_path)
+                    ############ QUANTITAIVE EVALUATION #############
+                    pipeline_img2img = StableDiffusionImg2ImgPipeline.from_pretrained(
+                        args.pretrained_model_name_or_path,
+                        unet=accelerator.unwrap_model(unet),
+                        revision=args.revision,
+                        torch_dtype=weight_dtype,
+                    )
+                    pipeline_img2img = pipeline_img2img.to(accelerator.device)
+                    pipeline_img2img.set_progress_bar_config(disable=True)
+
+
+                    metrics = []
+                    max_more_than_onces = 0
+                    for k, batch in tqdm(enumerate(val_dataloader3), total=len(val_dataloader3)):
+                        if k % 60 != 0:
+                            continue
+                        # measure time for the following line
+                        scores = score_batch(k, args, batch, pipeline_img2img)
+
+                        args.task = 'vg_attribution'
+                        acc, max_more_than_once = evaluate_scores(args, scores, batch)
+                        metrics += acc
+                        acc = sum(metrics) / len(metrics)
+                        max_more_than_onces += max_more_than_once
+                        print(f'VG Attribution Accuracy: {acc}')
+                        print(f'Max more than once: {max_more_than_onces}')
+                        with open(f'{save_path}/results.txt', 'w') as f:
+                            f.write(f'VG Attribution Accuracy: {acc}\n')
+                            f.write(f'Max more than once: {max_more_than_onces}\n')
+                            f.write(f"Sample size {len(metrics)}\n")
+                    wandb.log({'VG Attribution Accuracy': acc, 'Max more than once': max_more_than_onces})
 
             logs = {"step_loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
             progress_bar.set_postfix(**logs)
