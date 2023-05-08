@@ -63,7 +63,7 @@ def main(args):
         model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
     else:
         model_id = "./stable-diffusion-v1-5"
-    
+        model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, torch_dtype=torch.float16)
     model = model.to(accelerator.device)
     if args.lora_dir != '':
         model.unet.load_attn_procs(args.lora_dir)
@@ -191,6 +191,7 @@ if __name__ == '__main__':
     parser.add_argument('--sampling_steps', type=int, default=250)
     parser.add_argument('--img_retrieval', action='store_true')
     parser.add_argument('--gray_baseline', action='store_true')
+    parser.add_argument('--version', type=str, default='2.1')
     parser.add_argument('--lora_dir', type=str, default='')
     parser.add_argument('--targets', type=str, nargs='*', help="which target groups for mmbias")
     args = parser.parse_args()
@@ -215,7 +216,7 @@ if __name__ == '__main__':
         elif "inferencelike" in args.lora_dir:
             lora_type = "inferencelike"
 
-    args.run_id = f'{args.task}_diffusion_classifier_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}'
+    args.run_id = f'{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}'
 
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'
