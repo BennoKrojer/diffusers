@@ -193,7 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('--gray_baseline', action='store_true')
     parser.add_argument('--version', type=str, default='2.1')
     parser.add_argument('--lora_dir', type=str, default='')
-    parser.add_argument('--targets', type=str, nargs='*', help="which target groups for mmbias")
+    parser.add_argument('--targets', type=str, nargs='*', help="which target groups for mmbias",default='')
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -216,8 +216,7 @@ if __name__ == '__main__':
         elif "inferencelike" in args.lora_dir:
             lora_type = "inferencelike"
 
-    args.run_id = f'{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}'
-
+    args.run_id = f'{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}{args.targets}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}'
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'
         if not os.path.exists(args.cache_dir):

@@ -14,7 +14,7 @@ from aro.dataset_zoo import VG_Relation, VG_Attribution, COCO_Order, Flickr30k_O
 import pandas as pd
 import ast
 
-def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None, hard_neg=False, targets=None):
+def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only=False, tokenizer=None, split='val', max_train_samples=None, hard_neg=False, targets=None, neg_img=False):
     if dataset_name == 'winoground':
         return WinogroundDataset(root_dir, transform, resize=resize, scoring_only=scoring_only)
     if dataset_name == 'mmbias':
@@ -52,7 +52,7 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
     elif dataset_name == 'flickr30k_order':
         return Flickr30k_Order(image_preprocess=transform, download=True, root_dir=root_dir)
     elif dataset_name == 'mscoco':
-        return MSCOCODataset(root_dir, transform, resize=resize, split=split, tokenizer=tokenizer)
+        return MSCOCODataset(root_dir, transform, resize=resize, split=split, tokenizer=tokenizer, hard_neg=hard_neg, neg_img=neg_img)
     elif dataset_name == 'mscoco_val':
         return ValidMSCOCODataset(root_dir, transform, resize=resize, split='val', tokenizer=tokenizer)
     else:
@@ -166,8 +166,9 @@ class BiasDataset(Dataset):
         self.texts = self.phrases['pleasant_phrases']
         self.texts.extend(self.phrases['unpleasant_phrases']) # texts is ['good','texts',...,'bad','texts']
         self.classes = ['Christian','Muslim','Jewish','Hindu','American','Arab','Heterosexual','LGBT','Buddhist']
-        if not targets: # use all classes by default
+        if targets == '': # use all classes by default
             targets=self.classes
+        print(targets)
         self.data = []
         
         # Religion
@@ -304,7 +305,7 @@ class ImageCoDeDataset(Dataset):
 
 
 class MSCOCODataset(Dataset):
-    def __init__(self, root_dir, transform, resize=512, split='val', tokenizer=None, hard_neg=True, tsv_path='aro/temp_data/train_neg_clip.tsv'):
+    def __init__(self, root_dir, transform, resize=512, split='val', tokenizer=None, hard_neg=True, neg_img=False, tsv_path='aro/temp_data/train_neg_clip.tsv'):
         self.root_dir = 'datasets/mscoco/train2014'
         self.resize = resize
         self.data = pd.read_csv(tsv_path, delimiter='\t')
@@ -313,6 +314,14 @@ class MSCOCODataset(Dataset):
         self.split = split
         self.tokenizer = tokenizer
         self.hard_neg = hard_neg
+        self.neg_img = neg_img
+        karpathy_train = json.load(open(('datasets/mscoco/coco_karpathy_train.json', 'r')))
+        # Process the JSON data
+        self.img_id2path = {}
+        for item in self.data:
+            image_id = item['image_id'].replace('coco_', '')
+            image_path = item['image']
+            self.img_id2path[image_id] = image_path
 
     def __len__(self):
         return len(self.data)
@@ -329,6 +338,17 @@ class MSCOCODataset(Dataset):
         text = row['title']
         neg_captions =  ast.literal_eval(row['neg_caption'])
         neg_caption = neg_captions[np.random.randint(0, len(neg_captions))]
+
+        neg_img_ids = ast.literal_eval(row['neg_image'])
+        neg_paths = []
+        for img_id in neg_img_ids:
+            neg_path = self.img_id2path[img_id]
+            neg_path = neg_path.split('/')[-1]
+            if 'train2014' in img_path:
+                neg_path = f"{self.root_dir}/{img_path}"
+            else:
+                neg_path = f"datasets/coco_order/val2014/{img_path}"
+            neg_paths.append(neg_path)
         
         if self.tokenizer:
             text = self.tokenizer(text, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
@@ -351,8 +371,20 @@ class MSCOCODataset(Dataset):
         else:
             img_resize = img.resize((self.resize, self.resize))
             img_resize = diffusers_preprocess(img_resize)
+        imgs = [img_resize]
 
-        return [0, [img_resize]], text, 0
+        if self.neg_img:
+            assert not self.hard_neg
+            rand_path = neg_paths[np.random.randint(0, len(neg_paths))]
+            rand_img = Image.open(rand_path).convert("RGB")
+            if self.transform:
+                rand_img = self.transform(rand_img).unsqueeze(0)
+            else:
+                rand_img = rand_img.resize((self.resize, self.resize))
+                rand_img = diffusers_preprocess(rand_img)
+            imgs = imgs.append(rand_img)
+        
+        return [0, imgs], text, 0
 
 
 class ValidMSCOCODataset(Dataset):
