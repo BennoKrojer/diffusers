@@ -49,7 +49,6 @@ class Scorer:
                 dists = dists.mean(dim=1)
                 dists = -dists
                 scores.append(dists)
-        model.reset_sampling()
 
         scores = torch.stack(scores).permute(1, 0) if args.batchsize > 1 else torch.stack(scores).unsqueeze(0)
         return scores
@@ -58,9 +57,13 @@ class Scorer:
 def main(args):
 
     accelerator = Accelerator()
-    model_id = "stabilityai/stable-diffusion-2-1-base"
-    scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
-    model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
+    if args.version == '2.1':
+        model_id = "stabilityai/stable-diffusion-2-1-base"
+        scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
+        model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
+    else:
+        model_id = "./stable-diffusion-v1-5"
+    
     model = model.to(accelerator.device)
     if args.lora_dir != '':
         model.unet.load_attn_procs(args.lora_dir)
@@ -199,7 +202,13 @@ if __name__ == '__main__':
     torch.cuda.set_device(args.cuda_device)
 
     if args.lora_dir:
-        if "vanilla" in args.lora_dir:
+        if 'hardneg1.0' in args.lora_dir:
+            lora_type = "hard_neg1.0"
+        elif 'vanilla_coco' in args.lora_dir:
+            lora_type = "vanilla_coco"
+        elif "unhinged" in args.lora_dir:
+            lora_type = "unhinged_hard_neg"
+        elif "vanilla" in args.lora_dir:
             lora_type = "vanilla"
         elif "relativistic" in args.lora_dir:
             lora_type = "relativistic"

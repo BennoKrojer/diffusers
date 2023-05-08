@@ -308,6 +308,7 @@ class MSCOCODataset(Dataset):
         self.root_dir = 'datasets/mscoco/train2014'
         self.resize = resize
         self.data = pd.read_csv(tsv_path, delimiter='\t')
+        self.all_texts = self.data['title'].tolist()
         self.transform = transform
         self.split = split
         self.tokenizer = tokenizer
@@ -335,6 +336,10 @@ class MSCOCODataset(Dataset):
             # text0 = text[0]
             if self.hard_neg:
                 text_rand = self.tokenizer(neg_caption, max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
+                text_rand = text_rand.input_ids.squeeze(0)
+                text = torch.stack([text0, text_rand])
+            elif self.rand_neg:
+                text_rand = self.tokenizer(self.all_texts[np.random.randint(0, len(self.all_texts))], max_length=self.tokenizer.model_max_length, padding="max_length", truncation=True, return_tensors="pt")
                 text_rand = text_rand.input_ids.squeeze(0)
                 text = torch.stack([text0, text_rand])
             else:
