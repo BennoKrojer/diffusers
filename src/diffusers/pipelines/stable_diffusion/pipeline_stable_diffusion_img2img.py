@@ -564,10 +564,10 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
 
         return timesteps, num_inference_steps - t_start
 
-    def reset_sampling(self):
-        self.noise_samples = []
-        self.strengths = []
-        self.cached_prompt_embeds = None
+    # def reset_sampling(self):
+    #     self.noise_samples = []
+    #     self.strengths = []
+    #     self.cached_prompt_embeds = None
 
     def prepare_latents(self, image, timestep, batch_size, num_images_per_prompt, dtype, device,  generator=None, sampling_step=None, unconditional=False, optimize_latent=False):
         if not isinstance(image, (torch.Tensor, PIL.Image.Image, list)):
@@ -619,7 +619,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         # if sampling step is 1, we want to get the noise samples from index 1 eight times
         # etc
         noise = self.noise_samples[sampling_step] # (4,64,64)
-        noise = noise.unsqueeze(0).repeat(8, 1, 1, 1)  # (8, 4, 64, 64)
+        noise = noise.unsqueeze(0).repeat(batch_size, 1, 1, 1)  # (8, 4, 64, 64)
         # to device
         noise = noise.to(device=device, dtype=dtype)
 

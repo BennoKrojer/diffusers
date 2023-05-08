@@ -1,0 +1,5 @@
+Accuracy: 0.6003024193548387
+Max more than once: 15
+Sample size 1984
+pair_binding_size accuracy: 0.5801393728222997
+pair_binding_color accuracy: 0.6279904306220095
