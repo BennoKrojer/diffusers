@@ -271,6 +271,7 @@ def parse_args():
     parser.add_argument('--hard_neg', action='store_true')
     parser.add_argument('--relativistic', action='store_true')
     parser.add_argument('--unhinged', action='store_true')
+    parser.add_argument('--neg_img', action='store_true')
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -476,7 +477,7 @@ def main():
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
     
-    train_dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, split='train', tokenizer=tokenizer, hard_neg=args.hard_neg)
+    train_dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, split='train', tokenizer=tokenizer, hard_neg=args.hard_neg, neg_img=args.neg_img)
 
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
@@ -598,12 +599,21 @@ def main():
                 img, texts, _ = batch
                 if args.neg_prob > torch.rand(1):
                     # idx = torch.randint(1, texts.shape[1], (1,))[0]
-                    txt_neg = texts[:,1,:]
+                    if args.neg_img:
+                        img_neg = img[1][1]
+                        txt_neg = None
+                    else:
+                        txt_neg = texts[:,1,:]
+                        img_neg = None
                 else:
                     txt_neg = None
+                    img_neg = None
 
                 img = img[1][0]
-                text = texts[:,0,:]
+                if not args.neg_img:
+                    text = texts[:,0,:]
+                else:
+                    text = texts
 
                 latents = vae.encode(img.to(dtype=weight_dtype)).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
@@ -635,8 +645,23 @@ def main():
                 # Predict the noise residual and compute loss
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
                 loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
+
+                if img_neg is not None:
+                    latents_neg = vae.encode(img_neg.to(dtype=weight_dtype)).latent_dist.sample()
+                    latents_neg = latents_neg * vae.config.scaling_factor
+
+                    # Sample noise that we'll add to the negative latents
+                    noise_neg = torch.randn_like(latents_neg)
+
+                    # Add noise to the negative latents according to the noise magnitude at each timestep
+                    noisy_latents_neg = noise_scheduler.add_noise(latents_neg, noise_neg, timesteps)
+
+                    # Predict the noise residual for the negative latents
+                    model_pred_neg = unet(noisy_latents_neg, timesteps, encoder_hidden_states).sample
+
                 if txt_neg is not None:
                     model_pred_neg = unet(noisy_latents, timesteps, encoder_hidden_states_neg).sample
+                if txt_neg is not None or img_neg is not None:
                     if args.relativistic:
                         diff_neg = F.mse_loss(model_pred_neg.float(), model_pred.float(), reduction="mean")
                     else:
@@ -654,6 +679,7 @@ def main():
 
                     wandb.log({"loss_neg": loss_neg.item()})
                     loss = loss_neg + loss
+
                 wandb.log({"loss": loss.item()})
 
                 # Gather the losses across all processes for logging (if we use distributed training).
@@ -678,7 +704,8 @@ def main():
 
                 accelerator.wait_for_everyone()
 
-                if global_step % args.checkpointing_steps == 250:
+                # if global_step % args.checkpointing_steps == 250:
+                if False:
                     if accelerator.is_main_process:
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
                         if not os.path.exists(save_path):
@@ -801,7 +828,8 @@ def main():
                     del pipeline_img2img
                     torch.cuda.empty_cache()
             
-                elif global_step % args.checkpointing_steps == 450 and accelerator.is_main_process:
+                # elif False global_step % args.checkpointing_steps == 450 and accelerator.is_main_process:
+                elif False:
                     save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
                     if not os.path.exists(save_path):
                         os.makedirs(save_path)

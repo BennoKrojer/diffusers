@@ -54,7 +54,7 @@ def get_dataset(dataset_name, root_dir, transform=None, resize=512, scoring_only
     elif dataset_name == 'mscoco':
         return MSCOCODataset(root_dir, transform, resize=resize, split=split, tokenizer=tokenizer, hard_neg=hard_neg, neg_img=neg_img)
     elif dataset_name == 'mscoco_val':
-        return ValidMSCOCODataset(root_dir, transform, resize=resize, split='val', tokenizer=tokenizer)
+        return ValidMSCOCODataset(root_dir, transform, resize=resize, split='val', tokenizer=tokenizer, neg_img=True, hard_neg=False)
     else:
         raise ValueError(f'Unknown dataset {dataset_name}')
 
@@ -195,10 +195,10 @@ class BiasDataset(Dataset):
             self.arab_imgs = list(glob(f'{root_dir}/data/Images/Nationality/Arab/*.jpg'))
             self.data.extend([(img_path,5) for img_path in self.arab_imgs])
         # Sexuality
-        if 'Hetero' in targets:
+        if 'Heterosexual' in targets:
             self.hetero_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/Heterosexual/*.jpg'))
             self.data.extend([(img_path,6) for img_path in self.hetero_imgs])
-        if 'LBGT' in targets:
+        if 'LGBT' in targets:
             self.lgbt_imgs = list(glob(f'{root_dir}/data/Images/Sexual Orientation/LGBT/*.jpg'))
             self.data.extend([(img_path,7) for img_path in self.lgbt_imgs])
         # uncommment for just subset
@@ -315,13 +315,21 @@ class MSCOCODataset(Dataset):
         self.tokenizer = tokenizer
         self.hard_neg = hard_neg
         self.neg_img = neg_img
-        karpathy_train = json.load(open(('datasets/mscoco/coco_karpathy_train.json', 'r')))
+        self.rand_neg = not self.hard_neg
+        karpathy_train = json.load(open('datasets/mscoco/coco_karpathy_train.json', 'r'))
         # Process the JSON data
         self.img_id2path = {}
-        for item in self.data:
-            image_id = item['image_id'].replace('coco_', '')
+        for item in karpathy_train:
+            image_id = int(item['image_id'].replace('coco_', ''))
             image_path = item['image']
             self.img_id2path[image_id] = image_path
+        def filter_func(row):
+            neg_img_ids = ast.literal_eval(row['neg_image'])
+            return any(img_id in self.img_id2path for img_id in neg_img_ids)
+
+        self.data = self.data[self.data.apply(filter_func, axis=1)]
+        
+
 
     def __len__(self):
         return len(self.data)
@@ -342,12 +350,15 @@ class MSCOCODataset(Dataset):
         neg_img_ids = ast.literal_eval(row['neg_image'])
         neg_paths = []
         for img_id in neg_img_ids:
-            neg_path = self.img_id2path[img_id]
+            try:
+                neg_path = self.img_id2path[img_id]
+            except:
+                continue
             neg_path = neg_path.split('/')[-1]
-            if 'train2014' in img_path:
-                neg_path = f"{self.root_dir}/{img_path}"
+            if 'train2014' in neg_path:
+                neg_path = f"{self.root_dir}/{neg_path}"
             else:
-                neg_path = f"datasets/coco_order/val2014/{img_path}"
+                neg_path = f"datasets/coco_order/val2014/{neg_path}"
             neg_paths.append(neg_path)
         
         if self.tokenizer:
@@ -382,13 +393,17 @@ class MSCOCODataset(Dataset):
             else:
                 rand_img = rand_img.resize((self.resize, self.resize))
                 rand_img = diffusers_preprocess(rand_img)
-            imgs = imgs.append(rand_img)
+            imgs.append(rand_img)
+
+        # print("Img true:", img_path)
+        # print("Neg Img:", rand_path)
+        # print(text)
         
         return [0, imgs], text, 0
 
 
 class ValidMSCOCODataset(Dataset):
-    def __init__(self, root_dir, transform, resize=512, split='val', tokenizer=None, hard_neg=True, tsv_path='aro/temp_data/valid_neg_clip.tsv'):
+    def __init__(self, root_dir, transform, resize=512, split='val', tokenizer=None, hard_neg=False, tsv_path='aro/temp_data/valid_neg_clip.tsv', neg_img=False):
         self.root_dir = 'datasets/mscoco/'
         self.resize = resize
         self.data = pd.read_csv(tsv_path, delimiter='\t')
@@ -396,6 +411,21 @@ class ValidMSCOCODataset(Dataset):
         self.split = split
         self.tokenizer = tokenizer
         self.hard_neg = hard_neg
+        self.neg_img = neg_img
+
+        karpathy_train = json.load(open('datasets/coco_order/coco_karpathy_val.json', 'r'))
+        # Process the JSON data
+        self.img_id2path = {}
+        for item in karpathy_train:
+            image_path = item['image']
+            image_id = int(image_path.split('/')[-1].split('.')[0].split('_')[-1])
+            self.img_id2path[image_id] = image_path
+        def filter_func(row):
+            neg_img_ids = ast.literal_eval(row['neg_image'])
+            return any(img_id in self.img_id2path for img_id in neg_img_ids)
+
+        self.data = self.data[self.data.apply(filter_func, axis=1)]
+        
 
     def __len__(self):
         return len(self.data)
@@ -407,18 +437,52 @@ class ValidMSCOCODataset(Dataset):
         img_path = img_path.split('/')[-1]
         img_path = f"datasets/coco_order/val2014/{img_path}"
         text = row['title']
-        neg_captions =  ast.literal_eval(row['neg_caption'])
-        neg_caption = neg_captions[np.random.randint(0, len(neg_captions))]
-        text = [text, neg_caption]
-                
+        if self.hard_neg:
+            neg_captions =  ast.literal_eval(row['neg_caption'])
+            neg_caption = neg_captions[np.random.randint(0, len(neg_captions))]
+            text = [text, neg_caption]
+        else:
+            text = [text]
+
+        neg_img_ids = ast.literal_eval(row['neg_image'])
+        neg_paths = []
+        for img_id in neg_img_ids:
+            try:
+                neg_path = self.img_id2path[img_id]
+            except:
+                continue
+            neg_path = neg_path.split('/')[-1]
+            if 'train2014' in neg_path:
+                neg_path = f"{self.root_dir}/{neg_path}"
+            else:
+                neg_path = f"datasets/coco_order/val2014/{neg_path}"
+            neg_paths.append(neg_path)     
+
+
         img = Image.open(img_path).convert("RGB")
         if self.transform:
             img_resize = self.transform(img).unsqueeze(0)
         else:
             img_resize = img.resize((self.resize, self.resize))
             img_resize = diffusers_preprocess(img_resize)
+        imgs = [img_resize]
 
-        return [0, [img_resize]], text, 0
+        if self.neg_img:
+            assert not self.hard_neg
+            rand_path = neg_paths[np.random.randint(0, len(neg_paths))]
+            rand_img = Image.open(rand_path).convert("RGB")
+            if self.transform:
+                rand_img = self.transform(rand_img).unsqueeze(0)
+            else:
+                rand_img = rand_img.resize((self.resize, self.resize))
+                rand_img = diffusers_preprocess(rand_img)
+            imgs.append(rand_img)
+
+        print("Img true:", img_path)
+        print("Neg Img:", rand_path)
+        print(text)
+
+        return [0, imgs], text, 0
 
 
 class Flickr30KDataset(Dataset):

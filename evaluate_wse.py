@@ -83,6 +83,8 @@ def main(args):
     clevr_dict = {}
     bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
+        if i < args.skip:
+            continue
         if args.subset and i % 15 != 0:
             continue
         scores = scorer.score_batch(i, args, batch, model)
@@ -184,6 +186,7 @@ if __name__ == '__main__':
     parser.add_argument('--task', type=str)
     # parser.add_argument('--similarity', type=str, default='clip')
     parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--skip', type=int, default=0, help='number of batches to skip\nuse: skip if i < args.skip\ni.e. put 49 if you mean 50')
     parser.add_argument('--cache', action='store_true')
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=4)
@@ -203,7 +206,9 @@ if __name__ == '__main__':
     torch.cuda.set_device(args.cuda_device)
 
     if args.lora_dir:
-        if 'hardneg1.0' in args.lora_dir:
+        if 'hardimgneg' in args.lora_dir:
+            lora_type = 'hardimgneg'
+        elif 'hardneg1.0' in args.lora_dir:
             lora_type = "hard_neg1.0"
         elif 'vanilla_coco' in args.lora_dir:
             lora_type = "vanilla_coco"
