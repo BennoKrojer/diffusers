@@ -1,0 +1,3 @@
+Accuracy: 0.7130952380952381
+Max more than once: 30
+Sample size 7560

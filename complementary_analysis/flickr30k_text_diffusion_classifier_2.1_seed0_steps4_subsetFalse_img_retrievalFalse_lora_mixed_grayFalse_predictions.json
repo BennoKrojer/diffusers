@@ -1,0 +1,194 @@
+[
+    {
+        "id": 0,
+        "correct": 1,
+        "text": "A group of people stand in the back of a truck filled with cotton.",
+        "img_path": "datasets/flickr30k/images/1018148011.jpg"
+    },
+    {
+        "id": 1,
+        "correct": 0,
+        "text": "An adult wearing a gray shirt with red sleeves sleeping on a couch.",
+        "img_path": "datasets/flickr30k/images/1029450589.jpg"
+    },
+    {
+        "id": 2,
+        "correct": 1,
+        "text": "Boy in brown shirt with headphones on sits on woman's shoulders in a crowd.",
+        "img_path": "datasets/flickr30k/images/1029737941.jpg"
+    },
+    {
+        "id": 3,
+        "correct": 1,
+        "text": "Two men, standing on an ice, looking into something covered with a blue tarp.",
+        "img_path": "datasets/flickr30k/images/103205630.jpg"
+    },
+    {
+        "id": 4,
+        "correct": 1,
+        "text": "A man in a green shirt and red life jacket is sitting in a canoe drifting around the lake.",
+        "img_path": "datasets/flickr30k/images/10350842.jpg"
+    },
+    {
+        "id": 5,
+        "correct": 1,
+        "text": "A woman in jeans and a red coat and carrying a multicolored handbag spreads put her arms while leaping up from a cobblestone street.",
+        "img_path": "datasets/flickr30k/images/1054620089.jpg"
+    },
+    {
+        "id": 6,
+        "correct": 0,
+        "text": "Two dogs run towards each other on a rocky area with water in the background.",
+        "img_path": "datasets/flickr30k/images/1056873310.jpg"
+    },
+    {
+        "id": 7,
+        "correct": 0,
+        "text": "A young helmeted man, in his team uniform, is swinging his bat at an incoming baseball.",
+        "img_path": "datasets/flickr30k/images/1072439304.jpg"
+    },
+    {
+        "id": 8,
+        "correct": 1,
+        "text": "A guy sitting at a desk talking on a phone with books laying everywhere.",
+        "img_path": "datasets/flickr30k/images/1073444492.jpg"
+    },
+    {
+        "id": 9,
+        "correct": 1,
+        "text": "Woman is enjoying herself being outdoors biking in a forrest preserve.",
+        "img_path": "datasets/flickr30k/images/1092437557.jpg"
+    },
+    {
+        "id": 10,
+        "correct": 1,
+        "text": "A boy wearing blue and yellow walking on a cliff edge.",
+        "img_path": "datasets/flickr30k/images/109671650.jpg"
+    },
+    {
+        "id": 11,
+        "correct": 1,
+        "text": "A snowmobile rider flies through the air on his or her machine in front of tall pine trees.",
+        "img_path": "datasets/flickr30k/images/109738763.jpg"
+    },
+    {
+        "id": 12,
+        "correct": 1,
+        "text": "A mother and three children collecting garbage from a blue and white garbage can on the street.",
+        "img_path": "datasets/flickr30k/images/109982467.jpg"
+    },
+    {
+        "id": 13,
+        "correct": 0,
+        "text": "A dark-haired woman in a green and white apron sits amid her outdoor display of flowers for sale on a city street.",
+        "img_path": "datasets/flickr30k/images/110269384.jpg"
+    },
+    {
+        "id": 14,
+        "correct": 0,
+        "text": "There is a woman and man wearing orange shirts, playing instruments with sheet paper in front of them.",
+        "img_path": "datasets/flickr30k/images/1107507919.jpg"
+    },
+    {
+        "id": 15,
+        "correct": 1,
+        "text": "People on ATVs and dirt bikes are traveling along a worn path in a field surrounded by trees.",
+        "img_path": "datasets/flickr30k/images/112243673.jpg"
+    },
+    {
+        "id": 16,
+        "correct": 0,
+        "text": "An older man sits back and relaxes on a patio outside an adobe building where many bicycles are propped.",
+        "img_path": "datasets/flickr30k/images/1124448967.jpg"
+    },
+    {
+        "id": 17,
+        "correct": 0,
+        "text": "A group of people are standing outside at a carnival, near a ride called the Green Jungle.",
+        "img_path": "datasets/flickr30k/images/1126137905.jpg"
+    },
+    {
+        "id": 18,
+        "correct": 0,
+        "text": "A young girl sitting on a small chair surrounded by what looks like handmade fabrics and bags.",
+        "img_path": "datasets/flickr30k/images/1128874064.jpg"
+    },
+    {
+        "id": 19,
+        "correct": 1,
+        "text": "There are three young people, one dark-haired holding a bottled drink, one with head tilted back and finger in her mouth, and one with spiked hair.",
+        "img_path": "datasets/flickr30k/images/1130017585.jpg"
+    },
+    {
+        "id": 20,
+        "correct": 1,
+        "text": "A group of people gather in a bar, and one man in a black shirt holds his arm and signals to the camera.",
+        "img_path": "datasets/flickr30k/images/1141643526.jpg"
+    },
+    {
+        "id": 21,
+        "correct": 1,
+        "text": "Woman and man walking across wooden rope bridge with a caution sign beside it.",
+        "img_path": "datasets/flickr30k/images/1141718391.jpg"
+    },
+    {
+        "id": 22,
+        "correct": 0,
+        "text": "A man in a gray cap, a pink tank top and short skirt, pink-and-black striped socks, and boots juggles knives in front of a brick building whose sign reads \"The Pump Room\" while onlookers watch.",
+        "img_path": "datasets/flickr30k/images/1150429218.jpg"
+    },
+    {
+        "id": 23,
+        "correct": 1,
+        "text": "Woman dressed in a green hat and apron is holding a tray full of drink samples.",
+        "img_path": "datasets/flickr30k/images/1155138244.jpg"
+    },
+    {
+        "id": 24,
+        "correct": 0,
+        "text": "Construction workers standing on top of a piece of machinery.",
+        "img_path": "datasets/flickr30k/images/116569042.jpg"
+    },
+    {
+        "id": 25,
+        "correct": 0,
+        "text": "Two dogs are playing rough in a green field of grass.",
+        "img_path": "datasets/flickr30k/images/1206506157.jpg"
+    },
+    {
+        "id": 26,
+        "correct": 1,
+        "text": "A baby on the floor laughing at an older another child.",
+        "img_path": "datasets/flickr30k/images/120764850.jpg"
+    },
+    {
+        "id": 27,
+        "correct": 1,
+        "text": "Three men in cold-weather styled clothing walking down a road.",
+        "img_path": "datasets/flickr30k/images/121556607.jpg"
+    },
+    {
+        "id": 28,
+        "correct": 1,
+        "text": "Someone parasailing with a green parachute that has a face on the top of it",
+        "img_path": "datasets/flickr30k/images/1215804065.jpg"
+    },
+    {
+        "id": 29,
+        "correct": 1,
+        "text": "A constructions site on the side of the mountain with a bulldozer digging in the ground that is all dirt",
+        "img_path": "datasets/flickr30k/images/123244147.jpg"
+    },
+    {
+        "id": 30,
+        "correct": 0,
+        "text": "A young girl in dark shorts and a blue tank top runs on the grass near an orange cone and tape.",
+        "img_path": "datasets/flickr30k/images/1235099089.jpg"
+    },
+    {
+        "id": 31,
+        "correct": 0,
+        "text": "A red liquids travels down a grate as it leaks across a street.",
+        "img_path": "datasets/flickr30k/images/123866385.jpg"
+    }
+]

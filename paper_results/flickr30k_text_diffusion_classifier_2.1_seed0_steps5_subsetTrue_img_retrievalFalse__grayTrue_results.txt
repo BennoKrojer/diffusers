@@ -1,0 +1,4 @@
+R@1: 0.0
+R@5: 0.75
+Max more than once: 0
+Sample size 8

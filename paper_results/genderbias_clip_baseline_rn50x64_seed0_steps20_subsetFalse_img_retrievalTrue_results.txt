@@ -1,0 +1,4 @@
+Clothes bias score 0.3207298441633477
+Bags bias score 0.40435729839033907
+Drinks bias score 0.09632420052124117
+Positive scores indicate bias towards males, closer to 0 is less bias

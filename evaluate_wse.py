@@ -35,7 +35,7 @@ class Scorer:
 
         imgs, texts = batch[0], batch[1]
         imgs, imgs_resize = imgs[0], imgs[1]
-        imgs, imgs_resize = [img.cuda() for img in imgs], [img.cuda() for img in imgs_resize]
+        imgs_resize = [img.cuda() for img in imgs_resize]
 
         scores = []
         for txt_idx, text in enumerate(texts):
@@ -44,7 +44,7 @@ class Scorer:
                     resized_img = resized_img.unsqueeze(0)
                 
                 print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, gray_baseline=args.gray_baseline)
+                dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=args.guidance_scale, sampling_steps=args.sampling_steps, unconditional=args.img_retrieval, gray_baseline=args.gray_baseline)
                 dists = dists.to(torch.float32)
                 dists = dists.mean(dim=1)
                 dists = -dists
@@ -75,6 +75,8 @@ def main(args):
 
     model, dataloader = accelerator.prepare(model, dataloader)
 
+    SKIP_NUMB = 9 if args.task == 'coco_order' else 3
+
     r1s = []
     r5s = []
     max_more_than_onces = 0
@@ -82,10 +84,11 @@ def main(args):
     ids = []
     clevr_dict = {}
     bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
+    gender_bias_scores = {'male_clothes': [], 'female_clothes': [], 'male_bags': [], 'female_bags': [], 'male_drinks': [], 'female_drinks': []}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
         if i < args.skip:
             continue
-        if args.subset and i % 15 != 0:
+        if args.subset and i % SKIP_NUMB != 0:
             continue
         scores = scorer.score_batch(i, args, batch, model)
         scores = scores.contiguous()
@@ -154,6 +157,15 @@ def main(args):
                 if (i+1)%5==0:
                     print(bias_scores)
                     save_bias_scores(f'./paper_results/{args.run_id}_interim_results{i}.json',bias_scores)
+            elif args.task == 'genderbias':                
+                phis = evaluate_scores(args,scores,batch)
+                for class_id, phi_list in phis.items():
+                    if type(phi_list[0]) != float: # convert from numpy to regular float for json purposes
+                        phi_list = [a.item() for a in phi_list]
+                    gender_bias_scores[class_id].extend(phi_list)
+                if (i+1)%5==0:
+                    print(gender_bias_scores)
+                    save_bias_scores(f'./paper_results/{args.run_id}_interim_results{i}.json',gender_bias_scores)
             else:
                 acc, max_more_than_once = evaluate_scores(args, scores, batch)
                 metrics += acc
@@ -179,7 +191,22 @@ def main(args):
             f.close()
         # now write new contents
         save_bias_scores(f'./paper_results/{args.run_id}_results.json', bias_scores)
-        save_bias_results(f'./paper_results/{args.run_id}_results.txt', bias_scores)
+        save_bias_results(f'./paper_results/{args.run_id}_results.txt', bias_scores, 'mmbias')
+    elif args.task == 'genderbias':
+        print("\n\n-------------------------We're done!-------------------------\nGender Bias Scores:")
+        print(gender_bias_scores)
+        if os.path.exists(f'./paper_results/{args.run_id}_results.json'):
+            with open(f'./paper_results/{args.run_id}_results.json', 'r') as f:
+                existing_bias_scores = json.load(f)
+                # add previously calculated ones
+                for class_idx, scores in gender_bias_scores.items():
+                    if scores == []: # only overwrite if didn't recalculate this time
+                        if str(class_idx) in existing_bias_scores:
+                            gender_bias_scores[class_idx] = existing_bias_scores[str(class_idx)]
+            f.close()
+        # now write new contents
+        save_bias_scores(f'./paper_results/{args.run_id}_results.json', gender_bias_scores)
+        save_bias_results(f'./paper_results/{args.run_id}_results.txt', gender_bias_scores, 'genderbias')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -196,6 +223,7 @@ if __name__ == '__main__':
     parser.add_argument('--gray_baseline', action='store_true')
     parser.add_argument('--version', type=str, default='2.1')
     parser.add_argument('--lora_dir', type=str, default='')
+    parser.add_argument('--guidance_scale', type=float, default=0.0)
     parser.add_argument('--targets', type=str, nargs='*', help="which target groups for mmbias",default='')
     args = parser.parse_args()
 
@@ -206,7 +234,13 @@ if __name__ == '__main__':
     torch.cuda.set_device(args.cuda_device)
 
     if args.lora_dir:
-        if 'hardimgneg' in args.lora_dir:
+        if 'mixed' in args.lora_dir:
+            lora_type = 'mixed'
+        elif 'LONGER' in args.lora_dir:
+            lora_type = 'vanilla_LONGER'
+        elif 'randneg' in args.lora_dir:
+            lora_type = 'randneg'
+        elif 'hardimgneg' in args.lora_dir:
             lora_type = 'hardimgneg'
         elif 'hardneg1.0' in args.lora_dir:
             lora_type = "hard_neg1.0"
@@ -221,7 +255,7 @@ if __name__ == '__main__':
         elif "inferencelike" in args.lora_dir:
             lora_type = "inferencelike"
 
-    args.run_id = f'{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}{args.targets}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}'
+    args.run_id = f'{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}{args.targets}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}_gray{args.gray_baseline}'
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'
         if not os.path.exists(args.cache_dir):

@@ -1,0 +1,4 @@
+R@1: 0.5
+R@5: 0.9166666666666666
+Max more than once: 0
+Sample size 24

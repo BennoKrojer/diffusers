@@ -56,10 +56,12 @@ class Scorer:
 def main(args):
 
     clip_version = 'RN50x64'
+    if args.version == 'vitb32':
+        clip_version = 'ViT-B/32'
     model, preprocess = clip.load(clip_version, device=args.cuda_device)
 
     scorer = Scorer(args)
-    dataset = get_dataset(args.task, f'datasets/{args.task}', transform=preprocess)
+    dataset = get_dataset(args.task, f'datasets/{args.task}', transform=preprocess, targets=args.targets)
 
     dataloader = DataLoader(dataset, batch_size=args.batchsize, shuffle=False, num_workers=0)
 
@@ -70,6 +72,7 @@ def main(args):
     ids = []
     clevr_dict = {}
     bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]}
+    gender_bias_scores = {'male_clothes': [], 'female_clothes': [], 'male_bags': [], 'female_bags': [], 'male_drinks': [], 'female_drinks': []}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
         if args.subset and i % 10 != 0:
             continue
@@ -131,6 +134,12 @@ def main(args):
                 if type(phi_list[0]) != float: # convert from numpy to regular float for json purposes
                     phi_list = [a.item() for a in phi_list]
                 bias_scores[class_idx].extend(phi_list)
+        elif args.task == 'genderbias':                
+            phis = evaluate_scores(args,scores,batch)
+            for class_id, phi_list in phis.items():
+                if phi_list and type(phi_list[0]) != float: # convert from numpy to regular float for json purposes
+                    phi_list = [a.item() for a in phi_list]
+                gender_bias_scores[class_id].extend(phi_list)
         else:
             acc, max_more_than_once = evaluate_scores(args, scores, batch)
             metrics += acc
@@ -144,8 +153,8 @@ def main(args):
     if args.task == 'mmbias':
         print("\n\n-------------------------We're done!-------------------------\nBias Scores:")
         print(bias_scores)
-        if os.path.exists(f'./paper_results/{args.run_id}_results_{clip_version}.json'):
-            with open(f'./paper_results/{args.run_id}_results_{clip_version}.json', 'r') as f:
+        if os.path.exists(f'./paper_results/{args.run_id}_results.json'):
+            with open(f'./paper_results/{args.run_id}_results.json', 'r') as f:
                 existing_bias_scores = json.load(f)
                 # add previously calculated ones
                 for class_idx, scores in bias_scores.items():
@@ -154,12 +163,28 @@ def main(args):
                             bias_scores[class_idx] = existing_bias_scores[str(class_idx)]
             f.close()
         # now write new contents
-        save_bias_scores(f'./paper_results/{args.run_id}_results_{clip_version}.json', bias_scores)
-        save_bias_results(f'./paper_results/{args.run_id}_results_{clip_version}.txt', bias_scores)
+        save_bias_scores(f'./paper_results/{args.run_id}_results.json', bias_scores)
+        save_bias_results(f'./paper_results/{args.run_id}_results.txt', bias_scores, 'mmbias')
+    elif args.task == 'genderbias':
+        print("\n\n-------------------------We're done!-------------------------\nGender Bias Scores:")
+        print(gender_bias_scores)
+        if os.path.exists(f'./paper_results/{args.run_id}_results.json'):
+            with open(f'./paper_results/{args.run_id}_results.json', 'r') as f:
+                existing_bias_scores = json.load(f)
+                # add previously calculated ones
+                for class_idx, scores in gender_bias_scores.items():
+                    if scores == []: # only overwrite if didn't recalculate this time
+                        if str(class_idx) in existing_bias_scores:
+                            gender_bias_scores[class_idx] = existing_bias_scores[str(class_idx)]
+            f.close()
+        # now write new contents
+        save_bias_scores(f'./paper_results/{args.run_id}_results.json', gender_bias_scores)
+        save_bias_results(f'./paper_results/{args.run_id}_results.txt', gender_bias_scores, 'genderbias')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--task', type=str)
+    parser.add_argument('--version', type=str, default='rn50x64', help="version of clip to use, default is rn50x64")
     # parser.add_argument('--similarity', type=str, default='clip')
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--cache', action='store_true')
@@ -168,6 +193,7 @@ if __name__ == '__main__':
     parser.add_argument('--subset', action='store_true')
     parser.add_argument('--sampling_steps', type=int, default=250)
     parser.add_argument('--img_retrieval', action='store_true')
+    parser.add_argument('--targets', type=str, nargs='*', help="which target groups for mmbias",default='')
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -176,7 +202,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.cuda.set_device(args.cuda_device)
 
-    args.run_id = f'{args.task}_clip_baseline_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}'
+    args.run_id = f'{args.task}_clip_baseline_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}_img_retrieval{args.img_retrieval}'
 
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'

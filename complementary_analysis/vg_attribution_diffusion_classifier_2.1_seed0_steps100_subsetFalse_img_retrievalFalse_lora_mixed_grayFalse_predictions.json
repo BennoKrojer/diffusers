@@ -1,0 +1,6092 @@
+[
+    {
+        "id": 0,
+        "correct": 1,
+        "text": "the open door and the crouched man",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 1,
+        "correct": 1,
+        "text": "the open door and the gray floor",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 2,
+        "correct": 1,
+        "text": "the open door and the metal floor",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 3,
+        "correct": 1,
+        "text": "the open door and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 4,
+        "correct": 1,
+        "text": "the open door and the brown shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 5,
+        "correct": 1,
+        "text": "the open door and the striped shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 6,
+        "correct": 1,
+        "text": "the crouched man and the gray floor",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 7,
+        "correct": 1,
+        "text": "the crouched man and the metal floor",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 8,
+        "correct": 1,
+        "text": "the crouched man and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 9,
+        "correct": 1,
+        "text": "the crouched man and the brown shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 10,
+        "correct": 1,
+        "text": "the crouched man and the striped shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 11,
+        "correct": 0,
+        "text": "the gray floor and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 12,
+        "correct": 1,
+        "text": "the gray floor and the brown shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 13,
+        "correct": 0,
+        "text": "the gray floor and the striped shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 14,
+        "correct": 1,
+        "text": "the metal floor and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 15,
+        "correct": 1,
+        "text": "the metal floor and the brown shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 16,
+        "correct": 1,
+        "text": "the metal floor and the striped shirt",
+        "img_path": "datasets/vg_attribution/images/2410049.jpg"
+    },
+    {
+        "id": 17,
+        "correct": 1,
+        "text": "the unpeeled banana and the black table",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 18,
+        "correct": 1,
+        "text": "the unpeeled banana and the light colored plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 19,
+        "correct": 1,
+        "text": "the unpeeled banana and the square plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 20,
+        "correct": 1,
+        "text": "the unpeeled banana and the white plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 21,
+        "correct": 1,
+        "text": "the black table and the unpeeled banana",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 22,
+        "correct": 0,
+        "text": "the black table and the attached banana",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 23,
+        "correct": 1,
+        "text": "the black table and the light colored plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 24,
+        "correct": 1,
+        "text": "the black table and the square plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 25,
+        "correct": 1,
+        "text": "the black table and the white plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 26,
+        "correct": 1,
+        "text": "the unpeeled banana and the light colored plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 27,
+        "correct": 1,
+        "text": "the unpeeled banana and the square plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 28,
+        "correct": 1,
+        "text": "the unpeeled banana and the white plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 29,
+        "correct": 0,
+        "text": "the attached banana and the light colored plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 30,
+        "correct": 0,
+        "text": "the attached banana and the square plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 31,
+        "correct": 1,
+        "text": "the attached banana and the white plate",
+        "img_path": "datasets/vg_attribution/images/2375361.jpg"
+    },
+    {
+        "id": 32,
+        "correct": 0,
+        "text": "the gray street and the empty boat",
+        "img_path": "datasets/vg_attribution/images/2410041.jpg"
+    },
+    {
+        "id": 33,
+        "correct": 0,
+        "text": "the gray street and the orange wall",
+        "img_path": "datasets/vg_attribution/images/2410041.jpg"
+    },
+    {
+        "id": 34,
+        "correct": 1,
+        "text": "the gray street and the green water",
+        "img_path": "datasets/vg_attribution/images/2410041.jpg"
+    },
+    {
+        "id": 35,
+        "correct": 1,
+        "text": "the empty boat and the orange wall",
+        "img_path": "datasets/vg_attribution/images/2410041.jpg"
+    },
+    {
+        "id": 36,
+        "correct": 0,
+        "text": "the empty boat and the green water",
+        "img_path": "datasets/vg_attribution/images/2410041.jpg"
+    },
+    {
+        "id": 37,
+        "correct": 1,
+        "text": "the orange wall and the green water",
+        "img_path": "datasets/vg_attribution/images/2410041.jpg"
+    },
+    {
+        "id": 38,
+        "correct": 1,
+        "text": "the brown bread and the square plate",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 39,
+        "correct": 1,
+        "text": "the brown bread and the white plate",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 40,
+        "correct": 1,
+        "text": "the burnt bread and the square plate",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 41,
+        "correct": 1,
+        "text": "the burnt bread and the white plate",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 42,
+        "correct": 1,
+        "text": "the brown bread and the little sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 43,
+        "correct": 1,
+        "text": "the brown bread and the small sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 44,
+        "correct": 1,
+        "text": "the burnt bread and the little sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 45,
+        "correct": 1,
+        "text": "the burnt bread and the small sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 46,
+        "correct": 0,
+        "text": "the square plate and the little sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 47,
+        "correct": 0,
+        "text": "the square plate and the small sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 48,
+        "correct": 0,
+        "text": "the white plate and the little sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 49,
+        "correct": 0,
+        "text": "the white plate and the small sandwiches",
+        "img_path": "datasets/vg_attribution/images/2343566.jpg"
+    },
+    {
+        "id": 50,
+        "correct": 1,
+        "text": "the wood wall and the brown horse",
+        "img_path": "datasets/vg_attribution/images/2414605.jpg"
+    },
+    {
+        "id": 51,
+        "correct": 0,
+        "text": "the paved street and the green dress",
+        "img_path": "datasets/vg_attribution/images/1591973.jpg"
+    },
+    {
+        "id": 52,
+        "correct": 0,
+        "text": "the paved street and the large umbrella",
+        "img_path": "datasets/vg_attribution/images/1591973.jpg"
+    },
+    {
+        "id": 53,
+        "correct": 1,
+        "text": "the paved street and the white umbrella",
+        "img_path": "datasets/vg_attribution/images/1591973.jpg"
+    },
+    {
+        "id": 54,
+        "correct": 1,
+        "text": "the green dress and the large umbrella",
+        "img_path": "datasets/vg_attribution/images/1591973.jpg"
+    },
+    {
+        "id": 55,
+        "correct": 1,
+        "text": "the green dress and the white umbrella",
+        "img_path": "datasets/vg_attribution/images/1591973.jpg"
+    },
+    {
+        "id": 56,
+        "correct": 0,
+        "text": "the brown crust and the white cheese",
+        "img_path": "datasets/vg_attribution/images/2315418.jpg"
+    },
+    {
+        "id": 57,
+        "correct": 0,
+        "text": "the black racket and the bright ground",
+        "img_path": "datasets/vg_attribution/images/2409694.jpg"
+    },
+    {
+        "id": 58,
+        "correct": 1,
+        "text": "the sitting man and the brown building",
+        "img_path": "datasets/vg_attribution/images/2379412.jpg"
+    },
+    {
+        "id": 59,
+        "correct": 0,
+        "text": "the sitting man and the gray sky",
+        "img_path": "datasets/vg_attribution/images/2379412.jpg"
+    },
+    {
+        "id": 60,
+        "correct": 0,
+        "text": "the brown building and the gray sky",
+        "img_path": "datasets/vg_attribution/images/2379412.jpg"
+    },
+    {
+        "id": 61,
+        "correct": 1,
+        "text": "the brown cat and the green jacket",
+        "img_path": "datasets/vg_attribution/images/2375145.jpg"
+    },
+    {
+        "id": 62,
+        "correct": 1,
+        "text": "the furry cat and the green jacket",
+        "img_path": "datasets/vg_attribution/images/2375145.jpg"
+    },
+    {
+        "id": 63,
+        "correct": 1,
+        "text": "the white truck and the small tree",
+        "img_path": "datasets/vg_attribution/images/2394854.jpg"
+    },
+    {
+        "id": 64,
+        "correct": 1,
+        "text": "the white truck and the red building",
+        "img_path": "datasets/vg_attribution/images/2394854.jpg"
+    },
+    {
+        "id": 65,
+        "correct": 1,
+        "text": "the white truck and the brick building",
+        "img_path": "datasets/vg_attribution/images/2394854.jpg"
+    },
+    {
+        "id": 66,
+        "correct": 1,
+        "text": "the small tree and the red building",
+        "img_path": "datasets/vg_attribution/images/2394854.jpg"
+    },
+    {
+        "id": 67,
+        "correct": 1,
+        "text": "the small tree and the brick building",
+        "img_path": "datasets/vg_attribution/images/2394854.jpg"
+    },
+    {
+        "id": 68,
+        "correct": 1,
+        "text": "the young girl and the pink shirt",
+        "img_path": "datasets/vg_attribution/images/2394852.jpg"
+    },
+    {
+        "id": 69,
+        "correct": 0,
+        "text": "the happy girl and the pink shirt",
+        "img_path": "datasets/vg_attribution/images/2394852.jpg"
+    },
+    {
+        "id": 70,
+        "correct": 0,
+        "text": "the smiling girl and the pink shirt",
+        "img_path": "datasets/vg_attribution/images/2394852.jpg"
+    },
+    {
+        "id": 71,
+        "correct": 0,
+        "text": "the young girl and the pink shirt",
+        "img_path": "datasets/vg_attribution/images/2394852.jpg"
+    },
+    {
+        "id": 72,
+        "correct": 1,
+        "text": "the white legs and the long tail",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 73,
+        "correct": 1,
+        "text": "the white legs and the orange tail",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 74,
+        "correct": 1,
+        "text": "the white legs and the mesh table",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 75,
+        "correct": 1,
+        "text": "the white legs and the sleeping cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 76,
+        "correct": 1,
+        "text": "the white legs and the fluffy cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 77,
+        "correct": 0,
+        "text": "the white legs and the orange cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 78,
+        "correct": 0,
+        "text": "the long tail and the mesh table",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 79,
+        "correct": 0,
+        "text": "the orange tail and the mesh table",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 80,
+        "correct": 1,
+        "text": "the long tail and the sleeping cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 81,
+        "correct": 1,
+        "text": "the long tail and the fluffy cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 82,
+        "correct": 1,
+        "text": "the mesh table and the sleeping cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 83,
+        "correct": 1,
+        "text": "the mesh table and the fluffy cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 84,
+        "correct": 0,
+        "text": "the mesh table and the orange cat",
+        "img_path": "datasets/vg_attribution/images/2375140.jpg"
+    },
+    {
+        "id": 85,
+        "correct": 0,
+        "text": "the rusty fire hydrant and the concrete ground",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 86,
+        "correct": 0,
+        "text": "the white fire hydrant and the concrete ground",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 87,
+        "correct": 1,
+        "text": "the rusty fire hydrant and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 88,
+        "correct": 1,
+        "text": "the white fire hydrant and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 89,
+        "correct": 1,
+        "text": "the rusty fire hydrant and the painted wall",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 90,
+        "correct": 1,
+        "text": "the concrete ground and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 91,
+        "correct": 1,
+        "text": "the concrete ground and the painted wall",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 92,
+        "correct": 1,
+        "text": "the concrete ground and the white wall",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 93,
+        "correct": 1,
+        "text": "the concrete ground and the white building",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 94,
+        "correct": 1,
+        "text": "the blue sky and the painted wall",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 95,
+        "correct": 1,
+        "text": "the blue sky and the white wall",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 96,
+        "correct": 1,
+        "text": "the blue sky and the white building",
+        "img_path": "datasets/vg_attribution/images/2378230.jpg"
+    },
+    {
+        "id": 97,
+        "correct": 0,
+        "text": "the black laptop and the stacked books",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 98,
+        "correct": 1,
+        "text": "the black laptop and the vertical blinds",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 99,
+        "correct": 1,
+        "text": "the black laptop and the brown blinds",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 100,
+        "correct": 1,
+        "text": "the black laptop and the horizontal blinds",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 101,
+        "correct": 1,
+        "text": "the black laptop and the blue printer",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 102,
+        "correct": 1,
+        "text": "the black laptop and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 103,
+        "correct": 1,
+        "text": "the stacked books and the vertical blinds",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 104,
+        "correct": 1,
+        "text": "the stacked books and the brown blinds",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 105,
+        "correct": 1,
+        "text": "the stacked books and the horizontal blinds",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 106,
+        "correct": 1,
+        "text": "the stacked books and the blue printer",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 107,
+        "correct": 1,
+        "text": "the stacked books and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 108,
+        "correct": 0,
+        "text": "the vertical blinds and the blue printer",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 109,
+        "correct": 1,
+        "text": "the brown blinds and the blue printer",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 110,
+        "correct": 1,
+        "text": "the horizontal blinds and the blue printer",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 111,
+        "correct": 1,
+        "text": "the vertical blinds and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 112,
+        "correct": 1,
+        "text": "the brown blinds and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 113,
+        "correct": 1,
+        "text": "the horizontal blinds and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 114,
+        "correct": 1,
+        "text": "the blue printer and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2374892.jpg"
+    },
+    {
+        "id": 115,
+        "correct": 0,
+        "text": "the large crowd and the baseball game",
+        "img_path": "datasets/vg_attribution/images/2329750.jpg"
+    },
+    {
+        "id": 116,
+        "correct": 0,
+        "text": "the large crowd and the baseball field",
+        "img_path": "datasets/vg_attribution/images/2329750.jpg"
+    },
+    {
+        "id": 117,
+        "correct": 1,
+        "text": "the blue shirt and the cooking person",
+        "img_path": "datasets/vg_attribution/images/2397582.jpg"
+    },
+    {
+        "id": 118,
+        "correct": 1,
+        "text": "the blue shirt and the smooth burner",
+        "img_path": "datasets/vg_attribution/images/2397582.jpg"
+    },
+    {
+        "id": 119,
+        "correct": 1,
+        "text": "the blue shirt and the cooking burner",
+        "img_path": "datasets/vg_attribution/images/2397582.jpg"
+    },
+    {
+        "id": 120,
+        "correct": 1,
+        "text": "the brown field and the bending boy",
+        "img_path": "datasets/vg_attribution/images/2346551.jpg"
+    },
+    {
+        "id": 121,
+        "correct": 1,
+        "text": "the dry field and the bending boy",
+        "img_path": "datasets/vg_attribution/images/2346551.jpg"
+    },
+    {
+        "id": 122,
+        "correct": 1,
+        "text": "the grassy field and the bending boy",
+        "img_path": "datasets/vg_attribution/images/2346551.jpg"
+    },
+    {
+        "id": 123,
+        "correct": 0,
+        "text": "the large bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 124,
+        "correct": 0,
+        "text": "the large bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 125,
+        "correct": 1,
+        "text": "the large bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 126,
+        "correct": 1,
+        "text": "the large bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 127,
+        "correct": 0,
+        "text": "the covered bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 128,
+        "correct": 0,
+        "text": "the covered bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 129,
+        "correct": 0,
+        "text": "the covered bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 130,
+        "correct": 0,
+        "text": "the covered bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 131,
+        "correct": 0,
+        "text": "the painted bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 132,
+        "correct": 0,
+        "text": "the painted bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 133,
+        "correct": 0,
+        "text": "the painted bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 134,
+        "correct": 0,
+        "text": "the painted bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 135,
+        "correct": 1,
+        "text": "the parked bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 136,
+        "correct": 1,
+        "text": "the parked bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 137,
+        "correct": 1,
+        "text": "the parked bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 138,
+        "correct": 1,
+        "text": "the parked bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 139,
+        "correct": 1,
+        "text": "the metal bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 140,
+        "correct": 1,
+        "text": "the metal bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 141,
+        "correct": 1,
+        "text": "the metal bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 142,
+        "correct": 1,
+        "text": "the metal bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 143,
+        "correct": 0,
+        "text": "the lit bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 144,
+        "correct": 0,
+        "text": "the lit bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 145,
+        "correct": 1,
+        "text": "the lit bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 146,
+        "correct": 1,
+        "text": "the lit bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 147,
+        "correct": 0,
+        "text": "the white bus and the paved roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 148,
+        "correct": 0,
+        "text": "the white bus and the lined roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 149,
+        "correct": 0,
+        "text": "the white bus and the concrete roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 150,
+        "correct": 0,
+        "text": "the white bus and the black roadway",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 151,
+        "correct": 0,
+        "text": "the large bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 152,
+        "correct": 1,
+        "text": "the covered bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 153,
+        "correct": 1,
+        "text": "the painted bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 154,
+        "correct": 1,
+        "text": "the parked bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 155,
+        "correct": 1,
+        "text": "the metal bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 156,
+        "correct": 1,
+        "text": "the lit bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 157,
+        "correct": 0,
+        "text": "the white bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 158,
+        "correct": 0,
+        "text": "the paved roadway and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 159,
+        "correct": 1,
+        "text": "the lined roadway and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 160,
+        "correct": 0,
+        "text": "the concrete roadway and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 161,
+        "correct": 1,
+        "text": "the black roadway and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2406404.jpg"
+    },
+    {
+        "id": 162,
+        "correct": 1,
+        "text": "the pointy fence and the black coat",
+        "img_path": "datasets/vg_attribution/images/2343077.jpg"
+    },
+    {
+        "id": 163,
+        "correct": 0,
+        "text": "the dark walls and the open door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 164,
+        "correct": 1,
+        "text": "the dark walls and the framed door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 165,
+        "correct": 0,
+        "text": "the stone walls and the open door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 166,
+        "correct": 1,
+        "text": "the stone walls and the framed door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 167,
+        "correct": 0,
+        "text": "the fake walls and the open door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 168,
+        "correct": 1,
+        "text": "the fake walls and the framed door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 169,
+        "correct": 0,
+        "text": "the rough walls and the open door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 170,
+        "correct": 1,
+        "text": "the rough walls and the framed door",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 171,
+        "correct": 1,
+        "text": "the dark walls and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 172,
+        "correct": 1,
+        "text": "the dark walls and the clean toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 173,
+        "correct": 1,
+        "text": "the dark walls and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 174,
+        "correct": 1,
+        "text": "the stone walls and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 175,
+        "correct": 1,
+        "text": "the stone walls and the clean toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 176,
+        "correct": 1,
+        "text": "the stone walls and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 177,
+        "correct": 1,
+        "text": "the fake walls and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 178,
+        "correct": 1,
+        "text": "the fake walls and the clean toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 179,
+        "correct": 1,
+        "text": "the fake walls and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 180,
+        "correct": 1,
+        "text": "the rough walls and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 181,
+        "correct": 1,
+        "text": "the rough walls and the clean toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 182,
+        "correct": 1,
+        "text": "the rough walls and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 183,
+        "correct": 1,
+        "text": "the dark walls and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 184,
+        "correct": 1,
+        "text": "the dark walls and the white cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 185,
+        "correct": 1,
+        "text": "the stone walls and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 186,
+        "correct": 1,
+        "text": "the stone walls and the white cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 187,
+        "correct": 1,
+        "text": "the fake walls and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 188,
+        "correct": 1,
+        "text": "the fake walls and the white cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 189,
+        "correct": 1,
+        "text": "the rough walls and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 190,
+        "correct": 1,
+        "text": "the rough walls and the white cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 191,
+        "correct": 1,
+        "text": "the open door and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 192,
+        "correct": 1,
+        "text": "the open door and the clean toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 193,
+        "correct": 1,
+        "text": "the open door and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 194,
+        "correct": 1,
+        "text": "the framed door and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 195,
+        "correct": 1,
+        "text": "the framed door and the clean toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 196,
+        "correct": 1,
+        "text": "the framed door and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 197,
+        "correct": 1,
+        "text": "the open door and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 198,
+        "correct": 1,
+        "text": "the open door and the white cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 199,
+        "correct": 0,
+        "text": "the framed door and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 200,
+        "correct": 1,
+        "text": "the framed door and the white cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 201,
+        "correct": 1,
+        "text": "the porcelain toilet and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 202,
+        "correct": 1,
+        "text": "the clean toilet and the large cupboard",
+        "img_path": "datasets/vg_attribution/images/2347977.jpg"
+    },
+    {
+        "id": 203,
+        "correct": 1,
+        "text": "the dark brown icing and the silver fork",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 204,
+        "correct": 1,
+        "text": "the dark brown icing and the metal fork",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 205,
+        "correct": 1,
+        "text": "the dark brown icing and the round plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 206,
+        "correct": 1,
+        "text": "the dark brown icing and the rimmed plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 207,
+        "correct": 1,
+        "text": "the dark brown icing and the white plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 208,
+        "correct": 1,
+        "text": "the dark brown icing and the rectangular dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 209,
+        "correct": 0,
+        "text": "the dark brown icing and the brown dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 210,
+        "correct": 0,
+        "text": "the dark brown icing and the chocolate dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 211,
+        "correct": 1,
+        "text": "the silver fork and the round plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 212,
+        "correct": 1,
+        "text": "the silver fork and the rimmed plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 213,
+        "correct": 0,
+        "text": "the silver fork and the white plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 214,
+        "correct": 1,
+        "text": "the metal fork and the round plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 215,
+        "correct": 1,
+        "text": "the metal fork and the rimmed plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 216,
+        "correct": 1,
+        "text": "the metal fork and the white plate",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 217,
+        "correct": 1,
+        "text": "the silver fork and the rectangular dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 218,
+        "correct": 1,
+        "text": "the silver fork and the brown dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 219,
+        "correct": 1,
+        "text": "the silver fork and the chocolate dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 220,
+        "correct": 1,
+        "text": "the metal fork and the rectangular dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 221,
+        "correct": 1,
+        "text": "the metal fork and the brown dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 222,
+        "correct": 1,
+        "text": "the metal fork and the chocolate dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 223,
+        "correct": 1,
+        "text": "the round plate and the rectangular dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 224,
+        "correct": 1,
+        "text": "the round plate and the brown dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 225,
+        "correct": 1,
+        "text": "the round plate and the chocolate dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 226,
+        "correct": 1,
+        "text": "the rimmed plate and the rectangular dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 227,
+        "correct": 1,
+        "text": "the rimmed plate and the brown dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 228,
+        "correct": 1,
+        "text": "the rimmed plate and the chocolate dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 229,
+        "correct": 1,
+        "text": "the white plate and the rectangular dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 230,
+        "correct": 1,
+        "text": "the white plate and the brown dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 231,
+        "correct": 1,
+        "text": "the white plate and the chocolate dessert",
+        "img_path": "datasets/vg_attribution/images/2395984.jpg"
+    },
+    {
+        "id": 232,
+        "correct": 1,
+        "text": "the brown dog and the riding man",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 233,
+        "correct": 0,
+        "text": "the lying dog and the riding man",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 234,
+        "correct": 0,
+        "text": "the resting dog and the riding man",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 235,
+        "correct": 1,
+        "text": "the brown dog and the yellow outfit",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 236,
+        "correct": 1,
+        "text": "the lying dog and the yellow outfit",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 237,
+        "correct": 1,
+        "text": "the resting dog and the yellow outfit",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 238,
+        "correct": 0,
+        "text": "the brown dog and the driving motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 239,
+        "correct": 1,
+        "text": "the brown dog and the red motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 240,
+        "correct": 1,
+        "text": "the lying dog and the driving motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 241,
+        "correct": 1,
+        "text": "the lying dog and the red motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 242,
+        "correct": 1,
+        "text": "the resting dog and the driving motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 243,
+        "correct": 1,
+        "text": "the resting dog and the red motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 244,
+        "correct": 1,
+        "text": "the riding man and the yellow outfit",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 245,
+        "correct": 1,
+        "text": "the riding man and the driving motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 246,
+        "correct": 1,
+        "text": "the riding man and the red motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 247,
+        "correct": 1,
+        "text": "the yellow outfit and the driving motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 248,
+        "correct": 1,
+        "text": "the yellow outfit and the red motorcycle",
+        "img_path": "datasets/vg_attribution/images/2352130.jpg"
+    },
+    {
+        "id": 249,
+        "correct": 1,
+        "text": "the green grass and the long neck",
+        "img_path": "datasets/vg_attribution/images/2357747.jpg"
+    },
+    {
+        "id": 250,
+        "correct": 0,
+        "text": "the blue bus and the overgrown grass",
+        "img_path": "datasets/vg_attribution/images/2343311.jpg"
+    },
+    {
+        "id": 251,
+        "correct": 0,
+        "text": "the blue bus and the green grass",
+        "img_path": "datasets/vg_attribution/images/2343311.jpg"
+    },
+    {
+        "id": 252,
+        "correct": 0,
+        "text": "the painted bus and the overgrown grass",
+        "img_path": "datasets/vg_attribution/images/2343311.jpg"
+    },
+    {
+        "id": 253,
+        "correct": 0,
+        "text": "the painted bus and the green grass",
+        "img_path": "datasets/vg_attribution/images/2343311.jpg"
+    },
+    {
+        "id": 254,
+        "correct": 0,
+        "text": "the large bus and the overgrown grass",
+        "img_path": "datasets/vg_attribution/images/2343311.jpg"
+    },
+    {
+        "id": 255,
+        "correct": 0,
+        "text": "the large bus and the green grass",
+        "img_path": "datasets/vg_attribution/images/2343311.jpg"
+    },
+    {
+        "id": 256,
+        "correct": 1,
+        "text": "the blue sky and the full snow",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 257,
+        "correct": 1,
+        "text": "the blue sky and the brown snow",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 258,
+        "correct": 1,
+        "text": "the light sky and the full snow",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 259,
+        "correct": 1,
+        "text": "the light sky and the brown snow",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 260,
+        "correct": 1,
+        "text": "the blue sky and the large building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 261,
+        "correct": 1,
+        "text": "the blue sky and the covered building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 262,
+        "correct": 1,
+        "text": "the blue sky and the brown building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 263,
+        "correct": 1,
+        "text": "the light sky and the large building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 264,
+        "correct": 0,
+        "text": "the light sky and the covered building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 265,
+        "correct": 0,
+        "text": "the light sky and the brown building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 266,
+        "correct": 0,
+        "text": "the full snow and the large building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 267,
+        "correct": 0,
+        "text": "the full snow and the covered building",
+        "img_path": "datasets/vg_attribution/images/2411391.jpg"
+    },
+    {
+        "id": 268,
+        "correct": 1,
+        "text": "the dark water and the white boat",
+        "img_path": "datasets/vg_attribution/images/2360094.jpg"
+    },
+    {
+        "id": 269,
+        "correct": 1,
+        "text": "the dark water and the yellow fence",
+        "img_path": "datasets/vg_attribution/images/2360094.jpg"
+    },
+    {
+        "id": 270,
+        "correct": 1,
+        "text": "the white boat and the yellow fence",
+        "img_path": "datasets/vg_attribution/images/2360094.jpg"
+    },
+    {
+        "id": 271,
+        "correct": 1,
+        "text": "the red bus and the black backpack",
+        "img_path": "datasets/vg_attribution/images/2368088.jpg"
+    },
+    {
+        "id": 272,
+        "correct": 1,
+        "text": "the concrete street and the green trees",
+        "img_path": "datasets/vg_attribution/images/2415552.jpg"
+    },
+    {
+        "id": 273,
+        "correct": 1,
+        "text": "the yellow bike and the blue bikes",
+        "img_path": "datasets/vg_attribution/images/2321343.jpg"
+    },
+    {
+        "id": 274,
+        "correct": 1,
+        "text": "the dark shirt and the knotted tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 275,
+        "correct": 1,
+        "text": "the dark shirt and the shiny tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 276,
+        "correct": 1,
+        "text": "the dark shirt and the silk tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 277,
+        "correct": 1,
+        "text": "the dark shirt and the gray tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 278,
+        "correct": 1,
+        "text": "the striped shirt and the knotted tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 279,
+        "correct": 0,
+        "text": "the striped shirt and the shiny tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 280,
+        "correct": 1,
+        "text": "the striped shirt and the silk tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 281,
+        "correct": 1,
+        "text": "the striped shirt and the gray tie",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 282,
+        "correct": 0,
+        "text": "the dark shirt and the shiny collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 283,
+        "correct": 0,
+        "text": "the dark shirt and the black collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 284,
+        "correct": 0,
+        "text": "the fancy shirt and the shiny collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 285,
+        "correct": 0,
+        "text": "the fancy shirt and the black collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 286,
+        "correct": 1,
+        "text": "the knotted tie and the striped collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 287,
+        "correct": 1,
+        "text": "the knotted tie and the black collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 288,
+        "correct": 1,
+        "text": "the fancy tie and the striped collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 289,
+        "correct": 1,
+        "text": "the fancy tie and the black collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 290,
+        "correct": 0,
+        "text": "the silk tie and the striped collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 291,
+        "correct": 1,
+        "text": "the silk tie and the black collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 292,
+        "correct": 1,
+        "text": "the gray tie and the striped collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 293,
+        "correct": 1,
+        "text": "the gray tie and the black collar",
+        "img_path": "datasets/vg_attribution/images/2411027.jpg"
+    },
+    {
+        "id": 294,
+        "correct": 1,
+        "text": "the cloudy sky and the large cow",
+        "img_path": "datasets/vg_attribution/images/2395326.jpg"
+    },
+    {
+        "id": 295,
+        "correct": 1,
+        "text": "the cloudy sky and the healthy cow",
+        "img_path": "datasets/vg_attribution/images/2395326.jpg"
+    },
+    {
+        "id": 296,
+        "correct": 1,
+        "text": "the cloudy sky and the adult cow",
+        "img_path": "datasets/vg_attribution/images/2395326.jpg"
+    },
+    {
+        "id": 297,
+        "correct": 1,
+        "text": "the cloudy sky and the brown cow",
+        "img_path": "datasets/vg_attribution/images/2395326.jpg"
+    },
+    {
+        "id": 298,
+        "correct": 1,
+        "text": "the cloudy sky and the sandy cow",
+        "img_path": "datasets/vg_attribution/images/2395326.jpg"
+    },
+    {
+        "id": 299,
+        "correct": 1,
+        "text": "the cloudy sky and the walking cow",
+        "img_path": "datasets/vg_attribution/images/2395326.jpg"
+    },
+    {
+        "id": 300,
+        "correct": 1,
+        "text": "the white bus and the covered bus stop",
+        "img_path": "datasets/vg_attribution/images/2368884.jpg"
+    },
+    {
+        "id": 301,
+        "correct": 1,
+        "text": "the white bus and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2368884.jpg"
+    },
+    {
+        "id": 302,
+        "correct": 1,
+        "text": "the covered bus stop and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2368884.jpg"
+    },
+    {
+        "id": 303,
+        "correct": 1,
+        "text": "the tiny water and the thick tree",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 304,
+        "correct": 1,
+        "text": "the tiny water and the green tree",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 305,
+        "correct": 1,
+        "text": "the tiny water and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 306,
+        "correct": 1,
+        "text": "the tiny water and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 307,
+        "correct": 0,
+        "text": "the thick tree and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 308,
+        "correct": 1,
+        "text": "the thick tree and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 309,
+        "correct": 1,
+        "text": "the green tree and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 310,
+        "correct": 1,
+        "text": "the green tree and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2396982.jpg"
+    },
+    {
+        "id": 311,
+        "correct": 0,
+        "text": "the white cheese and the metal plate",
+        "img_path": "datasets/vg_attribution/images/2318653.jpg"
+    },
+    {
+        "id": 312,
+        "correct": 0,
+        "text": "the white cheese and the brown table",
+        "img_path": "datasets/vg_attribution/images/2318653.jpg"
+    },
+    {
+        "id": 313,
+        "correct": 0,
+        "text": "the white cheese and the wood table",
+        "img_path": "datasets/vg_attribution/images/2318653.jpg"
+    },
+    {
+        "id": 314,
+        "correct": 0,
+        "text": "the metal plate and the brown table",
+        "img_path": "datasets/vg_attribution/images/2318653.jpg"
+    },
+    {
+        "id": 315,
+        "correct": 0,
+        "text": "the metal plate and the wood table",
+        "img_path": "datasets/vg_attribution/images/2318653.jpg"
+    },
+    {
+        "id": 316,
+        "correct": 0,
+        "text": "the standing woman and the black jacket",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 317,
+        "correct": 0,
+        "text": "the standing woman and the gray fence",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 318,
+        "correct": 0,
+        "text": "the standing woman and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 319,
+        "correct": 0,
+        "text": "the standing woman and the white ground",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 320,
+        "correct": 0,
+        "text": "the black jacket and the gray fence",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 321,
+        "correct": 0,
+        "text": "the black jacket and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 322,
+        "correct": 1,
+        "text": "the black jacket and the white ground",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 323,
+        "correct": 1,
+        "text": "the gray fence and the white ground",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 324,
+        "correct": 0,
+        "text": "the chain-link fence and the white ground",
+        "img_path": "datasets/vg_attribution/images/2383415.jpg"
+    },
+    {
+        "id": 325,
+        "correct": 1,
+        "text": "the black pants and the melted cheese",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 326,
+        "correct": 1,
+        "text": "the black pants and the american cheese",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 327,
+        "correct": 1,
+        "text": "the black pants and the white cheese",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 328,
+        "correct": 1,
+        "text": "the black pants and the yellow mustard",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 329,
+        "correct": 1,
+        "text": "the black pants and the diced onions",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 330,
+        "correct": 1,
+        "text": "the black pants and the white onions",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 331,
+        "correct": 1,
+        "text": "the black pants and the white paper",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 332,
+        "correct": 1,
+        "text": "the black pants and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 333,
+        "correct": 1,
+        "text": "the black pants and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 334,
+        "correct": 1,
+        "text": "the black pants and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 335,
+        "correct": 1,
+        "text": "the black pants and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 336,
+        "correct": 1,
+        "text": "the melted cheese and the yellow mustard",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 337,
+        "correct": 1,
+        "text": "the american cheese and the yellow mustard",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 338,
+        "correct": 0,
+        "text": "the white cheese and the yellow mustard",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 339,
+        "correct": 0,
+        "text": "the melted cheese and the diced onions",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 340,
+        "correct": 0,
+        "text": "the american cheese and the diced onions",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 341,
+        "correct": 1,
+        "text": "the melted cheese and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 342,
+        "correct": 1,
+        "text": "the melted cheese and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 343,
+        "correct": 1,
+        "text": "the american cheese and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 344,
+        "correct": 0,
+        "text": "the american cheese and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 345,
+        "correct": 0,
+        "text": "the white cheese and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 346,
+        "correct": 0,
+        "text": "the white cheese and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 347,
+        "correct": 1,
+        "text": "the melted cheese and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 348,
+        "correct": 1,
+        "text": "the melted cheese and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 349,
+        "correct": 1,
+        "text": "the american cheese and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 350,
+        "correct": 1,
+        "text": "the american cheese and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 351,
+        "correct": 0,
+        "text": "the white cheese and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 352,
+        "correct": 0,
+        "text": "the white cheese and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 353,
+        "correct": 1,
+        "text": "the yellow mustard and the diced onions",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 354,
+        "correct": 1,
+        "text": "the yellow mustard and the white onions",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 355,
+        "correct": 0,
+        "text": "the yellow mustard and the white paper",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 356,
+        "correct": 1,
+        "text": "the yellow mustard and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 357,
+        "correct": 0,
+        "text": "the yellow mustard and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 358,
+        "correct": 0,
+        "text": "the yellow mustard and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 359,
+        "correct": 1,
+        "text": "the yellow mustard and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 360,
+        "correct": 1,
+        "text": "the diced onions and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 361,
+        "correct": 0,
+        "text": "the diced onions and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 362,
+        "correct": 0,
+        "text": "the white onions and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 363,
+        "correct": 0,
+        "text": "the white onions and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 364,
+        "correct": 0,
+        "text": "the diced onions and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 365,
+        "correct": 1,
+        "text": "the diced onions and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 366,
+        "correct": 0,
+        "text": "the white onions and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 367,
+        "correct": 0,
+        "text": "the white onions and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 368,
+        "correct": 0,
+        "text": "the white paper and the brown bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 369,
+        "correct": 0,
+        "text": "the white paper and the toasted bun",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 370,
+        "correct": 0,
+        "text": "the white paper and the brown planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 371,
+        "correct": 0,
+        "text": "the white paper and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 372,
+        "correct": 1,
+        "text": "the toasted bun and the wood planter",
+        "img_path": "datasets/vg_attribution/images/2380474.jpg"
+    },
+    {
+        "id": 373,
+        "correct": 0,
+        "text": "the striped pants and the bare trees",
+        "img_path": "datasets/vg_attribution/images/2380477.jpg"
+    },
+    {
+        "id": 374,
+        "correct": 1,
+        "text": "the white pants and the bare trees",
+        "img_path": "datasets/vg_attribution/images/2380477.jpg"
+    },
+    {
+        "id": 375,
+        "correct": 1,
+        "text": "the brick pavement and the gray building",
+        "img_path": "datasets/vg_attribution/images/2355489.jpg"
+    },
+    {
+        "id": 376,
+        "correct": 1,
+        "text": "the green tree and the rusty train",
+        "img_path": "datasets/vg_attribution/images/2322704.jpg"
+    },
+    {
+        "id": 377,
+        "correct": 1,
+        "text": "the green tree and the old train",
+        "img_path": "datasets/vg_attribution/images/2322704.jpg"
+    },
+    {
+        "id": 378,
+        "correct": 0,
+        "text": "the green tree and the colorful train",
+        "img_path": "datasets/vg_attribution/images/2322704.jpg"
+    },
+    {
+        "id": 379,
+        "correct": 1,
+        "text": "the green tree and the rustic train",
+        "img_path": "datasets/vg_attribution/images/2322704.jpg"
+    },
+    {
+        "id": 380,
+        "correct": 1,
+        "text": "the green tree and the vintage train",
+        "img_path": "datasets/vg_attribution/images/2322704.jpg"
+    },
+    {
+        "id": 381,
+        "correct": 1,
+        "text": "the closed door and the brown cow",
+        "img_path": "datasets/vg_attribution/images/2334060.jpg"
+    },
+    {
+        "id": 382,
+        "correct": 1,
+        "text": "the metal door and the brown cow",
+        "img_path": "datasets/vg_attribution/images/2334060.jpg"
+    },
+    {
+        "id": 383,
+        "correct": 1,
+        "text": "the closed door and the green building",
+        "img_path": "datasets/vg_attribution/images/2334060.jpg"
+    },
+    {
+        "id": 384,
+        "correct": 1,
+        "text": "the metal door and the green building",
+        "img_path": "datasets/vg_attribution/images/2334060.jpg"
+    },
+    {
+        "id": 385,
+        "correct": 0,
+        "text": "the brown cow and the green building",
+        "img_path": "datasets/vg_attribution/images/2334060.jpg"
+    },
+    {
+        "id": 386,
+        "correct": 1,
+        "text": "the cooking person and the sturdy table",
+        "img_path": "datasets/vg_attribution/images/2383269.jpg"
+    },
+    {
+        "id": 387,
+        "correct": 1,
+        "text": "the cooking person and the rectangular grill",
+        "img_path": "datasets/vg_attribution/images/2383269.jpg"
+    },
+    {
+        "id": 388,
+        "correct": 1,
+        "text": "the sturdy table and the rectangular grill",
+        "img_path": "datasets/vg_attribution/images/2383269.jpg"
+    },
+    {
+        "id": 389,
+        "correct": 1,
+        "text": "the blue chair and the dark floor",
+        "img_path": "datasets/vg_attribution/images/2365742.jpg"
+    },
+    {
+        "id": 390,
+        "correct": 0,
+        "text": "the blue chair and the light floor",
+        "img_path": "datasets/vg_attribution/images/2365742.jpg"
+    },
+    {
+        "id": 391,
+        "correct": 1,
+        "text": "the blue chair and the hardwood floor",
+        "img_path": "datasets/vg_attribution/images/2365742.jpg"
+    },
+    {
+        "id": 392,
+        "correct": 1,
+        "text": "the plastic chair and the dark floor",
+        "img_path": "datasets/vg_attribution/images/2365742.jpg"
+    },
+    {
+        "id": 393,
+        "correct": 1,
+        "text": "the plastic chair and the light floor",
+        "img_path": "datasets/vg_attribution/images/2365742.jpg"
+    },
+    {
+        "id": 394,
+        "correct": 0,
+        "text": "the plastic chair and the hardwood floor",
+        "img_path": "datasets/vg_attribution/images/2365742.jpg"
+    },
+    {
+        "id": 395,
+        "correct": 1,
+        "text": "the round bed and the dark floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 396,
+        "correct": 1,
+        "text": "the round bed and the hardwood floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 397,
+        "correct": 1,
+        "text": "the white bed and the dark floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 398,
+        "correct": 1,
+        "text": "the white bed and the hardwood floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 399,
+        "correct": 1,
+        "text": "the round bed and the brown headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 400,
+        "correct": 1,
+        "text": "the round bed and the wavy headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 401,
+        "correct": 1,
+        "text": "the round bed and the wood headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 402,
+        "correct": 1,
+        "text": "the white bed and the brown headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 403,
+        "correct": 0,
+        "text": "the white bed and the wavy headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 404,
+        "correct": 1,
+        "text": "the white bed and the wood headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 405,
+        "correct": 1,
+        "text": "the round comforter and the dark floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 406,
+        "correct": 1,
+        "text": "the round comforter and the hardwood floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 407,
+        "correct": 1,
+        "text": "the white comforter and the dark floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 408,
+        "correct": 0,
+        "text": "the white comforter and the hardwood floor",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 409,
+        "correct": 1,
+        "text": "the round comforter and the brown headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 410,
+        "correct": 0,
+        "text": "the round comforter and the wavy headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 411,
+        "correct": 1,
+        "text": "the round comforter and the wood headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 412,
+        "correct": 1,
+        "text": "the white comforter and the brown headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 413,
+        "correct": 0,
+        "text": "the white comforter and the wavy headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 414,
+        "correct": 0,
+        "text": "the white comforter and the wood headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 415,
+        "correct": 1,
+        "text": "the dark floor and the brown headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 416,
+        "correct": 1,
+        "text": "the dark floor and the wavy headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 417,
+        "correct": 1,
+        "text": "the dark floor and the wood headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 418,
+        "correct": 0,
+        "text": "the hardwood floor and the brown headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 419,
+        "correct": 0,
+        "text": "the hardwood floor and the wavy headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 420,
+        "correct": 0,
+        "text": "the hardwood floor and the wood headboard",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 421,
+        "correct": 1,
+        "text": "the dark floor and the white sheets",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 422,
+        "correct": 0,
+        "text": "the hardwood floor and the white sheets",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 423,
+        "correct": 1,
+        "text": "the brown headboard and the white sheets",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 424,
+        "correct": 1,
+        "text": "the wavy headboard and the white sheets",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 425,
+        "correct": 1,
+        "text": "the wood headboard and the white sheets",
+        "img_path": "datasets/vg_attribution/images/2365281.jpg"
+    },
+    {
+        "id": 426,
+        "correct": 1,
+        "text": "the tan frame and the black couch",
+        "img_path": "datasets/vg_attribution/images/90.jpg"
+    },
+    {
+        "id": 427,
+        "correct": 1,
+        "text": "the tan frame and the light colored floor",
+        "img_path": "datasets/vg_attribution/images/90.jpg"
+    },
+    {
+        "id": 428,
+        "correct": 1,
+        "text": "the tan frame and the wood floor",
+        "img_path": "datasets/vg_attribution/images/90.jpg"
+    },
+    {
+        "id": 429,
+        "correct": 1,
+        "text": "the black couch and the light colored floor",
+        "img_path": "datasets/vg_attribution/images/90.jpg"
+    },
+    {
+        "id": 430,
+        "correct": 1,
+        "text": "the black couch and the wood floor",
+        "img_path": "datasets/vg_attribution/images/90.jpg"
+    },
+    {
+        "id": 431,
+        "correct": 0,
+        "text": "the white snow and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2369757.jpg"
+    },
+    {
+        "id": 432,
+        "correct": 1,
+        "text": "the snowy ground and the fresh snow",
+        "img_path": "datasets/vg_attribution/images/2369757.jpg"
+    },
+    {
+        "id": 433,
+        "correct": 0,
+        "text": "the snowy ground and the white snow",
+        "img_path": "datasets/vg_attribution/images/2369757.jpg"
+    },
+    {
+        "id": 434,
+        "correct": 0,
+        "text": "the resting spoons and the melted ice cream",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 435,
+        "correct": 1,
+        "text": "the resting spoons and the vanilla ice cream",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 436,
+        "correct": 1,
+        "text": "the resting spoons and the full plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 437,
+        "correct": 1,
+        "text": "the resting spoons and the cream colored plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 438,
+        "correct": 0,
+        "text": "the resting spoons and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 439,
+        "correct": 1,
+        "text": "the melted ice cream and the full plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 440,
+        "correct": 1,
+        "text": "the melted ice cream and the cream colored plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 441,
+        "correct": 1,
+        "text": "the melted ice cream and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 442,
+        "correct": 1,
+        "text": "the vanilla ice cream and the full plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 443,
+        "correct": 0,
+        "text": "the vanilla ice cream and the cream colored plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 444,
+        "correct": 0,
+        "text": "the vanilla ice cream and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2327921.jpg"
+    },
+    {
+        "id": 445,
+        "correct": 0,
+        "text": "the large bus and the pink tree",
+        "img_path": "datasets/vg_attribution/images/2394857.jpg"
+    },
+    {
+        "id": 446,
+        "correct": 1,
+        "text": "the white bus and the pink tree",
+        "img_path": "datasets/vg_attribution/images/2394857.jpg"
+    },
+    {
+        "id": 447,
+        "correct": 0,
+        "text": "the collared shirt and the long hair",
+        "img_path": "datasets/vg_attribution/images/2377849.jpg"
+    },
+    {
+        "id": 448,
+        "correct": 1,
+        "text": "the brown shirt and the long hair",
+        "img_path": "datasets/vg_attribution/images/2377849.jpg"
+    },
+    {
+        "id": 449,
+        "correct": 0,
+        "text": "the collared shirt and the young man",
+        "img_path": "datasets/vg_attribution/images/2377849.jpg"
+    },
+    {
+        "id": 450,
+        "correct": 1,
+        "text": "the brown shirt and the young man",
+        "img_path": "datasets/vg_attribution/images/2377849.jpg"
+    },
+    {
+        "id": 451,
+        "correct": 1,
+        "text": "the long hair and the young man",
+        "img_path": "datasets/vg_attribution/images/2377849.jpg"
+    },
+    {
+        "id": 452,
+        "correct": 1,
+        "text": "the white microwave and the closed door",
+        "img_path": "datasets/vg_attribution/images/2320346.jpg"
+    },
+    {
+        "id": 453,
+        "correct": 1,
+        "text": "the large cake and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2362038.jpg"
+    },
+    {
+        "id": 454,
+        "correct": 1,
+        "text": "the decorated cake and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2362038.jpg"
+    },
+    {
+        "id": 455,
+        "correct": 1,
+        "text": "the large cake and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2362038.jpg"
+    },
+    {
+        "id": 456,
+        "correct": 1,
+        "text": "the decorated cake and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2362038.jpg"
+    },
+    {
+        "id": 457,
+        "correct": 0,
+        "text": "the tiled wall and the long sleeved shirt",
+        "img_path": "datasets/vg_attribution/images/2362038.jpg"
+    },
+    {
+        "id": 458,
+        "correct": 0,
+        "text": "the wrapped toilet paper and the white seat",
+        "img_path": "datasets/vg_attribution/images/2316504.jpg"
+    },
+    {
+        "id": 459,
+        "correct": 0,
+        "text": "the wrapped toilet paper and the white seat",
+        "img_path": "datasets/vg_attribution/images/2316504.jpg"
+    },
+    {
+        "id": 460,
+        "correct": 1,
+        "text": "the balding man and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2381701.jpg"
+    },
+    {
+        "id": 461,
+        "correct": 1,
+        "text": "the talking man and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2381701.jpg"
+    },
+    {
+        "id": 462,
+        "correct": 1,
+        "text": "the balding man and the dark coat",
+        "img_path": "datasets/vg_attribution/images/2381701.jpg"
+    },
+    {
+        "id": 463,
+        "correct": 1,
+        "text": "the talking man and the dark coat",
+        "img_path": "datasets/vg_attribution/images/2381701.jpg"
+    },
+    {
+        "id": 464,
+        "correct": 1,
+        "text": "the white shirt and the dark coat",
+        "img_path": "datasets/vg_attribution/images/2381701.jpg"
+    },
+    {
+        "id": 465,
+        "correct": 0,
+        "text": "the long bench and the grassy park",
+        "img_path": "datasets/vg_attribution/images/2402409.jpg"
+    },
+    {
+        "id": 466,
+        "correct": 0,
+        "text": "the wood bench and the grassy park",
+        "img_path": "datasets/vg_attribution/images/2402409.jpg"
+    },
+    {
+        "id": 467,
+        "correct": 1,
+        "text": "the blue wall and the designed headboard",
+        "img_path": "datasets/vg_attribution/images/2349252.jpg"
+    },
+    {
+        "id": 468,
+        "correct": 1,
+        "text": "the blue wall and the white headboard",
+        "img_path": "datasets/vg_attribution/images/2349252.jpg"
+    },
+    {
+        "id": 469,
+        "correct": 1,
+        "text": "the red bus and the large building",
+        "img_path": "datasets/vg_attribution/images/2385147.jpg"
+    },
+    {
+        "id": 470,
+        "correct": 1,
+        "text": "the red bus and the brown building",
+        "img_path": "datasets/vg_attribution/images/2385147.jpg"
+    },
+    {
+        "id": 471,
+        "correct": 1,
+        "text": "the red bus and the tall building",
+        "img_path": "datasets/vg_attribution/images/2385147.jpg"
+    },
+    {
+        "id": 472,
+        "correct": 0,
+        "text": "the brick wall and the white building",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 473,
+        "correct": 1,
+        "text": "the brick wall and the small building",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 474,
+        "correct": 0,
+        "text": "the brick wall and the wood fence",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 475,
+        "correct": 1,
+        "text": "the brick wall and the angled fence",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 476,
+        "correct": 1,
+        "text": "the brick wall and the white fence",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 477,
+        "correct": 0,
+        "text": "the brick wall and the brown ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 478,
+        "correct": 0,
+        "text": "the brick wall and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 479,
+        "correct": 1,
+        "text": "the brick wall and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 480,
+        "correct": 0,
+        "text": "the small building and the wood fence",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 481,
+        "correct": 0,
+        "text": "the small building and the angled fence",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 482,
+        "correct": 1,
+        "text": "the white building and the brown ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 483,
+        "correct": 1,
+        "text": "the white building and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 484,
+        "correct": 1,
+        "text": "the small building and the brown ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 485,
+        "correct": 0,
+        "text": "the small building and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 486,
+        "correct": 1,
+        "text": "the white building and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 487,
+        "correct": 1,
+        "text": "the small building and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 488,
+        "correct": 1,
+        "text": "the wood fence and the brown ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 489,
+        "correct": 1,
+        "text": "the wood fence and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 490,
+        "correct": 1,
+        "text": "the angled fence and the brown ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 491,
+        "correct": 1,
+        "text": "the angled fence and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 492,
+        "correct": 1,
+        "text": "the white fence and the brown ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 493,
+        "correct": 1,
+        "text": "the white fence and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 494,
+        "correct": 0,
+        "text": "the wood fence and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 495,
+        "correct": 0,
+        "text": "the angled fence and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 496,
+        "correct": 1,
+        "text": "the white fence and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 497,
+        "correct": 1,
+        "text": "the brown ground and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 498,
+        "correct": 1,
+        "text": "the snowy ground and the leafy tree",
+        "img_path": "datasets/vg_attribution/images/2410814.jpg"
+    },
+    {
+        "id": 499,
+        "correct": 0,
+        "text": "the yellow tractor and the standing cow",
+        "img_path": "datasets/vg_attribution/images/2377150.jpg"
+    },
+    {
+        "id": 500,
+        "correct": 1,
+        "text": "the yellow tractor and the concrete cow",
+        "img_path": "datasets/vg_attribution/images/2377150.jpg"
+    },
+    {
+        "id": 501,
+        "correct": 1,
+        "text": "the yellow tractor and the black cow",
+        "img_path": "datasets/vg_attribution/images/2377150.jpg"
+    },
+    {
+        "id": 502,
+        "correct": 1,
+        "text": "the gray pillow and the resting cat",
+        "img_path": "datasets/vg_attribution/images/2323105.jpg"
+    },
+    {
+        "id": 503,
+        "correct": 1,
+        "text": "the large tree trunk and the green leaves",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 504,
+        "correct": 1,
+        "text": "the brown tree trunk and the green leaves",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 505,
+        "correct": 1,
+        "text": "the large tree trunk and the blue jeans",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 506,
+        "correct": 1,
+        "text": "the brown tree trunk and the blue jeans",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 507,
+        "correct": 1,
+        "text": "the large tree trunk and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 508,
+        "correct": 0,
+        "text": "the brown tree trunk and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 509,
+        "correct": 1,
+        "text": "the green leaves and the blue jeans",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 510,
+        "correct": 0,
+        "text": "the green leaves and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 511,
+        "correct": 1,
+        "text": "the blue jeans and the white shirt",
+        "img_path": "datasets/vg_attribution/images/2377159.jpg"
+    },
+    {
+        "id": 512,
+        "correct": 1,
+        "text": "the wood headboard and the stone wall",
+        "img_path": "datasets/vg_attribution/images/2406796.jpg"
+    },
+    {
+        "id": 513,
+        "correct": 1,
+        "text": "the wood headboard and the rock wall",
+        "img_path": "datasets/vg_attribution/images/2406796.jpg"
+    },
+    {
+        "id": 514,
+        "correct": 1,
+        "text": "the wood headboard and the white wall",
+        "img_path": "datasets/vg_attribution/images/2406796.jpg"
+    },
+    {
+        "id": 515,
+        "correct": 1,
+        "text": "the lace curtains and the metal cage",
+        "img_path": "datasets/vg_attribution/images/2332290.jpg"
+    },
+    {
+        "id": 516,
+        "correct": 1,
+        "text": "the white curtains and the metal cage",
+        "img_path": "datasets/vg_attribution/images/2332290.jpg"
+    },
+    {
+        "id": 517,
+        "correct": 1,
+        "text": "the blue sky and the parked motorcycle",
+        "img_path": "datasets/vg_attribution/images/2394009.jpg"
+    },
+    {
+        "id": 518,
+        "correct": 1,
+        "text": "the blue sky and the white motorcycle",
+        "img_path": "datasets/vg_attribution/images/2394009.jpg"
+    },
+    {
+        "id": 519,
+        "correct": 1,
+        "text": "the yellow car and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2368153.jpg"
+    },
+    {
+        "id": 520,
+        "correct": 0,
+        "text": "the yellow car and the overcast sky",
+        "img_path": "datasets/vg_attribution/images/2368153.jpg"
+    },
+    {
+        "id": 521,
+        "correct": 1,
+        "text": "the yellow car and the hazy sky",
+        "img_path": "datasets/vg_attribution/images/2368153.jpg"
+    },
+    {
+        "id": 522,
+        "correct": 1,
+        "text": "the black flag and the dark brown bear",
+        "img_path": "datasets/vg_attribution/images/2323032.jpg"
+    },
+    {
+        "id": 523,
+        "correct": 0,
+        "text": "the green trees and the gray fence",
+        "img_path": "datasets/vg_attribution/images/2391748.jpg"
+    },
+    {
+        "id": 524,
+        "correct": 0,
+        "text": "the wood tree and the stone wall",
+        "img_path": "datasets/vg_attribution/images/2324708.jpg"
+    },
+    {
+        "id": 525,
+        "correct": 1,
+        "text": "the wood tree and the gray wall",
+        "img_path": "datasets/vg_attribution/images/2324708.jpg"
+    },
+    {
+        "id": 526,
+        "correct": 1,
+        "text": "the wood branch and the stone wall",
+        "img_path": "datasets/vg_attribution/images/2324708.jpg"
+    },
+    {
+        "id": 527,
+        "correct": 1,
+        "text": "the wood branch and the gray wall",
+        "img_path": "datasets/vg_attribution/images/2324708.jpg"
+    },
+    {
+        "id": 528,
+        "correct": 0,
+        "text": "the orange truck and the gray building",
+        "img_path": "datasets/vg_attribution/images/2399147.jpg"
+    },
+    {
+        "id": 529,
+        "correct": 0,
+        "text": "the shadowed hill and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2385420.jpg"
+    },
+    {
+        "id": 530,
+        "correct": 1,
+        "text": "the snowy hill and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2385420.jpg"
+    },
+    {
+        "id": 531,
+        "correct": 1,
+        "text": "the snowy ground and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2385420.jpg"
+    },
+    {
+        "id": 532,
+        "correct": 1,
+        "text": "the dirty fence and the young girl",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 533,
+        "correct": 0,
+        "text": "the white fence and the young girl",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 534,
+        "correct": 1,
+        "text": "the dirty fence and the large elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 535,
+        "correct": 1,
+        "text": "the dirty fence and the brown elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 536,
+        "correct": 1,
+        "text": "the white fence and the large elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 537,
+        "correct": 1,
+        "text": "the white fence and the brown elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 538,
+        "correct": 1,
+        "text": "the dirty fence and the large elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 539,
+        "correct": 1,
+        "text": "the dirty fence and the brown elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 540,
+        "correct": 1,
+        "text": "the white fence and the large elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 541,
+        "correct": 1,
+        "text": "the white fence and the brown elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 542,
+        "correct": 0,
+        "text": "the young girl and the large elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 543,
+        "correct": 0,
+        "text": "the young girl and the brown elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 544,
+        "correct": 0,
+        "text": "the young girl and the large elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 545,
+        "correct": 0,
+        "text": "the young girl and the brown elephant",
+        "img_path": "datasets/vg_attribution/images/2360558.jpg"
+    },
+    {
+        "id": 546,
+        "correct": 1,
+        "text": "the miniature vegetables and the blue wall",
+        "img_path": "datasets/vg_attribution/images/2356089.jpg"
+    },
+    {
+        "id": 547,
+        "correct": 1,
+        "text": "the white sign and the snowy house",
+        "img_path": "datasets/vg_attribution/images/2360554.jpg"
+    },
+    {
+        "id": 548,
+        "correct": 1,
+        "text": "the white sign and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2360554.jpg"
+    },
+    {
+        "id": 549,
+        "correct": 0,
+        "text": "the concrete ground and the bright sky",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 550,
+        "correct": 1,
+        "text": "the concrete ground and the open sky",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 551,
+        "correct": 0,
+        "text": "the concrete ground and the power power lines",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 552,
+        "correct": 0,
+        "text": "the concrete ground and the white bus",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 553,
+        "correct": 0,
+        "text": "the bright sky and the power power lines",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 554,
+        "correct": 1,
+        "text": "the open sky and the power power lines",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 555,
+        "correct": 0,
+        "text": "the bright sky and the white bus",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 556,
+        "correct": 0,
+        "text": "the open sky and the white bus",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 557,
+        "correct": 0,
+        "text": "the power power lines and the white bus",
+        "img_path": "datasets/vg_attribution/images/2360882.jpg"
+    },
+    {
+        "id": 558,
+        "correct": 1,
+        "text": "the large fence and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2318016.jpg"
+    },
+    {
+        "id": 559,
+        "correct": 0,
+        "text": "the large fence and the brown giraffe",
+        "img_path": "datasets/vg_attribution/images/2318016.jpg"
+    },
+    {
+        "id": 560,
+        "correct": 1,
+        "text": "the blue sky and the brown giraffe",
+        "img_path": "datasets/vg_attribution/images/2318016.jpg"
+    },
+    {
+        "id": 561,
+        "correct": 0,
+        "text": "the blue sky and the white wall",
+        "img_path": "datasets/vg_attribution/images/2318011.jpg"
+    },
+    {
+        "id": 562,
+        "correct": 1,
+        "text": "the baseball player and the short grass",
+        "img_path": "datasets/vg_attribution/images/2354049.jpg"
+    },
+    {
+        "id": 563,
+        "correct": 1,
+        "text": "the baseball player and the green grass",
+        "img_path": "datasets/vg_attribution/images/2354049.jpg"
+    },
+    {
+        "id": 564,
+        "correct": 0,
+        "text": "the blue uniform and the white pants",
+        "img_path": "datasets/vg_attribution/images/2315880.jpg"
+    },
+    {
+        "id": 565,
+        "correct": 0,
+        "text": "the baseball uniform and the white pants",
+        "img_path": "datasets/vg_attribution/images/2315880.jpg"
+    },
+    {
+        "id": 566,
+        "correct": 1,
+        "text": "the white garment and the green bench",
+        "img_path": "datasets/vg_attribution/images/2350216.jpg"
+    },
+    {
+        "id": 567,
+        "correct": 1,
+        "text": "the white garment and the brown jacket",
+        "img_path": "datasets/vg_attribution/images/2350216.jpg"
+    },
+    {
+        "id": 568,
+        "correct": 1,
+        "text": "the green bench and the brown jacket",
+        "img_path": "datasets/vg_attribution/images/2350216.jpg"
+    },
+    {
+        "id": 569,
+        "correct": 1,
+        "text": "the long cord and the walking cat",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 570,
+        "correct": 0,
+        "text": "the long cord and the gray cat",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 571,
+        "correct": 1,
+        "text": "the long cord and the striped cat",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 572,
+        "correct": 0,
+        "text": "the long cord and the tan dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 573,
+        "correct": 0,
+        "text": "the long cord and the small dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 574,
+        "correct": 1,
+        "text": "the long cord and the stained floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 575,
+        "correct": 1,
+        "text": "the long cord and the wood floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 576,
+        "correct": 1,
+        "text": "the long cord and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 577,
+        "correct": 1,
+        "text": "the long cord and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 578,
+        "correct": 1,
+        "text": "the long cord and the small dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 579,
+        "correct": 0,
+        "text": "the walking cat and the tan dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 580,
+        "correct": 0,
+        "text": "the walking cat and the small dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 581,
+        "correct": 1,
+        "text": "the gray cat and the tan dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 582,
+        "correct": 1,
+        "text": "the gray cat and the small dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 583,
+        "correct": 1,
+        "text": "the striped cat and the tan dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 584,
+        "correct": 1,
+        "text": "the striped cat and the small dog",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 585,
+        "correct": 1,
+        "text": "the walking cat and the stained floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 586,
+        "correct": 1,
+        "text": "the walking cat and the wood floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 587,
+        "correct": 1,
+        "text": "the gray cat and the stained floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 588,
+        "correct": 1,
+        "text": "the gray cat and the wood floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 589,
+        "correct": 1,
+        "text": "the striped cat and the stained floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 590,
+        "correct": 1,
+        "text": "the striped cat and the wood floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 591,
+        "correct": 1,
+        "text": "the walking cat and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 592,
+        "correct": 0,
+        "text": "the walking cat and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 593,
+        "correct": 1,
+        "text": "the walking cat and the small dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 594,
+        "correct": 1,
+        "text": "the gray cat and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 595,
+        "correct": 1,
+        "text": "the gray cat and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 596,
+        "correct": 1,
+        "text": "the gray cat and the small dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 597,
+        "correct": 1,
+        "text": "the striped cat and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 598,
+        "correct": 0,
+        "text": "the striped cat and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 599,
+        "correct": 0,
+        "text": "the striped cat and the small dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 600,
+        "correct": 0,
+        "text": "the tan dog and the stained floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 601,
+        "correct": 1,
+        "text": "the tan dog and the wood floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 602,
+        "correct": 1,
+        "text": "the small dog and the stained floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 603,
+        "correct": 1,
+        "text": "the small dog and the wood floor",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 604,
+        "correct": 0,
+        "text": "the tan dog and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 605,
+        "correct": 0,
+        "text": "the tan dog and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 606,
+        "correct": 1,
+        "text": "the stained floor and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 607,
+        "correct": 1,
+        "text": "the stained floor and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 608,
+        "correct": 1,
+        "text": "the stained floor and the small dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 609,
+        "correct": 1,
+        "text": "the wood floor and the lying dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 610,
+        "correct": 1,
+        "text": "the wood floor and the resting dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 611,
+        "correct": 1,
+        "text": "the wood floor and the small dogs",
+        "img_path": "datasets/vg_attribution/images/2350743.jpg"
+    },
+    {
+        "id": 612,
+        "correct": 1,
+        "text": "the skating person and the white sky",
+        "img_path": "datasets/vg_attribution/images/2318333.jpg"
+    },
+    {
+        "id": 613,
+        "correct": 1,
+        "text": "the purple shirt and the short hair",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 614,
+        "correct": 1,
+        "text": "the purple shirt and the white wall",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 615,
+        "correct": 1,
+        "text": "the orange shirt and the short hair",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 616,
+        "correct": 1,
+        "text": "the orange shirt and the white wall",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 617,
+        "correct": 1,
+        "text": "the short hair and the white wall",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 618,
+        "correct": 1,
+        "text": "the short hair and the blue shirt",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 619,
+        "correct": 1,
+        "text": "the white wall and the blue shirt",
+        "img_path": "datasets/vg_attribution/images/2318330.jpg"
+    },
+    {
+        "id": 620,
+        "correct": 0,
+        "text": "the blue sky and the large train",
+        "img_path": "datasets/vg_attribution/images/2359592.jpg"
+    },
+    {
+        "id": 621,
+        "correct": 1,
+        "text": "the blue sky and the gray train",
+        "img_path": "datasets/vg_attribution/images/2359592.jpg"
+    },
+    {
+        "id": 622,
+        "correct": 1,
+        "text": "the blue airplane and the brown runway",
+        "img_path": "datasets/vg_attribution/images/2334664.jpg"
+    },
+    {
+        "id": 623,
+        "correct": 0,
+        "text": "the blue airplane and the rough runway",
+        "img_path": "datasets/vg_attribution/images/2334664.jpg"
+    },
+    {
+        "id": 624,
+        "correct": 1,
+        "text": "the light colored zebra and the green grass",
+        "img_path": "datasets/vg_attribution/images/2392896.jpg"
+    },
+    {
+        "id": 625,
+        "correct": 1,
+        "text": "the sitting zebra and the green grass",
+        "img_path": "datasets/vg_attribution/images/2392896.jpg"
+    },
+    {
+        "id": 626,
+        "correct": 1,
+        "text": "the striped zebra and the green grass",
+        "img_path": "datasets/vg_attribution/images/2392896.jpg"
+    },
+    {
+        "id": 627,
+        "correct": 1,
+        "text": "the black zebra and the green grass",
+        "img_path": "datasets/vg_attribution/images/2392896.jpg"
+    },
+    {
+        "id": 628,
+        "correct": 1,
+        "text": "the young zebra and the green grass",
+        "img_path": "datasets/vg_attribution/images/2392896.jpg"
+    },
+    {
+        "id": 629,
+        "correct": 1,
+        "text": "the lying zebra and the green grass",
+        "img_path": "datasets/vg_attribution/images/2392896.jpg"
+    },
+    {
+        "id": 630,
+        "correct": 1,
+        "text": "the blue sky and the orange train",
+        "img_path": "datasets/vg_attribution/images/2331015.jpg"
+    },
+    {
+        "id": 631,
+        "correct": 0,
+        "text": "the light sky and the orange train",
+        "img_path": "datasets/vg_attribution/images/2331015.jpg"
+    },
+    {
+        "id": 632,
+        "correct": 0,
+        "text": "the shirtless man and the brass bed",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 633,
+        "correct": 0,
+        "text": "the shirtless man and the open book",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 634,
+        "correct": 1,
+        "text": "the shirtless man and the covered book",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 635,
+        "correct": 1,
+        "text": "the shirtless man and the green book",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 636,
+        "correct": 1,
+        "text": "the shirtless man and the hanging curtain",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 637,
+        "correct": 0,
+        "text": "the shirtless man and the reading people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 638,
+        "correct": 1,
+        "text": "the shirtless man and the sitting people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 639,
+        "correct": 1,
+        "text": "the shirtless man and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 640,
+        "correct": 1,
+        "text": "the brass bed and the open book",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 641,
+        "correct": 1,
+        "text": "the brass bed and the covered book",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 642,
+        "correct": 0,
+        "text": "the brass bed and the green book",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 643,
+        "correct": 1,
+        "text": "the brass bed and the hanging curtain",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 644,
+        "correct": 0,
+        "text": "the brass bed and the reading people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 645,
+        "correct": 1,
+        "text": "the brass bed and the sitting people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 646,
+        "correct": 1,
+        "text": "the brass bed and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 647,
+        "correct": 0,
+        "text": "the open book and the hanging curtain",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 648,
+        "correct": 0,
+        "text": "the covered book and the hanging curtain",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 649,
+        "correct": 0,
+        "text": "the green book and the hanging curtain",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 650,
+        "correct": 0,
+        "text": "the open book and the reading people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 651,
+        "correct": 0,
+        "text": "the open book and the sitting people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 652,
+        "correct": 1,
+        "text": "the covered book and the reading people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 653,
+        "correct": 0,
+        "text": "the covered book and the sitting people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 654,
+        "correct": 1,
+        "text": "the green book and the reading people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 655,
+        "correct": 0,
+        "text": "the green book and the sitting people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 656,
+        "correct": 0,
+        "text": "the open book and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 657,
+        "correct": 1,
+        "text": "the covered book and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 658,
+        "correct": 1,
+        "text": "the green book and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 659,
+        "correct": 0,
+        "text": "the hanging curtain and the reading people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 660,
+        "correct": 0,
+        "text": "the hanging curtain and the sitting people",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 661,
+        "correct": 1,
+        "text": "the hanging curtain and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 662,
+        "correct": 1,
+        "text": "the reading people and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 663,
+        "correct": 0,
+        "text": "the sitting people and the tan sheets",
+        "img_path": "datasets/vg_attribution/images/2325851.jpg"
+    },
+    {
+        "id": 664,
+        "correct": 1,
+        "text": "the yellow shirt and the white door",
+        "img_path": "datasets/vg_attribution/images/2370655.jpg"
+    },
+    {
+        "id": 665,
+        "correct": 1,
+        "text": "the pink sky and the green trees",
+        "img_path": "datasets/vg_attribution/images/2411256.jpg"
+    },
+    {
+        "id": 666,
+        "correct": 1,
+        "text": "the white shirt and the swinging racket",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 667,
+        "correct": 0,
+        "text": "the white shirt and the tennis racket",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 668,
+        "correct": 1,
+        "text": "the white shirt and the black racket",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 669,
+        "correct": 0,
+        "text": "the white shirt and the young man",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 670,
+        "correct": 1,
+        "text": "the white shirt and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 671,
+        "correct": 0,
+        "text": "the swinging racket and the young man",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 672,
+        "correct": 0,
+        "text": "the tennis racket and the young man",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 673,
+        "correct": 0,
+        "text": "the black racket and the young man",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 674,
+        "correct": 0,
+        "text": "the swinging racket and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 675,
+        "correct": 0,
+        "text": "the tennis racket and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 676,
+        "correct": 0,
+        "text": "the black racket and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 677,
+        "correct": 0,
+        "text": "the young man and the chain-link fence",
+        "img_path": "datasets/vg_attribution/images/2404499.jpg"
+    },
+    {
+        "id": 678,
+        "correct": 1,
+        "text": "the brown floor and the up seat",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 679,
+        "correct": 1,
+        "text": "the tiled floor and the up seat",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 680,
+        "correct": 0,
+        "text": "the brown floor and the metal pipe",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 681,
+        "correct": 0,
+        "text": "the tiled floor and the metal pipe",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 682,
+        "correct": 0,
+        "text": "the tiled floor and the plastic can",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 683,
+        "correct": 0,
+        "text": "the brown floor and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 684,
+        "correct": 1,
+        "text": "the brown floor and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 685,
+        "correct": 1,
+        "text": "the brown floor and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 686,
+        "correct": 0,
+        "text": "the tiled floor and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 687,
+        "correct": 1,
+        "text": "the tiled floor and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 688,
+        "correct": 1,
+        "text": "the tiled floor and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 689,
+        "correct": 1,
+        "text": "the brown wall and the up seat",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 690,
+        "correct": 1,
+        "text": "the tiled wall and the up seat",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 691,
+        "correct": 1,
+        "text": "the brown wall and the metal pipe",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 692,
+        "correct": 1,
+        "text": "the tiled wall and the metal pipe",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 693,
+        "correct": 1,
+        "text": "the tiled wall and the plastic can",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 694,
+        "correct": 0,
+        "text": "the brown wall and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 695,
+        "correct": 1,
+        "text": "the brown wall and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 696,
+        "correct": 1,
+        "text": "the brown wall and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 697,
+        "correct": 1,
+        "text": "the tiled wall and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 698,
+        "correct": 1,
+        "text": "the tiled wall and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 699,
+        "correct": 1,
+        "text": "the tiled wall and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 700,
+        "correct": 0,
+        "text": "the up seat and the metal pipe",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 701,
+        "correct": 1,
+        "text": "the up seat and the brown can",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 702,
+        "correct": 0,
+        "text": "the up seat and the plastic can",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 703,
+        "correct": 1,
+        "text": "the up seat and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 704,
+        "correct": 1,
+        "text": "the up seat and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 705,
+        "correct": 1,
+        "text": "the up seat and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 706,
+        "correct": 0,
+        "text": "the metal pipe and the brown can",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 707,
+        "correct": 1,
+        "text": "the metal pipe and the plastic can",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 708,
+        "correct": 1,
+        "text": "the metal pipe and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 709,
+        "correct": 1,
+        "text": "the metal pipe and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 710,
+        "correct": 1,
+        "text": "the metal pipe and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 711,
+        "correct": 1,
+        "text": "the brown can and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 712,
+        "correct": 1,
+        "text": "the brown can and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 713,
+        "correct": 1,
+        "text": "the brown can and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 714,
+        "correct": 1,
+        "text": "the plastic can and the full toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 715,
+        "correct": 1,
+        "text": "the plastic can and the porcelain toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 716,
+        "correct": 1,
+        "text": "the plastic can and the white toilet",
+        "img_path": "datasets/vg_attribution/images/2401323.jpg"
+    },
+    {
+        "id": 717,
+        "correct": 1,
+        "text": "the wood chair and the blue cup",
+        "img_path": "datasets/vg_attribution/images/2334521.jpg"
+    },
+    {
+        "id": 718,
+        "correct": 1,
+        "text": "the wood chair and the silver pan",
+        "img_path": "datasets/vg_attribution/images/2334521.jpg"
+    },
+    {
+        "id": 719,
+        "correct": 1,
+        "text": "the blue cup and the silver pan",
+        "img_path": "datasets/vg_attribution/images/2334521.jpg"
+    },
+    {
+        "id": 720,
+        "correct": 1,
+        "text": "the stone road and the painted building",
+        "img_path": "datasets/vg_attribution/images/2401325.jpg"
+    },
+    {
+        "id": 721,
+        "correct": 1,
+        "text": "the stone road and the orange building",
+        "img_path": "datasets/vg_attribution/images/2401325.jpg"
+    },
+    {
+        "id": 722,
+        "correct": 1,
+        "text": "the dry road and the painted building",
+        "img_path": "datasets/vg_attribution/images/2401325.jpg"
+    },
+    {
+        "id": 723,
+        "correct": 1,
+        "text": "the dry road and the orange building",
+        "img_path": "datasets/vg_attribution/images/2401325.jpg"
+    },
+    {
+        "id": 724,
+        "correct": 1,
+        "text": "the gray road and the painted building",
+        "img_path": "datasets/vg_attribution/images/2401325.jpg"
+    },
+    {
+        "id": 725,
+        "correct": 1,
+        "text": "the gray road and the orange building",
+        "img_path": "datasets/vg_attribution/images/2401325.jpg"
+    },
+    {
+        "id": 726,
+        "correct": 1,
+        "text": "the heavy jacket and the concrete walkway",
+        "img_path": "datasets/vg_attribution/images/2347569.jpg"
+    },
+    {
+        "id": 727,
+        "correct": 1,
+        "text": "the heavy jacket and the gray walkway",
+        "img_path": "datasets/vg_attribution/images/2347569.jpg"
+    },
+    {
+        "id": 728,
+        "correct": 1,
+        "text": "the black jacket and the concrete walkway",
+        "img_path": "datasets/vg_attribution/images/2347569.jpg"
+    },
+    {
+        "id": 729,
+        "correct": 1,
+        "text": "the black jacket and the gray walkway",
+        "img_path": "datasets/vg_attribution/images/2347569.jpg"
+    },
+    {
+        "id": 730,
+        "correct": 1,
+        "text": "the black fence and the concrete walkway",
+        "img_path": "datasets/vg_attribution/images/2347569.jpg"
+    },
+    {
+        "id": 731,
+        "correct": 0,
+        "text": "the black fence and the gray walkway",
+        "img_path": "datasets/vg_attribution/images/2347569.jpg"
+    },
+    {
+        "id": 732,
+        "correct": 1,
+        "text": "the black bicycle and the wood frame",
+        "img_path": "datasets/vg_attribution/images/2368165.jpg"
+    },
+    {
+        "id": 733,
+        "correct": 0,
+        "text": "the standing man and the brown beach",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 734,
+        "correct": 1,
+        "text": "the barefoot man and the brown beach",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 735,
+        "correct": 0,
+        "text": "the standing man and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 736,
+        "correct": 0,
+        "text": "the standing man and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 737,
+        "correct": 0,
+        "text": "the barefoot man and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 738,
+        "correct": 0,
+        "text": "the barefoot man and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 739,
+        "correct": 1,
+        "text": "the brown beach and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 740,
+        "correct": 1,
+        "text": "the brown beach and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2407387.jpg"
+    },
+    {
+        "id": 741,
+        "correct": 0,
+        "text": "the metal fence and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2407945.jpg"
+    },
+    {
+        "id": 742,
+        "correct": 0,
+        "text": "the black fence and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2407945.jpg"
+    },
+    {
+        "id": 743,
+        "correct": 0,
+        "text": "the gray sky and the blue airplane",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 744,
+        "correct": 1,
+        "text": "the gray sky and the large airplane",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 745,
+        "correct": 0,
+        "text": "the gray sky and the sitting airplane",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 746,
+        "correct": 0,
+        "text": "the gray sky and the green grass",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 747,
+        "correct": 1,
+        "text": "the blue airplane and the green grass",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 748,
+        "correct": 1,
+        "text": "the large airplane and the green grass",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 749,
+        "correct": 1,
+        "text": "the sitting airplane and the green grass",
+        "img_path": "datasets/vg_attribution/images/2378683.jpg"
+    },
+    {
+        "id": 750,
+        "correct": 1,
+        "text": "the white sheep and the brown hay",
+        "img_path": "datasets/vg_attribution/images/2378923.jpg"
+    },
+    {
+        "id": 751,
+        "correct": 1,
+        "text": "the brown table and the tan floor",
+        "img_path": "datasets/vg_attribution/images/4622.jpg"
+    },
+    {
+        "id": 752,
+        "correct": 1,
+        "text": "the wood table and the tan floor",
+        "img_path": "datasets/vg_attribution/images/4622.jpg"
+    },
+    {
+        "id": 753,
+        "correct": 1,
+        "text": "the brown desk and the gray couch",
+        "img_path": "datasets/vg_attribution/images/4626.jpg"
+    },
+    {
+        "id": 754,
+        "correct": 1,
+        "text": "the brown chair and the gray couch",
+        "img_path": "datasets/vg_attribution/images/4626.jpg"
+    },
+    {
+        "id": 755,
+        "correct": 1,
+        "text": "the wood chair and the gray couch",
+        "img_path": "datasets/vg_attribution/images/4626.jpg"
+    },
+    {
+        "id": 756,
+        "correct": 0,
+        "text": "the green ground and the brown shirt",
+        "img_path": "datasets/vg_attribution/images/2394351.jpg"
+    },
+    {
+        "id": 757,
+        "correct": 0,
+        "text": "the blue sky and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2356112.jpg"
+    },
+    {
+        "id": 758,
+        "correct": 0,
+        "text": "the clear sky and the snowy ground",
+        "img_path": "datasets/vg_attribution/images/2356112.jpg"
+    },
+    {
+        "id": 759,
+        "correct": 0,
+        "text": "the blue sky and the white snow",
+        "img_path": "datasets/vg_attribution/images/2356112.jpg"
+    },
+    {
+        "id": 760,
+        "correct": 0,
+        "text": "the clear sky and the white snow",
+        "img_path": "datasets/vg_attribution/images/2356112.jpg"
+    },
+    {
+        "id": 761,
+        "correct": 0,
+        "text": "the snowy ground and the white snow",
+        "img_path": "datasets/vg_attribution/images/2356112.jpg"
+    },
+    {
+        "id": 762,
+        "correct": 1,
+        "text": "the gray ceiling and the on laptop",
+        "img_path": "datasets/vg_attribution/images/2328226.jpg"
+    },
+    {
+        "id": 763,
+        "correct": 0,
+        "text": "the skinny tree and the green grass",
+        "img_path": "datasets/vg_attribution/images/2319825.jpg"
+    },
+    {
+        "id": 764,
+        "correct": 1,
+        "text": "the khaki shorts and the navy shirt",
+        "img_path": "datasets/vg_attribution/images/2364258.jpg"
+    },
+    {
+        "id": 765,
+        "correct": 0,
+        "text": "the steel bowl and the metal table",
+        "img_path": "datasets/vg_attribution/images/2327904.jpg"
+    },
+    {
+        "id": 766,
+        "correct": 1,
+        "text": "the brick wall and the brown table",
+        "img_path": "datasets/vg_attribution/images/2356371.jpg"
+    },
+    {
+        "id": 767,
+        "correct": 1,
+        "text": "the white wall and the brown table",
+        "img_path": "datasets/vg_attribution/images/2356371.jpg"
+    },
+    {
+        "id": 768,
+        "correct": 1,
+        "text": "the brick wall and the brown table",
+        "img_path": "datasets/vg_attribution/images/2356371.jpg"
+    },
+    {
+        "id": 769,
+        "correct": 1,
+        "text": "the white wall and the brown table",
+        "img_path": "datasets/vg_attribution/images/2356371.jpg"
+    },
+    {
+        "id": 770,
+        "correct": 0,
+        "text": "the skateboarding man and the long pants",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 771,
+        "correct": 1,
+        "text": "the skateboarding man and the black pants",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 772,
+        "correct": 1,
+        "text": "the drinking man and the long pants",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 773,
+        "correct": 1,
+        "text": "the drinking man and the black pants",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 774,
+        "correct": 1,
+        "text": "the skateboarding man and the large stone",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 775,
+        "correct": 1,
+        "text": "the drinking man and the large stone",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 776,
+        "correct": 1,
+        "text": "the long pants and the large stone",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 777,
+        "correct": 1,
+        "text": "the black pants and the large stone",
+        "img_path": "datasets/vg_attribution/images/2356372.jpg"
+    },
+    {
+        "id": 778,
+        "correct": 1,
+        "text": "the wood wall and the gray floor",
+        "img_path": "datasets/vg_attribution/images/174.jpg"
+    },
+    {
+        "id": 779,
+        "correct": 1,
+        "text": "the large bed and the gray floor",
+        "img_path": "datasets/vg_attribution/images/174.jpg"
+    },
+    {
+        "id": 780,
+        "correct": 0,
+        "text": "the colorful bed and the gray floor",
+        "img_path": "datasets/vg_attribution/images/174.jpg"
+    },
+    {
+        "id": 781,
+        "correct": 1,
+        "text": "the wood bed and the gray floor",
+        "img_path": "datasets/vg_attribution/images/174.jpg"
+    },
+    {
+        "id": 782,
+        "correct": 1,
+        "text": "the marble countertop and the white plate",
+        "img_path": "datasets/vg_attribution/images/2399323.jpg"
+    },
+    {
+        "id": 783,
+        "correct": 1,
+        "text": "the marble countertop and the orange beverage",
+        "img_path": "datasets/vg_attribution/images/2399323.jpg"
+    },
+    {
+        "id": 784,
+        "correct": 1,
+        "text": "the white plate and the orange beverage",
+        "img_path": "datasets/vg_attribution/images/2399323.jpg"
+    },
+    {
+        "id": 785,
+        "correct": 0,
+        "text": "the round fruit and the oblong dish",
+        "img_path": "datasets/vg_attribution/images/2369567.jpg"
+    },
+    {
+        "id": 786,
+        "correct": 0,
+        "text": "the round fruit and the ceramic dish",
+        "img_path": "datasets/vg_attribution/images/2369567.jpg"
+    },
+    {
+        "id": 787,
+        "correct": 1,
+        "text": "the round fruit and the white dish",
+        "img_path": "datasets/vg_attribution/images/2369567.jpg"
+    },
+    {
+        "id": 788,
+        "correct": 1,
+        "text": "the orange fruit and the oblong dish",
+        "img_path": "datasets/vg_attribution/images/2369567.jpg"
+    },
+    {
+        "id": 789,
+        "correct": 1,
+        "text": "the orange fruit and the ceramic dish",
+        "img_path": "datasets/vg_attribution/images/2369567.jpg"
+    },
+    {
+        "id": 790,
+        "correct": 1,
+        "text": "the orange fruit and the white dish",
+        "img_path": "datasets/vg_attribution/images/2369567.jpg"
+    },
+    {
+        "id": 791,
+        "correct": 1,
+        "text": "the green field and the patterned giraffe",
+        "img_path": "datasets/vg_attribution/images/2388844.jpg"
+    },
+    {
+        "id": 792,
+        "correct": 1,
+        "text": "the green field and the brown giraffe",
+        "img_path": "datasets/vg_attribution/images/2388844.jpg"
+    },
+    {
+        "id": 793,
+        "correct": 1,
+        "text": "the grassy field and the patterned giraffe",
+        "img_path": "datasets/vg_attribution/images/2388844.jpg"
+    },
+    {
+        "id": 794,
+        "correct": 1,
+        "text": "the grassy field and the brown giraffe",
+        "img_path": "datasets/vg_attribution/images/2388844.jpg"
+    },
+    {
+        "id": 795,
+        "correct": 1,
+        "text": "the patterned giraffe and the green tree",
+        "img_path": "datasets/vg_attribution/images/2388844.jpg"
+    },
+    {
+        "id": 796,
+        "correct": 1,
+        "text": "the brown giraffe and the green tree",
+        "img_path": "datasets/vg_attribution/images/2388844.jpg"
+    },
+    {
+        "id": 797,
+        "correct": 0,
+        "text": "the brick wall and the skateboarding man",
+        "img_path": "datasets/vg_attribution/images/2382418.jpg"
+    },
+    {
+        "id": 798,
+        "correct": 1,
+        "text": "the brick wall and the blue jeans",
+        "img_path": "datasets/vg_attribution/images/2382418.jpg"
+    },
+    {
+        "id": 799,
+        "correct": 1,
+        "text": "the skateboarding man and the blue jeans",
+        "img_path": "datasets/vg_attribution/images/2382418.jpg"
+    },
+    {
+        "id": 800,
+        "correct": 1,
+        "text": "the cloudy sky and the painted train",
+        "img_path": "datasets/vg_attribution/images/2415053.jpg"
+    },
+    {
+        "id": 801,
+        "correct": 1,
+        "text": "the hazy sky and the wet ground",
+        "img_path": "datasets/vg_attribution/images/2328951.jpg"
+    },
+    {
+        "id": 802,
+        "correct": 0,
+        "text": "the green trees and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2384150.jpg"
+    },
+    {
+        "id": 803,
+        "correct": 0,
+        "text": "the green trees and the hazy sky",
+        "img_path": "datasets/vg_attribution/images/2384150.jpg"
+    },
+    {
+        "id": 804,
+        "correct": 0,
+        "text": "the grouped trees and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2384150.jpg"
+    },
+    {
+        "id": 805,
+        "correct": 0,
+        "text": "the grouped trees and the hazy sky",
+        "img_path": "datasets/vg_attribution/images/2384150.jpg"
+    },
+    {
+        "id": 806,
+        "correct": 1,
+        "text": "the large bus and the black coat",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 807,
+        "correct": 0,
+        "text": "the red bus and the black coat",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 808,
+        "correct": 1,
+        "text": "the double decker bus and the black coat",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 809,
+        "correct": 1,
+        "text": "the large bus and the happy man",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 810,
+        "correct": 1,
+        "text": "the red bus and the happy man",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 811,
+        "correct": 1,
+        "text": "the double decker bus and the happy man",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 812,
+        "correct": 0,
+        "text": "the black coat and the happy man",
+        "img_path": "datasets/vg_attribution/images/2385826.jpg"
+    },
+    {
+        "id": 813,
+        "correct": 1,
+        "text": "the stone sidewalk and the tall building",
+        "img_path": "datasets/vg_attribution/images/2355874.jpg"
+    },
+    {
+        "id": 814,
+        "correct": 0,
+        "text": "the stone sidewalk and the dark pavement",
+        "img_path": "datasets/vg_attribution/images/2355874.jpg"
+    },
+    {
+        "id": 815,
+        "correct": 0,
+        "text": "the stone sidewalk and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2355874.jpg"
+    },
+    {
+        "id": 816,
+        "correct": 1,
+        "text": "the tall building and the dark pavement",
+        "img_path": "datasets/vg_attribution/images/2355874.jpg"
+    },
+    {
+        "id": 817,
+        "correct": 0,
+        "text": "the tall building and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2355874.jpg"
+    },
+    {
+        "id": 818,
+        "correct": 1,
+        "text": "the dark pavement and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2355874.jpg"
+    },
+    {
+        "id": 819,
+        "correct": 1,
+        "text": "the gray clouds and the asian building",
+        "img_path": "datasets/vg_attribution/images/2356128.jpg"
+    },
+    {
+        "id": 820,
+        "correct": 1,
+        "text": "the white floor and the black hat",
+        "img_path": "datasets/vg_attribution/images/2398747.jpg"
+    },
+    {
+        "id": 821,
+        "correct": 1,
+        "text": "the hanging bear and the black hat",
+        "img_path": "datasets/vg_attribution/images/2398747.jpg"
+    },
+    {
+        "id": 822,
+        "correct": 1,
+        "text": "the white bear and the black hat",
+        "img_path": "datasets/vg_attribution/images/2398747.jpg"
+    },
+    {
+        "id": 823,
+        "correct": 0,
+        "text": "the white jersey and the on television",
+        "img_path": "datasets/vg_attribution/images/2352473.jpg"
+    },
+    {
+        "id": 824,
+        "correct": 1,
+        "text": "the round sink and the drinking cat",
+        "img_path": "datasets/vg_attribution/images/2359351.jpg"
+    },
+    {
+        "id": 825,
+        "correct": 1,
+        "text": "the round sink and the black cat",
+        "img_path": "datasets/vg_attribution/images/2359351.jpg"
+    },
+    {
+        "id": 826,
+        "correct": 1,
+        "text": "the brown table and the thick soup",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 827,
+        "correct": 1,
+        "text": "the brown table and the green soup",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 828,
+        "correct": 1,
+        "text": "the wood table and the thick soup",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 829,
+        "correct": 1,
+        "text": "the wood table and the green soup",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 830,
+        "correct": 1,
+        "text": "the brown table and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 831,
+        "correct": 1,
+        "text": "the brown table and the white plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 832,
+        "correct": 1,
+        "text": "the wood table and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 833,
+        "correct": 1,
+        "text": "the wood table and the white plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 834,
+        "correct": 0,
+        "text": "the brown table and the fancy sandwich",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 835,
+        "correct": 0,
+        "text": "the wood table and the fancy sandwich",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 836,
+        "correct": 0,
+        "text": "the thick soup and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 837,
+        "correct": 0,
+        "text": "the thick soup and the white plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 838,
+        "correct": 1,
+        "text": "the green soup and the glass plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 839,
+        "correct": 1,
+        "text": "the green soup and the white plate",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 840,
+        "correct": 0,
+        "text": "the thick soup and the fancy sandwich",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 841,
+        "correct": 1,
+        "text": "the green soup and the fancy sandwich",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 842,
+        "correct": 0,
+        "text": "the glass plate and the fancy sandwich",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 843,
+        "correct": 1,
+        "text": "the white plate and the fancy sandwich",
+        "img_path": "datasets/vg_attribution/images/2393912.jpg"
+    },
+    {
+        "id": 844,
+        "correct": 1,
+        "text": "the red skateboard and the black knee pad",
+        "img_path": "datasets/vg_attribution/images/2394635.jpg"
+    },
+    {
+        "id": 845,
+        "correct": 0,
+        "text": "the white airplane and the clear sky",
+        "img_path": "datasets/vg_attribution/images/2343691.jpg"
+    },
+    {
+        "id": 846,
+        "correct": 1,
+        "text": "the black jeans and the striped scarf",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 847,
+        "correct": 1,
+        "text": "the black jeans and the large microwave",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 848,
+        "correct": 1,
+        "text": "the black jeans and the stainless steel microwave",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 849,
+        "correct": 1,
+        "text": "the black jeans and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 850,
+        "correct": 1,
+        "text": "the striped scarf and the large microwave",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 851,
+        "correct": 1,
+        "text": "the striped scarf and the stainless steel microwave",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 852,
+        "correct": 1,
+        "text": "the striped scarf and the stainless steel stove",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 853,
+        "correct": 0,
+        "text": "the striped scarf and the black stove",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 854,
+        "correct": 0,
+        "text": "the striped scarf and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 855,
+        "correct": 1,
+        "text": "the large microwave and the black stove",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 856,
+        "correct": 0,
+        "text": "the large microwave and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 857,
+        "correct": 0,
+        "text": "the stainless steel microwave and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 858,
+        "correct": 1,
+        "text": "the stainless steel stove and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 859,
+        "correct": 1,
+        "text": "the black stove and the tiled wall",
+        "img_path": "datasets/vg_attribution/images/2403677.jpg"
+    },
+    {
+        "id": 860,
+        "correct": 1,
+        "text": "the brown headboard and the large bed",
+        "img_path": "datasets/vg_attribution/images/2366034.jpg"
+    },
+    {
+        "id": 861,
+        "correct": 0,
+        "text": "the wood headboard and the large bed",
+        "img_path": "datasets/vg_attribution/images/2366034.jpg"
+    },
+    {
+        "id": 862,
+        "correct": 0,
+        "text": "the blue umbrella and the brown bench",
+        "img_path": "datasets/vg_attribution/images/2366031.jpg"
+    },
+    {
+        "id": 863,
+        "correct": 1,
+        "text": "the blue umbrella and the standing child",
+        "img_path": "datasets/vg_attribution/images/2366031.jpg"
+    },
+    {
+        "id": 864,
+        "correct": 0,
+        "text": "the brown bench and the standing child",
+        "img_path": "datasets/vg_attribution/images/2366031.jpg"
+    },
+    {
+        "id": 865,
+        "correct": 1,
+        "text": "the young elephant and the unpaved path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 866,
+        "correct": 1,
+        "text": "the young elephant and the rough path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 867,
+        "correct": 1,
+        "text": "the young elephant and the red path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 868,
+        "correct": 1,
+        "text": "the running elephant and the unpaved path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 869,
+        "correct": 1,
+        "text": "the running elephant and the rough path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 870,
+        "correct": 1,
+        "text": "the running elephant and the red path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 871,
+        "correct": 1,
+        "text": "the gray elephant and the unpaved path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 872,
+        "correct": 1,
+        "text": "the gray elephant and the rough path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 873,
+        "correct": 0,
+        "text": "the gray elephant and the red path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 874,
+        "correct": 1,
+        "text": "the walking elephant and the unpaved path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 875,
+        "correct": 1,
+        "text": "the walking elephant and the rough path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 876,
+        "correct": 1,
+        "text": "the walking elephant and the red path",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 877,
+        "correct": 1,
+        "text": "the young elephant and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 878,
+        "correct": 1,
+        "text": "the young elephant and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 879,
+        "correct": 1,
+        "text": "the running elephant and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 880,
+        "correct": 1,
+        "text": "the running elephant and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 881,
+        "correct": 1,
+        "text": "the gray elephant and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 882,
+        "correct": 1,
+        "text": "the gray elephant and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 883,
+        "correct": 1,
+        "text": "the walking elephant and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 884,
+        "correct": 1,
+        "text": "the walking elephant and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 885,
+        "correct": 0,
+        "text": "the unpaved path and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 886,
+        "correct": 0,
+        "text": "the unpaved path and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 887,
+        "correct": 1,
+        "text": "the rough path and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 888,
+        "correct": 1,
+        "text": "the rough path and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 889,
+        "correct": 1,
+        "text": "the red path and the dry tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 890,
+        "correct": 1,
+        "text": "the red path and the green tree",
+        "img_path": "datasets/vg_attribution/images/2368765.jpg"
+    },
+    {
+        "id": 891,
+        "correct": 0,
+        "text": "the wood seat and the empty picture",
+        "img_path": "datasets/vg_attribution/images/2407307.jpg"
+    },
+    {
+        "id": 892,
+        "correct": 0,
+        "text": "the tall tree and the hazy sky",
+        "img_path": "datasets/vg_attribution/images/1592132.jpg"
+    },
+    {
+        "id": 893,
+        "correct": 0,
+        "text": "the tall tree and the white snow",
+        "img_path": "datasets/vg_attribution/images/1592132.jpg"
+    },
+    {
+        "id": 894,
+        "correct": 1,
+        "text": "the tall tree and the white coat",
+        "img_path": "datasets/vg_attribution/images/1592132.jpg"
+    },
+    {
+        "id": 895,
+        "correct": 0,
+        "text": "the hazy sky and the white snow",
+        "img_path": "datasets/vg_attribution/images/1592132.jpg"
+    },
+    {
+        "id": 896,
+        "correct": 1,
+        "text": "the hazy sky and the white coat",
+        "img_path": "datasets/vg_attribution/images/1592132.jpg"
+    },
+    {
+        "id": 897,
+        "correct": 1,
+        "text": "the female surfer and the calm water",
+        "img_path": "datasets/vg_attribution/images/2389822.jpg"
+    },
+    {
+        "id": 898,
+        "correct": 1,
+        "text": "the female surfer and the splashing water",
+        "img_path": "datasets/vg_attribution/images/2389822.jpg"
+    },
+    {
+        "id": 899,
+        "correct": 0,
+        "text": "the riding surfer and the calm water",
+        "img_path": "datasets/vg_attribution/images/2389822.jpg"
+    },
+    {
+        "id": 900,
+        "correct": 0,
+        "text": "the riding surfer and the splashing water",
+        "img_path": "datasets/vg_attribution/images/2389822.jpg"
+    },
+    {
+        "id": 901,
+        "correct": 1,
+        "text": "the busy street and the green trees",
+        "img_path": "datasets/vg_attribution/images/1761.jpg"
+    },
+    {
+        "id": 902,
+        "correct": 0,
+        "text": "the busy street and the large building",
+        "img_path": "datasets/vg_attribution/images/1761.jpg"
+    },
+    {
+        "id": 903,
+        "correct": 1,
+        "text": "the busy street and the tan building",
+        "img_path": "datasets/vg_attribution/images/1761.jpg"
+    },
+    {
+        "id": 904,
+        "correct": 1,
+        "text": "the green trees and the large building",
+        "img_path": "datasets/vg_attribution/images/1761.jpg"
+    },
+    {
+        "id": 905,
+        "correct": 1,
+        "text": "the green trees and the tan building",
+        "img_path": "datasets/vg_attribution/images/1761.jpg"
+    },
+    {
+        "id": 906,
+        "correct": 1,
+        "text": "the concrete wall and the paved road",
+        "img_path": "datasets/vg_attribution/images/2389829.jpg"
+    },
+    {
+        "id": 907,
+        "correct": 0,
+        "text": "the concrete wall and the asphalt road",
+        "img_path": "datasets/vg_attribution/images/2389829.jpg"
+    },
+    {
+        "id": 908,
+        "correct": 1,
+        "text": "the large pizza and the sitting woman",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 909,
+        "correct": 1,
+        "text": "the cheese pizza and the sitting woman",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 910,
+        "correct": 1,
+        "text": "the white pizza and the sitting woman",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 911,
+        "correct": 1,
+        "text": "the large pizza and the dotted shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 912,
+        "correct": 1,
+        "text": "the large pizza and the black shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 913,
+        "correct": 1,
+        "text": "the cheese pizza and the dotted shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 914,
+        "correct": 1,
+        "text": "the cheese pizza and the black shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 915,
+        "correct": 1,
+        "text": "the white pizza and the dotted shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 916,
+        "correct": 1,
+        "text": "the white pizza and the black shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 917,
+        "correct": 1,
+        "text": "the large pizza and the closed blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 918,
+        "correct": 0,
+        "text": "the cheese pizza and the closed blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 919,
+        "correct": 0,
+        "text": "the sitting woman and the dotted shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 920,
+        "correct": 1,
+        "text": "the sitting woman and the black shirt",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 921,
+        "correct": 0,
+        "text": "the sitting woman and the white curtain",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 922,
+        "correct": 0,
+        "text": "the sitting woman and the closed blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 923,
+        "correct": 0,
+        "text": "the sitting woman and the white blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 924,
+        "correct": 0,
+        "text": "the dotted shirt and the white curtain",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 925,
+        "correct": 0,
+        "text": "the black shirt and the white curtain",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 926,
+        "correct": 1,
+        "text": "the dotted shirt and the closed blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 927,
+        "correct": 0,
+        "text": "the dotted shirt and the white blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 928,
+        "correct": 1,
+        "text": "the black shirt and the closed blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 929,
+        "correct": 1,
+        "text": "the black shirt and the white blinds",
+        "img_path": "datasets/vg_attribution/images/2402230.jpg"
+    },
+    {
+        "id": 930,
+        "correct": 1,
+        "text": "the blue skirt and the tan shirt",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 931,
+        "correct": 1,
+        "text": "the blue skirt and the sleeveless shirt",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 932,
+        "correct": 1,
+        "text": "the blue skirt and the silver van",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 933,
+        "correct": 1,
+        "text": "the blue skirt and the parked van",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 934,
+        "correct": 1,
+        "text": "the tan shirt and the silver van",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 935,
+        "correct": 1,
+        "text": "the tan shirt and the parked van",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 936,
+        "correct": 1,
+        "text": "the sleeveless shirt and the silver van",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 937,
+        "correct": 1,
+        "text": "the sleeveless shirt and the parked van",
+        "img_path": "datasets/vg_attribution/images/2402232.jpg"
+    },
+    {
+        "id": 938,
+        "correct": 1,
+        "text": "the blue blanket and the white chair",
+        "img_path": "datasets/vg_attribution/images/2326282.jpg"
+    },
+    {
+        "id": 939,
+        "correct": 1,
+        "text": "the large blanket and the white chair",
+        "img_path": "datasets/vg_attribution/images/2326282.jpg"
+    },
+    {
+        "id": 940,
+        "correct": 1,
+        "text": "the brown hair and the gravel ground",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 941,
+        "correct": 0,
+        "text": "the brown hair and the wood table",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 942,
+        "correct": 1,
+        "text": "the brown hair and the pink coat",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 943,
+        "correct": 0,
+        "text": "the brown hair and the sitting girl",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 944,
+        "correct": 0,
+        "text": "the gravel ground and the wood table",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 945,
+        "correct": 1,
+        "text": "the gravel ground and the pink coat",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 946,
+        "correct": 0,
+        "text": "the gravel ground and the sitting girl",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 947,
+        "correct": 1,
+        "text": "the wood table and the pink coat",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 948,
+        "correct": 1,
+        "text": "the wood table and the sitting girl",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 949,
+        "correct": 1,
+        "text": "the pink coat and the sitting girl",
+        "img_path": "datasets/vg_attribution/images/2396376.jpg"
+    },
+    {
+        "id": 950,
+        "correct": 1,
+        "text": "the clear table and the yellow coffee mug",
+        "img_path": "datasets/vg_attribution/images/1547.jpg"
+    },
+    {
+        "id": 951,
+        "correct": 1,
+        "text": "the clean table and the yellow coffee mug",
+        "img_path": "datasets/vg_attribution/images/1547.jpg"
+    },
+    {
+        "id": 952,
+        "correct": 1,
+        "text": "the glass table and the yellow coffee mug",
+        "img_path": "datasets/vg_attribution/images/1547.jpg"
+    },
+    {
+        "id": 953,
+        "correct": 1,
+        "text": "the blue sky and the white truck",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 954,
+        "correct": 1,
+        "text": "the blue sky and the gravel road",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 955,
+        "correct": 1,
+        "text": "the blue sky and the gray road",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 956,
+        "correct": 0,
+        "text": "the blue sky and the large vehicle",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 957,
+        "correct": 0,
+        "text": "the white truck and the gravel road",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 958,
+        "correct": 1,
+        "text": "the white truck and the gray road",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 959,
+        "correct": 0,
+        "text": "the white truck and the large vehicle",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 960,
+        "correct": 1,
+        "text": "the gravel road and the large vehicle",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 961,
+        "correct": 1,
+        "text": "the gray road and the large vehicle",
+        "img_path": "datasets/vg_attribution/images/2390060.jpg"
+    },
+    {
+        "id": 962,
+        "correct": 1,
+        "text": "the brown gorilla and the green food truck",
+        "img_path": "datasets/vg_attribution/images/2354454.jpg"
+    },
+    {
+        "id": 963,
+        "correct": 1,
+        "text": "the brown gorilla and the parked food truck",
+        "img_path": "datasets/vg_attribution/images/2354454.jpg"
+    },
+    {
+        "id": 964,
+        "correct": 1,
+        "text": "the striped shirt and the black dress",
+        "img_path": "datasets/vg_attribution/images/2351975.jpg"
+    },
+    {
+        "id": 965,
+        "correct": 1,
+        "text": "the crouched man and the black suit",
+        "img_path": "datasets/vg_attribution/images/2396086.jpg"
+    },
+    {
+        "id": 966,
+        "correct": 1,
+        "text": "the skiing man and the black suit",
+        "img_path": "datasets/vg_attribution/images/2396086.jpg"
+    },
+    {
+        "id": 967,
+        "correct": 1,
+        "text": "the snowboarding man and the black suit",
+        "img_path": "datasets/vg_attribution/images/2396086.jpg"
+    },
+    {
+        "id": 968,
+        "correct": 0,
+        "text": "the large building and the palm palm tree",
+        "img_path": "datasets/vg_attribution/images/2358741.jpg"
+    },
+    {
+        "id": 969,
+        "correct": 1,
+        "text": "the white building and the palm palm tree",
+        "img_path": "datasets/vg_attribution/images/2358741.jpg"
+    },
+    {
+        "id": 970,
+        "correct": 0,
+        "text": "the blue couch and the gray wall",
+        "img_path": "datasets/vg_attribution/images/2322922.jpg"
+    },
+    {
+        "id": 971,
+        "correct": 0,
+        "text": "the upholstered couch and the gray wall",
+        "img_path": "datasets/vg_attribution/images/2322922.jpg"
+    },
+    {
+        "id": 972,
+        "correct": 0,
+        "text": "the white racket and the vertical fence",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 973,
+        "correct": 1,
+        "text": "the white racket and the metal fence",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 974,
+        "correct": 1,
+        "text": "the white racket and the tennis shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 975,
+        "correct": 0,
+        "text": "the white racket and the green shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 976,
+        "correct": 0,
+        "text": "the white racket and the nike shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 977,
+        "correct": 0,
+        "text": "the vertical fence and the tennis shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 978,
+        "correct": 1,
+        "text": "the vertical fence and the green shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 979,
+        "correct": 0,
+        "text": "the vertical fence and the nike shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 980,
+        "correct": 0,
+        "text": "the metal fence and the tennis shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 981,
+        "correct": 1,
+        "text": "the metal fence and the green shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 982,
+        "correct": 0,
+        "text": "the metal fence and the nike shirt",
+        "img_path": "datasets/vg_attribution/images/2335456.jpg"
+    },
+    {
+        "id": 983,
+        "correct": 0,
+        "text": "the large clouds and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2350515.jpg"
+    },
+    {
+        "id": 984,
+        "correct": 1,
+        "text": "the large clouds and the cloudy sky",
+        "img_path": "datasets/vg_attribution/images/2350515.jpg"
+    },
+    {
+        "id": 985,
+        "correct": 1,
+        "text": "the large clouds and the cloudless sky",
+        "img_path": "datasets/vg_attribution/images/2350515.jpg"
+    },
+    {
+        "id": 986,
+        "correct": 0,
+        "text": "the white clouds and the blue sky",
+        "img_path": "datasets/vg_attribution/images/2350515.jpg"
+    },
+    {
+        "id": 987,
+        "correct": 0,
+        "text": "the white clouds and the cloudy sky",
+        "img_path": "datasets/vg_attribution/images/2350515.jpg"
+    },
+    {
+        "id": 988,
+        "correct": 1,
+        "text": "the white clouds and the cloudless sky",
+        "img_path": "datasets/vg_attribution/images/2350515.jpg"
+    },
+    {
+        "id": 989,
+        "correct": 1,
+        "text": "the rustic fence and the small zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 990,
+        "correct": 0,
+        "text": "the rustic fence and the black zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 991,
+        "correct": 1,
+        "text": "the red fence and the small zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 992,
+        "correct": 1,
+        "text": "the red fence and the black zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 993,
+        "correct": 1,
+        "text": "the worn fence and the small zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 994,
+        "correct": 1,
+        "text": "the worn fence and the black zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 995,
+        "correct": 1,
+        "text": "the wood fence and the small zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 996,
+        "correct": 0,
+        "text": "the wood fence and the black zebra",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 997,
+        "correct": 0,
+        "text": "the rustic fence and the thick mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 998,
+        "correct": 0,
+        "text": "the rustic fence and the short mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 999,
+        "correct": 1,
+        "text": "the rustic fence and the white mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1000,
+        "correct": 0,
+        "text": "the red fence and the thick mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1001,
+        "correct": 1,
+        "text": "the red fence and the short mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1002,
+        "correct": 1,
+        "text": "the red fence and the white mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1003,
+        "correct": 0,
+        "text": "the worn fence and the thick mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1004,
+        "correct": 0,
+        "text": "the worn fence and the short mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1005,
+        "correct": 0,
+        "text": "the worn fence and the white mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1006,
+        "correct": 0,
+        "text": "the wood fence and the thick mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1007,
+        "correct": 1,
+        "text": "the wood fence and the short mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1008,
+        "correct": 1,
+        "text": "the wood fence and the white mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1009,
+        "correct": 0,
+        "text": "the small zebra and the thick mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1010,
+        "correct": 0,
+        "text": "the small zebra and the short mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1011,
+        "correct": 1,
+        "text": "the small zebra and the white mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1012,
+        "correct": 0,
+        "text": "the black zebra and the thick mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1013,
+        "correct": 0,
+        "text": "the black zebra and the short mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    },
+    {
+        "id": 1014,
+        "correct": 0,
+        "text": "the black zebra and the white mane",
+        "img_path": "datasets/vg_attribution/images/2382258.jpg"
+    }
+]

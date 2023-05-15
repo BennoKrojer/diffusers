@@ -19,6 +19,33 @@ from accelerate import Accelerator
 
 import cProfile
 import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib as mpl
+
+import matplotlib.font_manager as fm
+
+# List of preferred alternative fonts to "Times New Roman"
+alternative_fonts = ["Palatino", "Georgia", "Garamond", "TeX Gyre Heros"]
+
+available_fonts = []
+for font in fm.findSystemFonts():
+    try:
+        available_fonts.append(fm.get_font(font).family_name)
+    except RuntimeError:
+        pass
+print(available_fonts)
+# Check if each alternative font is available
+for alt_font in alternative_fonts:
+    if alt_font in available_fonts:
+        print(f"Alternative font found: {alt_font}")
+        mpl.rcParams['font.family'] = alt_font
+        break
+else:
+    print("No alternative fonts found, using the default font.")
+
+
+# Set the general style of seaborn (white background with gridlines)
+sns.set(style="whitegrid")
 
 class Scorer:
     def __init__(self, args, clip_model=None, preprocess=None):
@@ -45,7 +72,7 @@ class Scorer:
         imgs, imgs_resize = [img.to('cuda:7') for img in imgs], [img.to('cuda:7') for img in imgs_resize]
 
         scores = []
-        for img_idx, resized_img in enumerate(imgs_resize[:5]):
+        for img_idx, resized_img in enumerate(imgs_resize[:2]):
             if len(resized_img.shape) == 3:
                 resized_img = resized_img.unsqueeze(0)
             intermediate_scores = []
@@ -55,35 +82,57 @@ class Scorer:
                 print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
                 dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=False, gray_baseline=args.gray_baseline)
                 dists = dists.to(torch.float32)
-                intermediate_scores.append(dists.squeeze().detach().cpu())
-            uncond_dist = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=True, gray_baseline=args.gray_baseline)
+                intermediate_scores.append(dists.squeeze()[2].detach().cpu())
+            uncond_dist = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, weird_thing=True, gray_baseline=args.gray_baseline)
             uncond_dist = uncond_dist.to(torch.float32)
-            intermediate_scores.append(uncond_dist.squeeze().detach().cpu())
+            intermediate_scores.append(uncond_dist.squeeze()[2].detach().cpu())
             scores.append(intermediate_scores)
         data = np.array(scores)
+        print(data)
 
-        x_labels = [f'Image {i+1}' for i in range(data.shape[0])]
+        x_labels = ['Groundtruth Image' if i==0 else 'Similar Image' for i in range(data.shape[0])]
 
-        # Create 2x2 grid of scatter plots
-        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
+        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 3))
         axes = axes.flatten()
 
+        # Define a color palette
+        palette = sns.color_palette(["#9b1b30", "#38761d", "#134f5c"])  # Soft red, green, blue
+
         for i, ax in enumerate(axes):
-            # Set colors for the scatter plot points
-            colors = ['red'] * data.shape[1]
-            colors[0] = 'green'
-            colors[-1] = 'blue'
-            ax.scatter(np.arange(data.shape[1]), data[i, :], color=colors)
-            ax.set_xlabel('Caption Index')
-            ax.set_ylabel('Denoising Error')
-            ax.set_title(f'Denoising Errors for {x_labels[i]}')
-            ax.set_ylim(data[i, :].min() - 0.1, data[i, :].max() + 0.1)
+            y = data[i, :]
+
+            # Create a color and marker list based on the data
+            colors = [palette[0]] * len(y)  # Use the first color in the palette
+            colors[0] = palette[1]  # Use a different color for the first point
+            colors[-1] = palette[2]  # Use the last color in the palette for the last point
+
+            markers = ['o'] * len(y)  # Use 'o' marker for all points
+            markers[0] = '*'  # Use '^' marker for the first point
+            markers[-1] = '*'  # Use 's' marker for the last point
+
+            # Plot each point individually
+            for j in [1,2,3,4,5,6,7,8,9,10,0,11]:
+                if j == 0 or j == len(y) - 1:
+                    size = 500  # Larger marker size for the first point
+                else:
+                    size=100
+                ax.scatter(y[j], 0, color=colors[j], marker=markers[j], s=size)  # All y-coordinates are set to 0
+                if j == 0:
+                    ax.annotate('correct caption', (y[j], 0), textcoords="offset points", xytext=(8,20), ha='center', fontsize=11, color=colors[j])
+                elif j == len(y) - 1:
+                    ax.annotate('unconditional', (y[j], 0), textcoords="offset points", xytext=(0,20), ha='center', fontsize=11, color=colors[j])
+                elif j == 1:
+                    ax.annotate('random captions', (y[j], 0), textcoords="offset points", xytext=(0,20), ha='center', fontsize=11, color=colors[j])
+            ax.set_yticks([])  # Hide y-axis
+            ax.set_xlabel('Denoising Error', fontsize=14)
+            ax.set_title(f'Denoising Errors for {x_labels[i]}', fontsize=16)
 
         fig.tight_layout()
 
         # Save the plot as a file (e.g. PNG format)
-        plt.savefig('scatter_plots_2x2.png', dpi=300, bbox_inches='tight')
+        plt.savefig('1D_scatter_plots_1x2.png', dpi=300, bbox_inches='tight')
 
+        print('saved')
 
 def main(args):
 
@@ -215,7 +264,7 @@ if __name__ == '__main__':
     parser.add_argument('--cuda_device', type=int, default=0)
     parser.add_argument('--batchsize', type=int, default=4)
     parser.add_argument('--subset', action='store_true')
-    parser.add_argument('--sampling_steps', type=int, default=250)
+    parser.add_argument('--sampling_steps', type=int, default=4)
     parser.add_argument('--img_retrieval', action='store_true')
     parser.add_argument('--gray_baseline', action='store_true')
     parser.add_argument('--lora_dir', type=str, default='')

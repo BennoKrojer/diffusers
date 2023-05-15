@@ -1,0 +1,4 @@
+R@1: 25.0
+R@5: 25.0
+Max more than once: 0
+Sample size 9

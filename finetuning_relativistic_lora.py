@@ -272,6 +272,7 @@ def parse_args():
     parser.add_argument('--relativistic', action='store_true')
     parser.add_argument('--unhinged', action='store_true')
     parser.add_argument('--neg_img', action='store_true')
+    parser.add_argument('--mixed_neg', action='store_true')
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -291,7 +292,7 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
     else:
         return f"{organization}/{model_id}"
 
-def score_batch(i, args, batch, model):
+def score_batch(i, args, batch, model, img_retrieval=False):
     """
     Takes a batch of images and captions and returns a score for each image-caption pair.
     """
@@ -307,7 +308,7 @@ def score_batch(i, args, batch, model):
                 resized_img = resized_img.unsqueeze(0)
             
             print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
-            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=4, unconditional=False)
+            dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=4, unconditional=img_retrieval)
             dists = dists.to(torch.float32)
             dists = dists.mean(dim=1)
             dists = -dists
@@ -477,7 +478,7 @@ def main():
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
     
-    train_dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, split='train', tokenizer=tokenizer, hard_neg=args.hard_neg, neg_img=args.neg_img)
+    train_dataset = get_dataset(args.task, f'datasets/{args.task}', transform=None, split='train', tokenizer=tokenizer, hard_neg=args.hard_neg, neg_img=args.neg_img, mixed_neg=args.mixed_neg)
 
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
@@ -488,14 +489,16 @@ def main():
     )
 
 
-    val_dataset = get_dataset('mscoco_val', f'datasets/{args.task}', transform=None, split='val')
+    val_dataset = get_dataset('mscoco_val', f'datasets/{args.task}', transform=None, split='val', neg_img=False, hard_neg=True)
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=0)
 
-    val_dataset2 = get_dataset('flickr30k_text', f'datasets/flickr30k_text', transform=None, split='val')
+    val_dataset2 = get_dataset('mscoco_val', f'datasets/{args.task}', transform=None, split='val', neg_img=True, hard_neg=False)
     val_dataloader2 = torch.utils.data.DataLoader(val_dataset2, batch_size=8, shuffle=False, num_workers=0)
+    # val_dataset2 = get_dataset('flickr30k_text', f'datasets/flickr30k_text', transform=None, split='val')
+    # val_dataloader2 = torch.utils.data.DataLoader(val_dataset2, batch_size=8, shuffle=False, num_workers=0)
 
-    val_dataset3 = get_dataset('vg_attribution', f'datasets/vg_attribution', transform=None)
-    val_dataloader3 = torch.utils.data.DataLoader(val_dataset3, batch_size=8, shuffle=False, num_workers=0)
+    # val_dataset3 = get_dataset('vg_attribution', f'datasets/vg_attribution', transform=None)
+    # val_dataloader3 = torch.utils.data.DataLoader(val_dataset3, batch_size=8, shuffle=False, num_workers=0)
 
     # val_dataset3 = get_dataset('coco_order', f'datasets/coco_order', transform=None)
     # val_dataloader3 = torch.utils.data.DataLoader(val_dataset3, batch_size=8, shuffle=False, num_workers=0)
@@ -586,7 +589,22 @@ def main():
     for epoch in range(first_epoch, args.num_train_epochs):
         unet.train()
         train_loss = 0.0
+
         for step, batch in enumerate(train_dataloader):
+            
+            if args.mixed_neg:
+                neg_img_ = False
+                hard_neg_ = False
+                rand_neg_ = False
+                if 0.5 < torch.rand(1):
+                    neg_img_ = True
+                else:
+                    if 0.5 < torch.rand(1):
+                        hard_neg_ = True
+                    else:
+                        rand_neg_ = True
+
+
             # Skip steps until we reach the resumed step
             if args.resume_from_checkpoint and epoch == first_epoch and step < resume_step:
                 if step % args.gradient_accumulation_steps == 0:
@@ -597,23 +615,20 @@ def main():
                 # Convert images to latent space
 
                 img, texts, _ = batch
-                if args.neg_prob > torch.rand(1):
-                    # idx = torch.randint(1, texts.shape[1], (1,))[0]
-                    if args.neg_img:
-                        img_neg = img[1][1]
-                        txt_neg = None
-                    else:
-                        txt_neg = texts[:,1,:]
-                        img_neg = None
-                else:
+                # idx = torch.randint(1, texts.shape[1], (1,))[0]
+                if neg_img_:
+                    img_neg = img[1][1]
                     txt_neg = None
+                elif hard_neg_:
+                    txt_neg = texts[:,1,:]
                     img_neg = None
-
-                img = img[1][0]
-                if not args.neg_img:
-                    text = texts[:,0,:]
                 else:
-                    text = texts
+                    txt_neg = texts[:,2,:]
+                    img_neg = None
+                
+                img = img[1][0]
+                text = texts[:,0,:]
+    
 
                 latents = vae.encode(img.to(dtype=weight_dtype)).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
@@ -651,10 +666,10 @@ def main():
                     latents_neg = latents_neg * vae.config.scaling_factor
 
                     # Sample noise that we'll add to the negative latents
-                    noise_neg = torch.randn_like(latents_neg)
+                    # noise_neg = torch.randn_like(latents_neg)
 
                     # Add noise to the negative latents according to the noise magnitude at each timestep
-                    noisy_latents_neg = noise_scheduler.add_noise(latents_neg, noise_neg, timesteps)
+                    noisy_latents_neg = noise_scheduler.add_noise(latents_neg, noise, timesteps)
 
                     # Predict the noise residual for the negative latents
                     model_pred_neg = unet(noisy_latents_neg, timesteps, encoder_hidden_states).sample
@@ -694,6 +709,7 @@ def main():
                 optimizer.step()
                 lr_scheduler.step()
                 optimizer.zero_grad()
+
 
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:
@@ -818,13 +834,38 @@ def main():
                         metrics += acc
                         acc = sum(metrics) / len(metrics)
                         max_more_than_onces += max_more_than_once
-                        print(f'MSCOCO Val Accuracy: {acc}')
+                        print(f'MSCOCO Val Accuracy Txt: {acc}')
                         print(f'Max more than once: {max_more_than_onces}')
-                        with open(f'{save_path}/results.txt', 'w') as f:
-                            f.write(f'MSCOCO Val Accuracy: {acc}\n')
+                        with open(f'{save_path}/results_txt.txt', 'w') as f:
+                            f.write(f'MSCOCO Val Accuracy Txt: {acc}\n')
                             f.write(f'Max more than once: {max_more_than_onces}\n')
                             f.write(f"Sample size {len(metrics)}\n")
-                    wandb.log({'MSCOCO Val Accuracy': acc, 'Max more than once': max_more_than_onces})
+                    wandb.log({'MSCOCO Val Accuracy Txt': acc, 'Max more than once': max_more_than_onces})
+                    txt_acc = acc
+
+                    metrics = []
+                    max_more_than_onces = 0
+                    for k, batch in tqdm(enumerate(val_dataloader2), total=len(val_dataloader2)):
+                        if k % 15 != 0:
+                            continue
+                        # measure time for the following line
+                        scores = score_batch(k, args, batch, pipeline_img2img, img_retrieval=True)
+
+                        args.task = 'mscoco_val'
+                        acc, max_more_than_once = evaluate_scores(args, scores, batch)
+                        metrics += acc
+                        acc = sum(metrics) / len(metrics)
+                        max_more_than_onces += max_more_than_once
+                        print(f'MSCOCO Val Accuracy Img: {acc}')
+                        print(f'Max more than once: {max_more_than_onces}')
+                        with open(f'{save_path}/results_txt.txt', 'w') as f:
+                            f.write(f'MSCOCO Val Accuracy Img: {acc}\n')
+                            f.write(f'Max more than once: {max_more_than_onces}\n')
+                            f.write(f"Sample size {len(metrics)}\n")
+                    wandb.log({'MSCOCO Val Accuracy Img': acc, 'Max more than once': max_more_than_onces})
+                    img_acc = acc
+                    wandb.log({'Overall Val Accuracy': (txt_acc + img_acc) / 2})
+
                     del pipeline_img2img
                     torch.cuda.empty_cache()
             

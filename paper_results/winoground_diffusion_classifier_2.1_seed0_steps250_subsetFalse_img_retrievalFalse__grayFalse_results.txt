@@ -1,0 +1,3 @@
+Text score: 0.3725
+Image score: 0.0025
+Group score: 0.0025
