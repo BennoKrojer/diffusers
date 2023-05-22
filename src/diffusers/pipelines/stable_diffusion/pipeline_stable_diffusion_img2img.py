@@ -888,6 +888,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
         sampling_steps = 200,
         unconditional = False,
         gray_baseline = False,
+        weird_thing = False
     ):
         r"""
         Function invoked when calling the pipeline for generation.
@@ -974,7 +975,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
             prompt,
             device,
             num_images_per_prompt,
-            unconditional,
+            unconditional or guidance_scale > 0,
             negative_prompt,
             prompt_embeds=prompt_embeds,
             negative_prompt_embeds=negative_prompt_embeds,
@@ -1001,7 +1002,7 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
                     gray_latents, gray_noise, _ = self.prepare_latents(gray_image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator, sampling_step, unconditional)
 
                 # expand the latents if we are doing classifier free guidance
-                latent_model_input = torch.cat([latents] * 2) if unconditional else latents
+                latent_model_input = torch.cat([latents] * 2) if unconditional or guidance_scale > 0  else latents
                 latent_model_input = self.scheduler.scale_model_input(latent_model_input, t)
                 if gray_baseline:
                     gray_latent_model_input = torch.cat([gray_latents] * 2) if unconditional else gray_latents
@@ -1022,8 +1023,11 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
 
                     dist = torch.norm(noise - noise_pred_text, p=2, dim=1)
                     base_dist = torch.norm(noise - noise_pred_uncond, p=2, dim=1)
+                    if weird_thing:
+                        dists.append(base_dist)
+                    else:
                     # dists.append(base_dist) #TODO: undo!
-                    dists.append(dist - base_dist)
+                        dists.append(dist - base_dist)
                 elif gray_baseline:
                     noise = noise.flatten(1)
                     noise_pred = noise_pred.flatten(1)
@@ -1031,6 +1035,13 @@ class StableDiffusionImg2ImgPipeline(DiffusionPipeline):
                     dist = torch.norm(noise - noise_pred, p=2, dim=1)
                     base_dist = torch.norm(noise - gray_noise_pred, p=2, dim=1)
                     dists.append(dist - base_dist)
+                elif guidance_scale > 0:
+                    noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+                    noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
+                    noise = noise.flatten(1)
+                    noise_pred = noise_pred.flatten(1)
+                    dist = torch.norm(noise - noise_pred, p=2, dim=1)
+                    dists.append(dist)
                 else:
                     noise = noise.flatten(1)
                     noise_pred = noise_pred.flatten(1)

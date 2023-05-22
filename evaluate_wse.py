@@ -255,7 +255,7 @@ if __name__ == '__main__':
         elif "inferencelike" in args.lora_dir:
             lora_type = "inferencelike"
 
-    args.run_id = f'{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}{args.targets}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}_gray{args.gray_baseline}'
+    args.run_id = f'XX{args.task}_diffusion_classifier_{args.version}_seed{args.seed}_steps{args.sampling_steps}_subset{args.subset}{args.targets}_img_retrieval{args.img_retrieval}_{"lora_" + lora_type if args.lora_dir else ""}_gray{args.gray_baseline}'
     if args.cache:
         args.cache_dir = f'./cache/{args.run_id}'
         if not os.path.exists(args.cache_dir):

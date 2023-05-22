@@ -53,7 +53,8 @@ def evaluate_bias(args, good_scores, bad_scores, img_idx):
     good_scores = good_scores.cpu().numpy()
     bad_scores = bad_scores.cpu().numpy()
     phis = {}
-    for i in range(len(good_scores)):
+    for i in range(len(good_scores)): # rows of tensor are images, columns are the words
+        # p val test just needs the phi(w,A,B) which i have!  just code it elionrrr
         class_idx = int(img_idx[i]) # get class, should be an integer {0,1,...,7}
         good_score = good_scores[i].mean() # mean_{a\in A} sigma(x,a)
         bad_score = bad_scores[i].mean() # mean_{b\in B} sigma(x,b)
@@ -62,7 +63,7 @@ def evaluate_bias(args, good_scores, bad_scores, img_idx):
             phis[class_idx].append(phi)
         else:
             phis[class_idx] = [phi]
-    return phis
+    return phis#, raw_scores
 
 def evaluate_gender_bias(args, m_attr_scores, f_attr_scores, class_ids):
     entity = class_ids[0].split('_')[-1] # either clothes, drinks, or bags

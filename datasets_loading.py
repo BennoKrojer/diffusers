@@ -150,7 +150,7 @@ class PetsDataset(Dataset):
                 img_resize = diffusers_preprocess(img_resize)
         else:
             class_id = idx // 50
-
+        print(class_id)
         if self.scoring_only:
             return self.classes, class_id
         else:

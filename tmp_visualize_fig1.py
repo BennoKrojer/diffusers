@@ -62,14 +62,14 @@ class Scorer:
         print(self.texts)
 
 
-    def score_batch(self, i, args, batch, model):
+    def score_batch(self, idx, args, batch, model):
         """
         Takes a batch of images and captions and returns a score for each image-caption pair.
         """
 
         imgs, texts = batch[0], batch[1]
         imgs, imgs_resize = imgs[0], imgs[1]
-        imgs, imgs_resize = [img.to('cuda:7') for img in imgs], [img.to('cuda:7') for img in imgs_resize]
+        imgs_resize =[img.to('cuda:7') for img in imgs_resize]
 
         scores = []
         for img_idx, resized_img in enumerate(imgs_resize[:2]):
@@ -79,7 +79,7 @@ class Scorer:
             for txt_idx, text in enumerate(texts + self.texts): 
                 if txt_idx > 0:
                     text = [text]   
-                print(f'Batch {i}, Text {txt_idx}, Image {img_idx}')
+                print(f'Batch {idx}, Text {txt_idx}, Image {img_idx}')
                 dists = model(prompt=list(text), image=resized_img, scoring=True, guidance_scale=0.0, sampling_steps=args.sampling_steps, unconditional=False, gray_baseline=args.gray_baseline)
                 dists = dists.to(torch.float32)
                 intermediate_scores.append(dists.squeeze()[2].detach().cpu())
@@ -88,51 +88,62 @@ class Scorer:
             intermediate_scores.append(uncond_dist.squeeze()[2].detach().cpu())
             scores.append(intermediate_scores)
         data = np.array(scores)
-        print(data)
 
-        x_labels = ['Groundtruth Image' if i==0 else 'Similar Image' for i in range(data.shape[0])]
+        x_labels = ['Image 1' if i == 0 else 'Image 2' for i in range(data.shape[0])]
 
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(15, 3))
-        axes = axes.flatten()
+        fig, ax = plt.subplots(figsize=(15, 3))
 
-        # Define a color palette
-        palette = sns.color_palette(["#9b1b30", "#38761d", "#134f5c"])  # Soft red, green, blue
+        palette = sns.color_palette("colorblind")
 
-        for i, ax in enumerate(axes):
+        separator = 0.5
+
+        legend_elements = []
+
+        for i in range(data.shape[0]):
             y = data[i, :]
 
-            # Create a color and marker list based on the data
-            colors = [palette[0]] * len(y)  # Use the first color in the palette
-            colors[0] = palette[1]  # Use a different color for the first point
-            colors[-1] = palette[2]  # Use the last color in the palette for the last point
+            colors = [palette[0]] * len(y)
+            colors[0] = palette[1]
+            colors[-1] = palette[2]
 
-            markers = ['o'] * len(y)  # Use 'o' marker for all points
-            markers[0] = '*'  # Use '^' marker for the first point
-            markers[-1] = '*'  # Use 's' marker for the last point
+            markers = ['o'] * len(y)
+            markers[0] = '*'
+            markers[-1] = '^'
 
-            # Plot each point individually
-            for j in [1,2,3,4,5,6,7,8,9,10,0,11]:
+            y_coordinates = [i * separator] * len(y)
+            if i == 0:
+                y_coordinates = [y - 0.6 for y in y_coordinates]
+            else:
+                y_coordinates = [y for y in y_coordinates]
+
+            for j in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 11]:
                 if j == 0 or j == len(y) - 1:
-                    size = 500  # Larger marker size for the first point
+                    size = 600
                 else:
-                    size=100
-                ax.scatter(y[j], 0, color=colors[j], marker=markers[j], s=size)  # All y-coordinates are set to 0
-                if j == 0:
-                    ax.annotate('correct caption', (y[j], 0), textcoords="offset points", xytext=(8,20), ha='center', fontsize=11, color=colors[j])
-                elif j == len(y) - 1:
-                    ax.annotate('unconditional', (y[j], 0), textcoords="offset points", xytext=(0,20), ha='center', fontsize=11, color=colors[j])
-                elif j == 1:
-                    ax.annotate('random captions', (y[j], 0), textcoords="offset points", xytext=(0,20), ha='center', fontsize=11, color=colors[j])
-            ax.set_yticks([])  # Hide y-axis
-            ax.set_xlabel('Denoising Error', fontsize=14)
-            ax.set_title(f'Denoising Errors for {x_labels[i]}', fontsize=16)
+                    size = 100
+                ax.scatter(y[j], y_coordinates[j], color=colors[j], marker=markers[j], s=size)
+
+                if j == 0 and i == 0:
+                    legend_elements.append(plt.Line2D([0], [0], marker='*', color='w', label='caption 1', markerfacecolor=colors[j], markersize=18))
+                elif j == len(y) - 1 and i == 0:
+                    legend_elements.append(plt.Line2D([0], [0], marker='^', color='w', label='unconditional', markerfacecolor=colors[j], markersize=18))
+                elif j == 1 and i == 0:
+                    legend_elements.append(plt.Line2D([0], [0], marker='o', color='w', label='random captions', markerfacecolor=colors[j], markersize=18))
+
+        ax.set_ylim(-1, 1)
+        ax.set_yticks([])
+        ax.axhline(0, color='gray', linestyle='--', linewidth=1.5, zorder=-1)
+        ax.set_xlabel('Denoising Error', fontsize=14)
+        ax.text(min(ax.get_xlim()) + 2, -separator / 2, 'Image 1', fontsize=25, verticalalignment='center')
+        ax.text(min(ax.get_xlim()) + 0.6, separator / 2, 'Image 2', fontsize=25, verticalalignment='center')
+
+        # Add legend
+        ax.legend(handles=legend_elements, loc='center left', bbox_to_anchor=(1.05, 0.5), fontsize=16)
 
         fig.tight_layout()
 
-        # Save the plot as a file (e.g. PNG format)
-        plt.savefig('1D_scatter_plots_1x2.png', dpi=300, bbox_inches='tight')
+        plt.savefig(f'1D_scatter_plots_samefig.pdf', dpi=300, bbox_inches='tight')
 
-        print('saved')
 
 def main(args):
 
@@ -159,110 +170,18 @@ def main(args):
     clevr_dict = {}
     bias_scores = {0:[],1:[],2:[],3:[],4:[],5:[],6:[],7:[]}
     for i, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-        if args.subset and i % 15 != 0:
-            continue
         scores = scorer.score_batch(i, args, batch, model)
-        scores = scores.contiguous()
-        accelerator.wait_for_everyone()
-        print(scores)
-        scores = accelerator.gather(scores)
-        batch[-1] = accelerator.gather(batch[-1])
-        if accelerator.is_main_process:
-            if args.task == 'winoground':
-                text_scores, img_scores, group_scores = evaluate_scores(args, scores, batch)
-                metrics += list(zip(text_scores, img_scores, group_scores))
-                text_score = sum([m[0] for m in metrics]) / len(metrics)
-                img_score = sum([m[1] for m in metrics]) / len(metrics)
-                group_score = sum([m[2] for m in metrics]) / len(metrics)
-                print(f'Text score: {text_score}')
-                print(f'Image score: {img_score}')
-                print(f'Group score: {group_score}')
-                print(len(metrics))
-                with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
-                    f.write(f'Text score: {text_score}\n')
-                    f.write(f'Image score: {img_score}\n')
-                    f.write(f'Group score: {group_score}\n')
-            elif args.task in ['flickr30k', 'imagecode', 'imagenet', 'flickr30k_text']:
-                r1,r5, max_more_than_once = evaluate_scores(args, scores, batch)
-                r1s += r1
-                r5s += r5
-                max_more_than_onces += max_more_than_once
-                r1 = sum(r1s) / len(r1s)
-                r5 = sum(r5s) / len(r5s)
-                print(f'R@1: {r1}')
-                print(f'R@5: {r5}')
-                print(f'Max more than once: {max_more_than_onces}')
-                with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
-                    f.write(f'R@1: {r1}\n')
-                    f.write(f'R@5: {r5}\n')
-                    f.write(f'Max more than once: {max_more_than_onces}\n')
-                    f.write(f"Sample size {len(r1s)}\n")
-            elif args.task == 'clevr':
-                acc_list, max_more_than_once = evaluate_scores(args, scores, batch)
-                metrics += acc_list
-                acc = sum(metrics) / len(metrics)
-                max_more_than_onces += max_more_than_once
-                print(f'Accuracy: {acc}')
-                print(f'Max more than once: {max_more_than_onces}')
-                with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
-                    f.write(f'Accuracy: {acc}\n')
-                    f.write(f'Max more than once: {max_more_than_onces}\n')
-                    f.write(f"Sample size {len(metrics)}\n")
-
-                # now do the same but for every subtask of CLEVR
-                subtasks = batch[-2]
-                for i, subtask in enumerate(subtasks):
-                    if subtask not in clevr_dict:
-                        clevr_dict[subtask] = []
-                    clevr_dict[subtask].append(acc_list[i])
-                for subtask in clevr_dict:
-                    print(f'{subtask} accuracy: {sum(clevr_dict[subtask]) / len(clevr_dict[subtask])}')
-                    with open(f'./paper_results/{args.run_id}_results.txt', 'a') as f:
-                        f.write(f'{subtask} accuracy: {sum(clevr_dict[subtask]) / len(clevr_dict[subtask])}\n')
-            elif args.task == 'mmbias':
-                phis = evaluate_scores(args,scores,batch)
-                for class_idx, phi_list in phis.items():
-                    bias_scores[class_idx].extend(phi_list)
-                christian = bias_scores[0]
-                muslim = bias_scores[1]
-                print(f'Batch {i} Christian-Muslim bias score {(np.mean(christian)-np.mean(muslim))/(np.concatenate((christian,muslim)).std())}')
-            else:
-                acc, max_more_than_once = evaluate_scores(args, scores, batch)
-                metrics += acc
-                acc = sum(metrics) / len(metrics)
-                max_more_than_onces += max_more_than_once
-                print(f'Accuracy: {acc}')
-                print(f'Max more than once: {max_more_than_onces}')
-                with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
-                    f.write(f'Accuracy: {acc}\n')
-                    f.write(f'Max more than once: {max_more_than_onces}\n')
-                    f.write(f"Sample size {len(metrics)}\n")
-    if args.task == 'mmbias':
-        with open(f'./paper_results/{args.run_id}_results.txt', 'w') as f:
-            christian = bias_scores[0]
-            muslim = bias_scores[1]
-            jewish = bias_scores[2]
-            hindu = bias_scores[3]
-            american = bias_scores[4]
-            arab = bias_scores[5]
-            hetero = bias_scores[6]
-            lgbt = bias_scores[7]
-            f.write(f'Christian-Muslim bias score {(np.mean(christian)-np.mean(muslim))/(np.concatenate((christian,muslim)).std())}\n')
-            f.write(f'Christian-Jewish bias score {(np.mean(christian)-np.mean(jewish))/(np.concatenate((christian,jewish)).std())}\n')
-            f.write(f'Hindu-Muslim bias score {(np.mean(hindu)-np.mean(muslim))/(np.concatenate((hindu,muslim)).std())}\n')
-            f.write(f'American-Arab bias score {(np.mean(american)-np.mean(arab))/(np.concatenate((american,arab)).std())}\n')
-            f.write(f'Hetero-LGBT bias score {(np.mean(hetero)-np.mean(lgbt))/(np.concatenate((hetero,lgbt)).std())}\n')
-            f.write('Positive scores indicate bias towards the first group, closer to 0 is less bias')
-
+        break
+        
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--task', type=str)
     # parser.add_argument('--similarity', type=str, default='clip')
-    parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--seed', type=int, default=1)
     parser.add_argument('--cache', action='store_true')
     parser.add_argument('--cuda_device', type=int, default=0)
-    parser.add_argument('--batchsize', type=int, default=4)
+    parser.add_argument('--batchsize', type=int, default=1)
     parser.add_argument('--subset', action='store_true')
     parser.add_argument('--sampling_steps', type=int, default=4)
     parser.add_argument('--img_retrieval', action='store_true')

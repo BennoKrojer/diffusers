@@ -59,6 +59,7 @@ fig = px.bar(df, x="task", y="score", color="model",
                  "model": "Model"
              },
              height=400, width=100, text_auto=True,
+             color_discrete_map={'Diffusion ITM with Stable Diffusion 2.1':'#DC3220','Diffusion ITM with Stable Diffusion 1.5':'#005AB5'}
              )
 
 # Update the layout properties
@@ -70,9 +71,11 @@ fig.update_layout(
     legend=dict(x=0.72,y=1,bgcolor='rgba(0,0,0,0)',
         font=dict(size=40, family="Times New Roman, bold"),  # Set the font size and family of the legend
     ),  # Set the font size of the text
+    # legend_itemwidth=30,
+    # legend_itemsizing='constant',
 )
 # fig.update_traces(texttemplate='%{text:.2s}', textposition='outside', 
 #                   insidetextfont=dict(size=25))  # adjust the size as per your need
 
 # Save the figure
-fig.write_image("1.5vs2.1.png")
+fig.write_image("1.5vs2.1_bigger.png")

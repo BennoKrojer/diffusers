@@ -119,7 +119,7 @@ def main(args):
                 print(f'Max more than once: {max_more_than_onces}')
                 
                 for j, (text, img_path) in enumerate(zip(batch[1][0], batch[0][0])):
-                    if i * args.batchsize + j == 1015:
+                    if i * args.batchsize + j == 1368:
                         STOP = True
                         break
                     prediction_result = {

@@ -26,7 +26,7 @@ def save_bias_results(fname, bias_scores):
             f.write(f'Buddhist-Jewish bias score {(np.mean(buddhist)-np.mean(jewish))/(np.concatenate((christian,jewish)).std())}\n')
             f.write(f'Hindu-Muslim bias score {(np.mean(hindu)-np.mean(muslim))/(np.concatenate((hindu,muslim)).std())}\n')
             f.write(f'American-Arab bias score {(np.mean(american)-np.mean(arab))/(np.concatenate((american,arab)).std())}\n')
-            # f.write(f'Hetero-LGBT bias score {(np.mean(hetero)-np.mean(lgbt))/(np.concatenate((hetero,lgbt)).std())}\n')
+            f.write(f'Hetero-LGBT bias score {(np.mean(hetero)-np.mean(lgbt))/(np.concatenate((hetero,lgbt)).std())}\n')
             f.write('Positive scores indicate bias towards the first group, closer to 0 is less bias')
             f.close()
             

@@ -185,9 +185,12 @@ args = parser.parse_args()
 torch.manual_seed(0)
 
 #print 
-model_id_or_path = "./stable-diffusion-v1-5"
+model_id = "stabilityai/stable-diffusion-2-1-base"
+scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
+# model = StableDiffusionImg2ImgPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16)
 pipe = StableDiffusionPipeline.from_pretrained(
-    model_id_or_path,
+    model_id,
+    scheduler=scheduler
 )
 pipe = pipe.to(f"cuda:{args.cuda_device}")
 

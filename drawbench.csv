@@ -1,0 +1,105 @@
+Prompts,Category
+A red colored car.,Colors
+A black colored car.,Colors
+A pink colored car.,Colors
+A black colored dog.,Colors
+A red colored dog.,Colors
+A blue colored dog.,Colors
+A green colored banana.,Colors
+A red colored banana.,Colors
+A black colored banana.,Colors
+A white colored sandwich.,Colors
+A black colored sandwich.,Colors
+An orange colored sandwich.,Colors
+A pink colored giraffe.,Colors
+A yellow colored giraffe.,Colors
+A brown colored giraffe.,Colors
+A red car and a white sheep.,Colors
+A blue bird and a brown bear.,Colors
+A green apple and a black backpack.,Colors
+A green cup and a blue cell phone.,Colors
+A yellow book and a red vase.,Colors
+A white car and a red sheep.,Colors
+A brown bird and a blue bear.,Colors
+A black apple and a green backpack.,Colors
+A blue cup and a green cell phone.,Colors
+A red book and a yellow vase.,Colors
+A horse riding an astronaut.,Conflicting
+A pizza cooking an oven.,Conflicting
+A bird scaring a scarecrow.,Conflicting
+A blue coloured pizza.,Conflicting
+Hovering cow abducting aliens.,Conflicting
+A panda making latte art.,Conflicting
+A shark in the desert.,Conflicting
+An elephant under the sea.,Conflicting
+Rainbow coloured penguin.,Conflicting
+A fish eating a pelican.,Conflicting
+One car on the street.,Counting
+Two cars on the street.,Counting
+Three cars on the street.,Counting
+Four cars on the street.,Counting
+Five cars on the street.,Counting
+One dog on the street.,Counting
+Two dogs on the street.,Counting
+Three dogs on the street.,Counting
+Four dogs on the street.,Counting
+Five dogs on the street.,Counting
+One cat and one dog sitting on the grass.,Counting
+One cat and two dogs sitting on the grass.,Counting
+One cat and three dogs sitting on the grass.,Counting
+Two cats and one dog sitting on the grass.,Counting
+Two cats and two dogs sitting on the grass.,Counting
+Two cats and three dogs sitting on the grass.,Counting
+Three cats and one dog sitting on the grass.,Counting
+Three cats and two dogs sitting on the grass.,Counting
+Three cats and three dogs sitting on the grass.,Counting
+A triangular purple flower pot. A purple flower pot in the shape of a triangle.,DALL-E
+A triangular orange picture frame. An orange picture frame in the shape of a triangle.,DALL-E
+A triangular pink stop sign. A pink stop sign in the shape of a triangle.,DALL-E
+A cube made of denim. A cube with the texture of denim.,DALL-E
+A sphere made of kitchen tile. A sphere with the texture of kitchen tile.,DALL-E
+A cube made of brick. A cube with the texture of brick.,DALL-E
+A collection of nail is sitting on a table.,DALL-E
+A single clock is sitting on a table.,DALL-E
+A couple of glasses are sitting on a table.,DALL-E
+An illustration of a large red elephant sitting on a small blue mouse.,DALL-E
+An illustration of a small green elephant standing behind a large red mouse.,DALL-E
+A small blue book sitting on a large red book.,DALL-E
+"A stack of 3 plates. A blue plate is on the top, sitting on a blue plate. The blue plate is in the middle, sitting on a green plate. The green plate is on the bottom.",DALL-E
+"A stack of 3 cubes. A red cube is on the top, sitting on a red cube. The red cube is in the middle, sitting on a green cube. The green cube is on the bottom.",DALL-E
+"A stack of 3 books. A green book is on the top, sitting on a red book. The red book is in the middle, sitting on a blue book. The blue book is on the bottom.",DALL-E
+"An emoji of a baby panda wearing a red hat, green gloves, red shirt, and green pants.",DALL-E
+"An emoji of a baby panda wearing a red hat, blue gloves, green shirt, and blue pants.",DALL-E
+A fisheye lens view of a turtle sitting in a forest.,DALL-E
+A side view of an owl sitting in a field.,DALL-E
+A cross-section view of a brain.,DALL-E
+Paying for a quarter-sized pizza with a pizza-sized quarter.,Gary Marcus et al. 
+An oil painting of a couple in formal evening wear going home get caught in a heavy downpour with no umbrellas.,Gary Marcus et al. 
+"A grocery store refrigerator has pint cartons of milk on the top shelf, quart cartons on the middle shelf, and gallon plastic jugs on the bottom shelf.",Gary Marcus et al. 
+"In late afternoon in January in New England, a man stands in the shadow of a maple tree.",Gary Marcus et al. 
+An elephant is behind a tree. You can see the trunk on one side and the back legs on the other.,Gary Marcus et al. 
+A tomato has been put on top of a pumpkin on a kitchen stool. There is a fork sticking into the pumpkin. The scene is viewed from above.,Gary Marcus et al. 
+A pear cut into seven pieces arranged in a ring.,Gary Marcus et al. 
+"A donkey and an octopus are playing a game. The donkey is holding a rope on one end, the octopus is holding onto the other. The donkey holds the rope in its mouth. A cat is jumping over the rope.",Gary Marcus et al. 
+"Supreme Court Justices play a baseball game with the FBI. The FBI is at bat, the justices are on the field.",Gary Marcus et al. 
+Abraham Lincoln touches his toes while George Washington does chin-ups. Lincoln is barefoot. Washington is wearing boots.,Gary Marcus et al. 
+A train on top of a surfboard.,Positional
+A wine glass on top of a dog.,Positional
+A bicycle on top of a boat.,Positional
+An umbrella on top of a spoon.,Positional
+A laptop on top of a teddy bear.,Positional
+A giraffe underneath a microwave.,Positional
+A donut underneath a toilet.,Positional
+A hair drier underneath a sheep.,Positional
+A tennis racket underneath a traffic light.,Positional
+A zebra underneath a broccoli.,Positional
+A banana on the left of an apple.,Positional
+A couch on the left of a chair.,Positional
+A car on the left of a bus.,Positional
+A cat on the left of a dog.,Positional
+A carrot on the left of a broccoli.,Positional
+A pizza on the right of a suitcase.,Positional
+A cat on the right of a tennis racket.,Positional
+A stop sign on the right of a refrigerator.,Positional
+A sheep to the right of a wine glass.,Positional
+A zebra to the right of a fire hydrant.,Positional

@@ -1,4 +1,4 @@
-R@1: 0.5714285714285714
-R@5: 0.8392857142857143
-Max more than once: 0
-Sample size 56
+R@1: 0.4486607142857143
+R@5: 0.8214285714285714
+Max more than once: 1
+Sample size 448
