@@ -1,9 +1,12 @@
 import numpy as np
 import json
-from math import floor
 from typing import Union, Callable
 import torch
 import torch.nn.functional as F
+import itertools
+import math
+import scipy.special
+import scipy.stats
 
 RETRIEVAL_TASKS = ['imagecode', 'imagecode_video', 'flickr30k', 'imagenet', 'clevr', 'svo_verb', 'svo_subj', 'svo_obj', 'pets', 'flickr30k_text', 'vg_relation', 'vg_attribution', 'coco_order', 'flickr30k_order', 'mscoco_val']
 
@@ -54,7 +57,6 @@ def evaluate_bias(args, good_scores, bad_scores, img_idx):
     bad_scores = bad_scores.cpu().numpy()
     phis = {}
     for i in range(len(good_scores)): # rows of tensor are images, columns are the words
-        # p val test just needs the phi(w,A,B) which i have!  just code it elionrrr
         class_idx = int(img_idx[i]) # get class, should be an integer {0,1,...,7}
         good_score = good_scores[i].mean() # mean_{a\in A} sigma(x,a)
         bad_score = bad_scores[i].mean() # mean_{b\in B} sigma(x,b)
@@ -63,7 +65,7 @@ def evaluate_bias(args, good_scores, bad_scores, img_idx):
             phis[class_idx].append(phi)
         else:
             phis[class_idx] = [phi]
-    return phis#, raw_scores
+    return phis
 
 def evaluate_gender_bias(args, m_attr_scores, f_attr_scores, class_ids):
     entity = class_ids[0].split('_')[-1] # either clothes, drinks, or bags
@@ -81,6 +83,66 @@ def evaluate_gender_bias(args, m_attr_scores, f_attr_scores, class_ids):
     phi_female = f_imgs_m_attr - f_imgs_f_attr #phi(f,w_m,w_f) = sigma(f,w_m)-sigma(f,w_f)
     
     return {f'male_{entity}':phi_male,f'female_{entity}':phi_female}
+
+def permutation_test(X, Y, n_samples):
+    # p val test just needs the phi(w,A,B) which i have!  just code it elionrrr
+    """Compute the p-val for the permutation test, which is defined as
+    the probability that a random even partition X_i, Y_i of X u Y
+    satisfies P[s(X_i, Y_i, A, B) > s(X, Y, A, B)]
+    
+    s(X', Y', A, B) > s(X, Y, A, B)
+        if and only if
+    si := sum_{x in X'} s(x, A, B) > sum_{x in X} s(x, A, B) =: s
+    """
+    # phi_list = {class_id:[list of the 250 sWABs/phis], ...}
+    # X = phis[some_class_id]
+    # Y = phis[some_class_id]
+    # the phi list gives us for each image, the mean difference between the two attribute word lists
+    # were permuting over the various target groups
+    # sWAB is the phi(w,A,B)
+
+    assert len(X) == len(Y)
+    size = len(X)
+    XY = np.concatenate((X, Y)) # union
+    s = np.sum(X)
+    total_true = 0
+    total_equal = 0
+    total = 0
+    num_partitions = int(scipy.special.binom(2 * size, size))
+    
+    if num_partitions > n_samples:
+            # We only have as much precision as the number of samples drawn;
+            # bias the p-value (hallucinate a positive observation) to
+            # reflect that.
+            total_true += 1
+            total += 1
+            print("Drawing {} samples (and biasing by 1)".format(n_samples - total))
+            for _ in range(n_samples - 1):
+                np.random.shuffle(XY)
+                si = XY[:size]
+                assert 2 * len(si) == len(XY)
+                si = np.sum(si)
+                if si > s:
+                    total_true += 1
+                elif si == s:  # use conservative test
+                    total_true += 1
+                    total_equal += 1
+                total += 1
+    else:
+        print("Using exact test ({} partitions)".format(num_partitions))
+        for si in itertools.combinations(XY, len(X)):
+            si = np.sum(si)
+            if si > s:
+                total_true += 1
+            elif si == s:  # use conservative test
+                total_true += 1
+                total_equal += 1
+            total += 1
+
+    if total_equal:
+        print("Equalities contributed {}/{} to p-value".format(total_equal, total))
+
+    return total_true / total
 
 def save_bias_scores(fname, bias_scores):
     with open(fname, 'w') as f:
@@ -131,7 +193,7 @@ def evaluate_scores(args, scores, batch):
         # example for 4 texts and batchsize 2
         # scores = tensor([[ 0.0555,  0.0121,  0.0113,mmOKxRfPbYjE -0.0000],
         #         [ 0.0398, -0.0133, -0.0340, -0.0391]], device='cuda:7')
-        text_len = floor(len(batch[1])/2) # number of good / bad texts
+        text_len = math.floor(len(batch[1])/2) # number of good / bad texts
         good_scores = scores[:, :text_len]  # extract the first len(good_texts) cols for pleasant_texts
         bad_scores = scores[:, text_len:]   # extract the remaining cols for unpleasant_texts
         assert len(good_scores) == len(bad_scores)
