@@ -194,7 +194,7 @@ class EulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
         return self._step_index
 
     def scale_model_input(
-        self, sample: torch.FloatTensor, timestep: Union[float, torch.FloatTensor]
+        self, sample: torch.FloatTensor, timestep: Union[float, torch.FloatTensor], disc_mode: bool = False
     ) -> torch.FloatTensor:
         """
         Ensures interchangeability with schedulers that need to scale the denoising model input depending on the
@@ -212,8 +212,10 @@ class EulerDiscreteScheduler(SchedulerMixin, ConfigMixin):
         """
         if self.step_index is None:
             self._init_step_index(timestep)
-
-        sigma = self.sigmas[self.step_index]
+        step_index = (self.timesteps == timestep).nonzero().item()
+        # if disc_mode:
+        #     step_index = step_index // 20
+        sigma = self.sigmas[step_index]
         sample = sample / ((sigma**2 + 1) ** 0.5)
 
         self.is_scale_input_called = True

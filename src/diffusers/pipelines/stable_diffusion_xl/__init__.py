@@ -22,6 +22,7 @@ except OptionalDependencyNotAvailable:
 else:
     _import_structure["pipeline_stable_diffusion_xl"] = ["StableDiffusionXLPipeline"]
     _import_structure["pipeline_stable_diffusion_xl_img2img"] = ["StableDiffusionXLImg2ImgPipeline"]
+    _import_structure["pipeline_stable_diffusion_xl_disc"] = ["StableDiffusionXLDiscPipeline"]
     _import_structure["pipeline_stable_diffusion_xl_inpaint"] = ["StableDiffusionXLInpaintPipeline"]
     _import_structure["pipeline_stable_diffusion_xl_instruct_pix2pix"] = ["StableDiffusionXLInstructPix2PixPipeline"]
 
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     else:
         from .pipeline_stable_diffusion_xl import StableDiffusionXLPipeline
         from .pipeline_stable_diffusion_xl_img2img import StableDiffusionXLImg2ImgPipeline
+        from .pipeline_stable_diffusion_xl_disc import StableDiffusionXLDiscPipeline
         from .pipeline_stable_diffusion_xl_inpaint import StableDiffusionXLInpaintPipeline
         from .pipeline_stable_diffusion_xl_instruct_pix2pix import StableDiffusionXLInstructPix2PixPipeline
 

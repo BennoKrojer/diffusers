@@ -123,6 +123,7 @@ else:
             "StableDiffusionGLIGENTextImagePipeline",
             "StableDiffusionImageVariationPipeline",
             "StableDiffusionImg2ImgPipeline",
+            "StableDiffusionDiscPipeline",
             "StableDiffusionInpaintPipeline",
             "StableDiffusionInpaintPipelineLegacy",
             "StableDiffusionInstructPix2PixPipeline",
@@ -142,6 +143,7 @@ else:
     _import_structure["stable_diffusion_safe"] = ["StableDiffusionPipelineSafe"]
     _import_structure["stable_diffusion_xl"] = [
         "StableDiffusionXLImg2ImgPipeline",
+        "StableDiffusionXLDiscPipeline",
         "StableDiffusionXLInpaintPipeline",
         "StableDiffusionXLInstructPix2PixPipeline",
         "StableDiffusionXLPipeline",
@@ -333,6 +335,7 @@ if TYPE_CHECKING:
             StableDiffusionGLIGENTextImagePipeline,
             StableDiffusionImageVariationPipeline,
             StableDiffusionImg2ImgPipeline,
+            StableDiffusionDiscPipeline,
             StableDiffusionInpaintPipeline,
             StableDiffusionInpaintPipelineLegacy,
             StableDiffusionInstructPix2PixPipeline,
@@ -351,6 +354,8 @@ if TYPE_CHECKING:
         from .stable_diffusion_safe import StableDiffusionPipelineSafe
         from .stable_diffusion_xl import (
             StableDiffusionXLImg2ImgPipeline,
+            StableDiffusionXLDiscPipeline,
+            StableDiffusionXLDiscPipeline,
             StableDiffusionXLInpaintPipeline,
             StableDiffusionXLInstructPix2PixPipeline,
             StableDiffusionXLPipeline,
