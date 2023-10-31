@@ -37,6 +37,7 @@ else:
     _import_structure["pipeline_stable_diffusion_gligen_text_image"] = ["StableDiffusionGLIGENTextImagePipeline"]
     _import_structure["pipeline_stable_diffusion_img2img"] = ["StableDiffusionImg2ImgPipeline"]
     _import_structure["pipeline_stable_diffusion_disc"] = ["StableDiffusionDiscPipeline"]
+    _import_structure["pipeline_stable_diffusion_noisepred"] = ["StableDiffusionNoisePredPipeline"]
     _import_structure["pipeline_stable_diffusion_inpaint"] = ["StableDiffusionInpaintPipeline"]
     _import_structure["pipeline_stable_diffusion_inpaint_legacy"] = ["StableDiffusionInpaintPipelineLegacy"]
     _import_structure["pipeline_stable_diffusion_instruct_pix2pix"] = ["StableDiffusionInstructPix2PixPipeline"]
@@ -141,6 +142,7 @@ if TYPE_CHECKING:
         from .pipeline_stable_diffusion_gligen_text_image import StableDiffusionGLIGENTextImagePipeline
         from .pipeline_stable_diffusion_img2img import StableDiffusionImg2ImgPipeline
         from .pipeline_stable_diffusion_disc import StableDiffusionDiscPipeline
+        from .pipeline_stable_diffusion_inpaint import StableDiffusionNoisePredPipeline
         from .pipeline_stable_diffusion_inpaint import StableDiffusionInpaintPipeline
         from .pipeline_stable_diffusion_inpaint_legacy import StableDiffusionInpaintPipelineLegacy
         from .pipeline_stable_diffusion_instruct_pix2pix import StableDiffusionInstructPix2PixPipeline

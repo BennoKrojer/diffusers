@@ -510,7 +510,7 @@ class StableDiffusionXLImg2ImgPipeline(
         return timesteps, num_inference_steps - t_start
 
     def prepare_latents(
-        self, image, timestep, batch_size, num_images_per_prompt, dtype, device, generator=None, add_noise=True
+        self, image, timestep, batch_size, num_images_per_prompt, dtype, device, generator=None, add_noise=True, seed=0
     ):
         if not isinstance(image, (torch.Tensor, PIL.Image.Image, list)):
             raise ValueError(
@@ -569,7 +569,7 @@ class StableDiffusionXLImg2ImgPipeline(
         if add_noise:
             shape = init_latents.shape
             # noise = randn_tensor(shape, generator=generator, device=device, dtype=dtype)
-            torch.manual_seed(0)
+            torch.manual_seed(seed)
             noise = randn_tensor(shape, device=device, dtype=dtype)
             # get latents
             init_latents = self.scheduler.add_noise(init_latents, noise, timestep)
@@ -684,6 +684,7 @@ class StableDiffusionXLImg2ImgPipeline(
         negative_target_size: Optional[Tuple[int, int]] = None,
         aesthetic_score: float = 6.0,
         negative_aesthetic_score: float = 2.5,
+        seed: int = 0
     ):
         r"""
         Function invoked when calling the pipeline for generation.
@@ -903,6 +904,7 @@ class StableDiffusionXLImg2ImgPipeline(
             device,
             generator,
             add_noise,
+            seed=seed
         )
         # 7. Prepare extra step kwargs.
         extra_step_kwargs = self.prepare_extra_step_kwargs(generator, eta)
@@ -989,12 +991,12 @@ class StableDiffusionXLImg2ImgPipeline(
                     added_cond_kwargs=added_cond_kwargs,
                     return_dict=False,
                 )[0]
-                torch.manual_seed(0)
+                torch.manual_seed(seed)
                 true_noise = randn_tensor(noise_pred.shape, device=device, dtype=noise_pred.dtype)
                 noise = true_noise.flatten(1)
                 noise_pred = noise_pred.flatten(1)
                 dist = torch.norm(noise - noise_pred, p=2, dim=1)
-                return dist
+                return dist, noise_pred
 
                 # perform guidance
                 if do_classifier_free_guidance:

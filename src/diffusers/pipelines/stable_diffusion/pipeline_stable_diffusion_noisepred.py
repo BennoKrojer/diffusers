@@ -93,7 +93,7 @@ def preprocess(image):
     return image
 
 
-class StableDiffusionImg2ImgPipeline(
+class StableDiffusionNoisePredPipeline(
     DiffusionPipeline, TextualInversionLoaderMixin, LoraLoaderMixin, FromSingleFileMixin
 ):
     r"""
@@ -506,7 +506,7 @@ class StableDiffusionImg2ImgPipeline(
 
         return timesteps, num_inference_steps - t_start
 
-    def prepare_latents(self, image, timestep, batch_size, num_images_per_prompt, dtype, device, generator=None, seed=0):
+    def prepare_latents(self, image, timestep, batch_size, num_images_per_prompt, dtype, device, generator=None):
         if not isinstance(image, (torch.Tensor, PIL.Image.Image, list)):
             raise ValueError(
                 f"`image` has to be of type `torch.Tensor`, `PIL.Image.Image` or list but is {type(image)}"
@@ -556,7 +556,7 @@ class StableDiffusionImg2ImgPipeline(
 
         shape = init_latents.shape
         # noise = randn_tensor(shape, generator=generator, device=device, dtype=dtype)
-        torch.manual_seed(seed)
+        torch.manual_seed(0)
         noise = randn_tensor(shape, device=device, dtype=dtype)
         # get latents
         init_latents = self.scheduler.add_noise(init_latents, noise, timestep)
@@ -584,7 +584,7 @@ class StableDiffusionImg2ImgPipeline(
         callback: Optional[Callable[[int, int, torch.FloatTensor], None]] = None,
         callback_steps: int = 1,
         cross_attention_kwargs: Optional[Dict[str, Any]] = None,
-        seed = 0,
+        do_classifier_free_guidance: bool = False,
     ):
         r"""
         The call function to the pipeline for generation.
@@ -665,7 +665,6 @@ class StableDiffusionImg2ImgPipeline(
         # here `guidance_scale` is defined analog to the guidance weight `w` of equation (2)
         # of the Imagen paper: https://arxiv.org/pdf/2205.11487.pdf . `guidance_scale = 1`
         # corresponds to doing no classifier free guidance.
-        do_classifier_free_guidance = False
 
         # 3. Encode input prompt
         text_encoder_lora_scale = (
@@ -697,7 +696,7 @@ class StableDiffusionImg2ImgPipeline(
 
         # 6. Prepare latent variables
         latents = self.prepare_latents(
-            image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator, seed=seed
+            image, latent_timestep, batch_size, num_images_per_prompt, prompt_embeds.dtype, device, generator
         )
 
         # 7. Prepare extra step kwargs. TODO: Logic should ideally just be moved out of the pipeline
@@ -719,13 +718,7 @@ class StableDiffusionImg2ImgPipeline(
                     cross_attention_kwargs=cross_attention_kwargs,
                     return_dict=False,
                 )[0]
-
-                torch.manual_seed(seed)
-                true_noise = randn_tensor(noise_pred.shape, device=device, dtype=noise_pred.dtype)
-                noise = true_noise.flatten(1)
-                noise_pred = noise_pred.flatten(1)
-                dist = torch.norm(noise - noise_pred, p=2, dim=1)
-                return dist, noise_pred
+                return noise_pred
 
                 # perform guidance
                 if do_classifier_free_guidance:
@@ -737,7 +730,7 @@ class StableDiffusionImg2ImgPipeline(
 
                 # call the callback, if provided
                 if i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
-                    progress_bar.update()
+                    # progress_bar.update()
                     if callback is not None and i % callback_steps == 0:
                         callback(i, t, latents)
 

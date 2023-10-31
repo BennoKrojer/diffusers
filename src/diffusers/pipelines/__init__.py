@@ -124,6 +124,7 @@ else:
             "StableDiffusionImageVariationPipeline",
             "StableDiffusionImg2ImgPipeline",
             "StableDiffusionDiscPipeline",
+            "StableDiffusionNoisePredPipeline",
             "StableDiffusionInpaintPipeline",
             "StableDiffusionInpaintPipelineLegacy",
             "StableDiffusionInstructPix2PixPipeline",
@@ -144,6 +145,7 @@ else:
     _import_structure["stable_diffusion_xl"] = [
         "StableDiffusionXLImg2ImgPipeline",
         "StableDiffusionXLDiscPipeline",
+        "StableDiffusionXLNoisePredPipeline",
         "StableDiffusionXLInpaintPipeline",
         "StableDiffusionXLInstructPix2PixPipeline",
         "StableDiffusionXLPipeline",
@@ -336,6 +338,7 @@ if TYPE_CHECKING:
             StableDiffusionImageVariationPipeline,
             StableDiffusionImg2ImgPipeline,
             StableDiffusionDiscPipeline,
+            StableDiffusionNoisePredPipeline,
             StableDiffusionInpaintPipeline,
             StableDiffusionInpaintPipelineLegacy,
             StableDiffusionInstructPix2PixPipeline,
@@ -355,7 +358,7 @@ if TYPE_CHECKING:
         from .stable_diffusion_xl import (
             StableDiffusionXLImg2ImgPipeline,
             StableDiffusionXLDiscPipeline,
-            StableDiffusionXLDiscPipeline,
+            StableDiffusionXLNoisePredPipeline,
             StableDiffusionXLInpaintPipeline,
             StableDiffusionXLInstructPix2PixPipeline,
             StableDiffusionXLPipeline,

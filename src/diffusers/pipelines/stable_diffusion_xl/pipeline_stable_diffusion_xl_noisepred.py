@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import inspect
-import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import PIL.Image
@@ -21,7 +20,7 @@ import torch
 from transformers import CLIPTextModel, CLIPTextModelWithProjection, CLIPTokenizer
 
 from ...image_processor import PipelineImageInput, VaeImageProcessor
-from ...loaders import FromSingleFileMixin, LoraLoaderMixin, TextualInversionLoaderMixin
+from ...loaders import FromSingleFileMixin, StableDiffusionXLLoraLoaderMixin, TextualInversionLoaderMixin
 from ...models import AutoencoderKL, UNet2DConditionModel
 from ...models.attention_processor import (
     AttnProcessor2_0,
@@ -32,8 +31,6 @@ from ...models.attention_processor import (
 from ...models.lora import adjust_lora_scale_text_encoder
 from ...schedulers import KarrasDiffusionSchedulers
 from ...utils import (
-    is_accelerate_available,
-    is_accelerate_version,
     is_invisible_watermark_available,
     logging,
     replace_example_docstring,
@@ -84,8 +81,8 @@ def rescale_noise_cfg(noise_cfg, noise_pred_text, guidance_rescale=0.0):
     return noise_cfg
 
 
-class StableDiffusionXLImg2ImgPipeline(
-    DiffusionPipeline, TextualInversionLoaderMixin, LoraLoaderMixin, FromSingleFileMixin
+class StableDiffusionXLNoisePredPipeline(
+    DiffusionPipeline, TextualInversionLoaderMixin, FromSingleFileMixin, StableDiffusionXLLoraLoaderMixin
 ):
     r"""
     Pipeline for text-to-image generation using Stable Diffusion XL.
@@ -94,11 +91,11 @@ class StableDiffusionXLImg2ImgPipeline(
     library implements for all the pipelines (such as downloading or saving, running on a particular device, etc.)
 
     In addition the pipeline inherits the following loading methods:
-        - *LoRA*: [`loaders.LoraLoaderMixin.load_lora_weights`]
+        - *LoRA*: [`loaders.StableDiffusionXLLoraLoaderMixin.load_lora_weights`]
         - *Ckpt*: [`loaders.FromSingleFileMixin.from_single_file`]
 
     as well as the following saving methods:
-        - *LoRA*: [`loaders.LoraLoaderMixin.save_lora_weights`]
+        - *LoRA*: [`loaders.StableDiffusionXLLoraLoaderMixin.save_lora_weights`]
 
     Args:
         vae ([`AutoencoderKL`]):
@@ -266,7 +263,7 @@ class StableDiffusionXLImg2ImgPipeline(
 
         # set lora scale so that monkey patched LoRA
         # function of text encoder can correctly access it
-        if lora_scale is not None and isinstance(self, LoraLoaderMixin):
+        if lora_scale is not None and isinstance(self, StableDiffusionXLLoraLoaderMixin):
             self._lora_scale = lora_scale
 
             # dynamically adjust the LoRA scale
@@ -571,7 +568,9 @@ class StableDiffusionXLImg2ImgPipeline(
 
         if add_noise:
             shape = init_latents.shape
-            noise = randn_tensor(shape, generator=generator, device=device, dtype=dtype)
+            # noise = randn_tensor(shape, generator=generator, device=device, dtype=dtype)
+            torch.manual_seed(0)
+            noise = randn_tensor(shape, device=device, dtype=dtype)
             # get latents
             init_latents = self.scheduler.add_noise(init_latents, noise, timestep)
 
@@ -685,6 +684,7 @@ class StableDiffusionXLImg2ImgPipeline(
         negative_target_size: Optional[Tuple[int, int]] = None,
         aesthetic_score: float = 6.0,
         negative_aesthetic_score: float = 2.5,
+        do_classifier_free_guidance: bool = False,
     ):
         r"""
         Function invoked when calling the pipeline for generation.
@@ -854,7 +854,6 @@ class StableDiffusionXLImg2ImgPipeline(
         # here `guidance_scale` is defined analog to the guidance weight `w` of equation (2)
         # of the Imagen paper: https://arxiv.org/pdf/2205.11487.pdf . `guidance_scale = 1`
         # corresponds to doing no classifier free guidance.
-        do_classifier_free_guidance = guidance_scale > 1.0
 
         # 3. Encode input prompt
         text_encoder_lora_scale = (
@@ -970,7 +969,10 @@ class StableDiffusionXLImg2ImgPipeline(
             num_inference_steps = len(list(filter(lambda ts: ts >= discrete_timestep_cutoff, timesteps)))
             timesteps = timesteps[:num_inference_steps]
 
-        with self.progress_bar(total=num_inference_steps) as progress_bar:
+        # with self.progress_bar(total=num_inference_steps) as progress_bar:
+        if True:
+            # if strength == 0.01:
+            #     timesteps = [10]
             for i, t in enumerate(timesteps):
                 # expand the latents if we are doing classifier free guidance
                 latent_model_input = torch.cat([latents] * 2) if do_classifier_free_guidance else latents
@@ -987,10 +989,13 @@ class StableDiffusionXLImg2ImgPipeline(
                     added_cond_kwargs=added_cond_kwargs,
                     return_dict=False,
                 )[0]
+                if not do_classifier_free_guidance:
+                    return noise_pred
 
                 # perform guidance
                 if do_classifier_free_guidance:
                     noise_pred_uncond, noise_pred_text = noise_pred.chunk(2)
+                    return noise_pred_uncond
                     noise_pred = noise_pred_uncond + guidance_scale * (noise_pred_text - noise_pred_uncond)
 
                 if do_classifier_free_guidance and guidance_rescale > 0.0:
@@ -1002,7 +1007,7 @@ class StableDiffusionXLImg2ImgPipeline(
 
                 # call the callback, if provided
                 if i == len(timesteps) - 1 or ((i + 1) > num_warmup_steps and (i + 1) % self.scheduler.order == 0):
-                    progress_bar.update()
+                    # progress_bar.update()
                     if callback is not None and i % callback_steps == 0:
                         callback(i, t, latents)
 
@@ -1036,108 +1041,3 @@ class StableDiffusionXLImg2ImgPipeline(
             return (image,)
 
         return StableDiffusionXLPipelineOutput(images=image)
-
-    # Overrride to properly handle the loading and unloading of the additional text encoder.
-    # Copied from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl.StableDiffusionXLPipeline.load_lora_weights
-    def load_lora_weights(self, pretrained_model_name_or_path_or_dict: Union[str, Dict[str, torch.Tensor]], **kwargs):
-        # We could have accessed the unet config from `lora_state_dict()` too. We pass
-        # it here explicitly to be able to tell that it's coming from an SDXL
-        # pipeline.
-
-        # Remove any existing hooks.
-        if is_accelerate_available() and is_accelerate_version(">=", "0.17.0.dev0"):
-            from accelerate.hooks import AlignDevicesHook, CpuOffload, remove_hook_from_module
-        else:
-            raise ImportError("Offloading requires `accelerate v0.17.0` or higher.")
-
-        is_model_cpu_offload = False
-        is_sequential_cpu_offload = False
-        recursive = False
-        for _, component in self.components.items():
-            if isinstance(component, torch.nn.Module):
-                if hasattr(component, "_hf_hook"):
-                    is_model_cpu_offload = isinstance(getattr(component, "_hf_hook"), CpuOffload)
-                    is_sequential_cpu_offload = isinstance(getattr(component, "_hf_hook"), AlignDevicesHook)
-                    logger.info(
-                        "Accelerate hooks detected. Since you have called `load_lora_weights()`, the previous hooks will be first removed. Then the LoRA parameters will be loaded and the hooks will be applied again."
-                    )
-                    recursive = is_sequential_cpu_offload
-                    remove_hook_from_module(component, recurse=recursive)
-        state_dict, network_alphas = self.lora_state_dict(
-            pretrained_model_name_or_path_or_dict,
-            unet_config=self.unet.config,
-            **kwargs,
-        )
-        self.load_lora_into_unet(state_dict, network_alphas=network_alphas, unet=self.unet)
-
-        text_encoder_state_dict = {k: v for k, v in state_dict.items() if "text_encoder." in k}
-        if len(text_encoder_state_dict) > 0:
-            self.load_lora_into_text_encoder(
-                text_encoder_state_dict,
-                network_alphas=network_alphas,
-                text_encoder=self.text_encoder,
-                prefix="text_encoder",
-                lora_scale=self.lora_scale,
-            )
-
-        text_encoder_2_state_dict = {k: v for k, v in state_dict.items() if "text_encoder_2." in k}
-        if len(text_encoder_2_state_dict) > 0:
-            self.load_lora_into_text_encoder(
-                text_encoder_2_state_dict,
-                network_alphas=network_alphas,
-                text_encoder=self.text_encoder_2,
-                prefix="text_encoder_2",
-                lora_scale=self.lora_scale,
-            )
-
-        # Offload back.
-        if is_model_cpu_offload:
-            self.enable_model_cpu_offload()
-        elif is_sequential_cpu_offload:
-            self.enable_sequential_cpu_offload()
-
-    @classmethod
-    # Copied from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl.StableDiffusionXLPipeline.save_lora_weights
-    def save_lora_weights(
-        self,
-        save_directory: Union[str, os.PathLike],
-        unet_lora_layers: Dict[str, Union[torch.nn.Module, torch.Tensor]] = None,
-        text_encoder_lora_layers: Dict[str, Union[torch.nn.Module, torch.Tensor]] = None,
-        text_encoder_2_lora_layers: Dict[str, Union[torch.nn.Module, torch.Tensor]] = None,
-        is_main_process: bool = True,
-        weight_name: str = None,
-        save_function: Callable = None,
-        safe_serialization: bool = True,
-    ):
-        state_dict = {}
-
-        def pack_weights(layers, prefix):
-            layers_weights = layers.state_dict() if isinstance(layers, torch.nn.Module) else layers
-            layers_state_dict = {f"{prefix}.{module_name}": param for module_name, param in layers_weights.items()}
-            return layers_state_dict
-
-        if not (unet_lora_layers or text_encoder_lora_layers or text_encoder_2_lora_layers):
-            raise ValueError(
-                "You must pass at least one of `unet_lora_layers`, `text_encoder_lora_layers` or `text_encoder_2_lora_layers`."
-            )
-
-        if unet_lora_layers:
-            state_dict.update(pack_weights(unet_lora_layers, "unet"))
-
-        if text_encoder_lora_layers and text_encoder_2_lora_layers:
-            state_dict.update(pack_weights(text_encoder_lora_layers, "text_encoder"))
-            state_dict.update(pack_weights(text_encoder_2_lora_layers, "text_encoder_2"))
-
-        self.write_lora_layers(
-            state_dict=state_dict,
-            save_directory=save_directory,
-            is_main_process=is_main_process,
-            weight_name=weight_name,
-            save_function=save_function,
-            safe_serialization=safe_serialization,
-        )
-
-    # Copied from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl.StableDiffusionXLPipeline._remove_text_encoder_monkey_patch
-    def _remove_text_encoder_monkey_patch(self):
-        self._remove_text_encoder_monkey_patch_classmethod(self.text_encoder)
-        self._remove_text_encoder_monkey_patch_classmethod(self.text_encoder_2)
